@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reserva Sala Común Escalonia 15</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -809,14 +810,20 @@
 
   <script>
     (function () {
-      // CONFIGURACIÓN SUPABASE REALTIME (rellena URL y ANON_KEY para sincronización en la nube entre dispositivos)
-      const SUPABASE_URL = '';
-      const SUPABASE_ANON_KEY = '';
-      const SUPABASE_TABLE = 'escalonia15_state';
-      const SUPABASE_ROW_ID = 'escalonia15_main';
+      const firebaseConfig = {
+        apiKey: "AIzaSyCB15Exkb3uDkYrSzapnXNGbpHJsb32EHs",
+        authDomain: "sala-comun-escalonia.firebaseapp.com",
+        databaseURL: "https://sala-comun-escalonia-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "sala-comun-escalonia",
+        storageBucket: "sala-comun-escalonia.firebasestorage.app",
+        messagingSenderId: "471494051738",
+        appId: "1:471494051738:web:824604e9c2cd93fe0c5c23",
+        measurementId: "G-KB9PC646M7"
+      };
 
-      const STORAGE_KEY = 'escalonia15_sala_comun_v11';
-      const CHANNEL_NAME = 'escalonia15_realtime_sync_v11';
+      const RTDB_PATH = 'escalonia15/state';
+      const STORAGE_KEY = 'escalonia15_sala_comun_rtdb_v1';
+      const CHANNEL_NAME = 'escalonia15_rtdb_sync_v1';
       const PORTALS = Array.from({ length: 18 }, (_, i) => `Portal ${i + 1}`);
       const UNITS = [
         'Bajo A', 'Bajo B', 'Bajo C', 'Bajo D',
@@ -824,18 +831,17 @@
         'Segundo A', 'Segundo B', 'Segundo C', 'Segundo D'
       ];
 
-      const hasSupabaseConfig = Boolean(
-        SUPABASE_URL &&
-        SUPABASE_ANON_KEY &&
-        !SUPABASE_URL.includes('TU_PROYECTO') &&
-        !SUPABASE_ANON_KEY.includes('TU_ANON_KEY') &&
-        window.supabase &&
-        typeof window.supabase.createClient === 'function'
-      );
-
-      const supabaseClient = hasSupabaseConfig
-        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-        : null;
+      let rtdbRef = null;
+      if (window.firebase && typeof window.firebase.initializeApp === 'function') {
+        try {
+          const app = window.firebase.apps.length
+            ? window.firebase.app()
+            : window.firebase.initializeApp(firebaseConfig);
+          rtdbRef = app.database().ref(RTDB_PATH);
+        } catch (err) {
+          rtdbRef = null;
+        }
+      }
 
       const syncChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(CHANNEL_NAME) : null;
       let lastKnownRawState = '';
@@ -956,7 +962,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
       function normalizeState(parsed) {
         const base = buildInitialState();
-        return {
+        const merged = {
           ...base,
           ...(parsed || {}),
           adminConfig: {
@@ -964,6 +970,10 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             ...((parsed && parsed.adminConfig) || {})
           }
         };
+        merged.admins = Array.isArray(merged.admins) ? merged.admins : base.admins;
+        merged.users = Array.isArray(merged.users) ? merged.users : base.users;
+        merged.reservations = Array.isArray(merged.reservations) ? merged.reservations : base.reservations;
+        return merged;
       }
 
       function loadState() {
@@ -1016,22 +1026,16 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         renderAdminDashboard();
       }
 
-      async function pushStateToCloud(serializedState, eventType = 'UPDATE') {
-        if (!supabaseClient) return;
+      async function pushStateToRTDB(serializedState, eventType = 'UPDATE') {
+        if (!rtdbRef) return;
         try {
-          await supabaseClient
-            .from(SUPABASE_TABLE)
-            .upsert(
-              {
-                id: SUPABASE_ROW_ID,
-                payload: JSON.parse(serializedState),
-                last_event: eventType,
-                updated_at: new Date().toISOString()
-              },
-              { onConflict: 'id' }
-            );
+          await rtdbRef.set({
+            data: JSON.parse(serializedState),
+            lastEvent: eventType,
+            updatedAt: new Date().toISOString()
+          });
         } catch (err) {
-          // Fallback local continúa operando sin interrupciones
+          // Respaldo local continúa operando sin interrupciones
         }
       }
 
@@ -1045,7 +1049,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             syncChannel.postMessage({ type: 'STATE_UPDATED', eventType, payload: serialized, ts: Date.now() });
           }
           window.dispatchEvent(new CustomEvent('escalonia15:live-update', { detail: serialized }));
-          pushStateToCloud(serialized, eventType);
+          pushStateToRTDB(serialized, eventType);
         }
       }
 
@@ -1086,42 +1090,22 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         };
       }
 
-      async function pullInitialCloudStateAndSubscribe() {
-        if (!supabaseClient) return;
-        try {
-          const { data } = await supabaseClient
-            .from(SUPABASE_TABLE)
-            .select('payload')
-            .eq('id', SUPABASE_ROW_ID)
-            .maybeSingle();
-
-          if (data && data.payload) {
-            syncFromExternalRaw(JSON.stringify(data.payload));
-          } else {
-            await pushStateToCloud(JSON.stringify(state), 'INSERT');
+      function subscribeRealtimeDatabase() {
+        if (!rtdbRef) return;
+        rtdbRef.on(
+          'value',
+          (snapshot) => {
+            const val = snapshot.val();
+            if (val && val.data) {
+              syncFromExternalRaw(JSON.stringify(val.data));
+            } else if (!val) {
+              pushStateToRTDB(JSON.stringify(state), 'INSERT');
+            }
+          },
+          () => {
+            // Respaldo local activo si hay algún error de permisos o conexión
           }
-
-          supabaseClient
-            .channel('escalonia15-realtime-channel')
-            .on(
-              'postgres_changes',
-              {
-                event: '*',
-                schema: 'public',
-                table: SUPABASE_TABLE,
-                filter: `id=eq.${SUPABASE_ROW_ID}`
-              },
-              (payload) => {
-                const nextPayload = payload.new && payload.new.payload;
-                if (nextPayload) {
-                  syncFromExternalRaw(JSON.stringify(nextPayload));
-                }
-              }
-            )
-            .subscribe();
-        } catch (e) {
-          // Si no existe la tabla aún, el respaldo local mantiene el funcionamiento
-        }
+        );
       }
 
       // Respaldo continuo entre pestañas / contextos del navegador
@@ -1974,10 +1958,10 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         showToast('Administrador guardado.');
       });
 
-      // Render inicial y suscripción en tiempo real
+      // Render inicial y suscripción en tiempo real a Firebase Realtime Database
       applyScreenVisibility();
       refreshAllViews();
-      pullInitialCloudStateAndSubscribe();
+      subscribeRealtimeDatabase();
     })();
   </script>
 </body>
