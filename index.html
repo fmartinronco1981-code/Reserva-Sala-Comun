@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reserva Sala Común Escalonia 15</title>
+  <title>Reserva Sala Común Escalonia 15 — v1.0</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script>
     tailwind.config = {
@@ -129,12 +130,17 @@
     <div id="toastInner" class="pointer-events-auto rounded-xl px-4 py-3 text-xs sm:text-sm font-medium shadow-xl border bg-slate-900 text-white border-slate-700"></div>
   </div>
 
-  <!-- PANTALLA 0: ENTRADA PRINCIPAL (SOLO ESTO AL ABRIR) -->
+  <!-- PANTALLA 0: ENTRADA PRINCIPAL -->
   <section id="landingScreen" class="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-brand-dark via-brand-primary to-emerald-900 text-white">
     <div class="max-w-xl w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-7 sm:p-10 text-center shadow-2xl space-y-7">
-      <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
-        Bienvenido a reserva sala común Escalonia 15
-      </h1>
+      <div class="space-y-1">
+        <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-emerald-200 px-3 py-1 rounded-full bg-white/10">
+          Versión 1.0 · Producción
+        </span>
+        <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight pt-2">
+          Bienvenido a reserva sala común Escalonia 15
+        </h1>
+      </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
         <button
@@ -166,13 +172,13 @@
           </div>
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-emerald-300">
-              Reserva Sala Común Escalonia 15
+              Reserva Sala Común Escalonia 15 · v1.0
             </p>
             <h2 id="ownerWelcomeTitle" class="text-base sm:text-lg font-extrabold tracking-tight leading-tight">
               Bienvenido · Vivienda
             </h2>
             <p id="activeUserBanner" class="text-xs text-emerald-200/85">
-              Cargando sesión...
+              Sin sesión iniciada
             </p>
           </div>
         </div>
@@ -183,7 +189,14 @@
             type="button"
             class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 border border-white/15 transition"
           >
-            Cuenta / Cambiar usuario
+            Cuenta / Activar / Cambiar
+          </button>
+          <button
+            id="btnOwnerLogout"
+            type="button"
+            class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600/80 hover:bg-rose-600 text-white transition"
+          >
+            Cerrar sesión
           </button>
           <button
             id="btnBackToLandingFromOwner"
@@ -284,7 +297,7 @@
               <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
                 <div class="flex justify-between">
                   <span class="text-slate-500">Propietario / Correo:</span>
-                  <span id="formUserEmail" class="font-bold text-slate-800 truncate max-w-[190px]">-</span>
+                  <span id="formUserEmail" class="font-bold text-slate-800 truncate max-w-[190px]">Sin sesión</span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-slate-500">Vivienda:</span>
@@ -302,7 +315,6 @@
                   Pulsa un día en el calendario para elegir entre Turno mañana y Turno tarde.
                 </div>
 
-                <!-- Ventanita / pestañita interactiva de turno para elegir o confirmar -->
                 <div id="shiftQuickSelector" class="hidden rounded-xl bg-emerald-50/70 border border-emerald-200 p-2 space-y-1.5">
                   <div class="flex items-center justify-between text-[11px] font-semibold text-emerald-950 px-0.5">
                     <span>Elegir turno de la fecha:</span>
@@ -400,56 +412,35 @@
 
           <div class="space-y-2.5">
             <p>12.1. La reserva se hará con los mismos plazos (un mes) por correo electrónico a la administración, con una excepción, cuando se trate de una reserva para celebrar un acto con fecha fija (bautizo, comunión, etc.) en que podrá reservarse sin sujetarse al plazo general de un mes.</p>
-
             <p>12.2. El solicitante deberá ser titular o inquilino de la vivienda. Cada solicitante solo podrá reservar la sala dos veces al año.</p>
-
             <p>12.3. El propietario o inquilino que acceda a la sala, se registrará previamente en conserjería. (sustituido por el 12.1)</p>
-
             <p>12.4. Hasta las 17:00 horas, solo se podrán realizar actividades que no generen ruido, compatibles con actividades laborales.</p>
-
             <p>12.5. El solicitante deberá pagar:</p>
             <div class="pl-5 space-y-1.5">
               <p>12.5.1. Una cuota de 100 € de fianza, que se devolverá, tras verificar que el salón se deja en perfecto estado.</p>
               <p>12.5.2. Una cuota de 50 € por el uso en exclusiva del local por parte del propietario que lo reserva, más la cuota de limpieza del local.</p>
               <p>12.5.3. El pago de la fianza y de la cuota de exclusividad, se realizará mediante transferencia a la cuenta bancaria de la comunidad; la devolución de la parte reembolsable, se realizará igualmente mediante transferencia a la cuenta bancaria del propietario.</p>
             </div>
-
             <p>12.6. El solicitante de la sala debe garantizar que esta quede recogida y limpia tras su uso, que debe finalizar antes de la hora límite.</p>
-
             <p>12.7. Queda prohibido sacar el mobiliario del local.</p>
-
             <p>12.8. La puerta del salón deberá permanecer cerrada durante su utilización.</p>
-
             <p>12.9. La sala solo podrá ser reservada en un turno al día (o de mañana o de tarde):</p>
             <div class="pl-5 space-y-1.5">
               <p>12.9.1. Horario de mañana: de 10:00 a 16:30 horas.</p>
               <p>12.9.2. Horario de tarde: De domingo a jueves: De 17:30 a 22:00 horas, los viernes, sábados y vísperas de festivos: De 17:30 a 24:00 horas.</p>
             </div>
-
             <p>12.10. En caso de dejar la sala sucia, se contratará un servicio externo de limpieza. El coste correrá a cargo del usuario, descontándose de la fianza. En caso de que los costes excedan el monto de la fianza, se cobrará el faltante al vecino.</p>
-
             <p>12.11. No se podrá acceder a la sala en traje de baño o estando mojado.</p>
-
             <p>12.12. Está prohibido pegar o anclar cualquier material en las paredes.</p>
-
             <p>12.13. El solicitante se hará responsable de todas las acciones que pudieran realizar sus invitados.</p>
-
             <p>12.14. En caso de producirse algún desperfecto, será sufragado por el solicitante.</p>
-
             <p>12.15. Los niños deberán estar acompañados por adultos.</p>
-
             <p>12.16. En todo momento, los invitados harán caso de las instrucciones que pudieran recibir de la Junta de Gobierno.</p>
-
             <p>12.17. Los actos comunitarios tendrán preferencia, a la hora de la reserva sobre actos particulares.</p>
-
             <p>12.18. La celebración de los actos estarán limitados al recinto del local.</p>
-
             <p>12.19. Las reservas solicitadas deberán abonarse como máximo en las 48 h. siguientes a su solicitud. Pasado ese plazo, si no se ha procedido a su abono, se anulará la misma.</p>
-
             <p>12.20. En caso de querer anular la reserva, deberán informarlo con una antelación mínima de 7 días a la fecha solicitada. Pasado ese plazo, en caso de anulación, se procederá a la devolución de la fianza pero no de la parte que corresponde al alquiler.</p>
-
             <p>12.21. Se preparará un sistema que permita equilibrar el número de usos por los diferentes solicitantes, dando prioridad a los nuevos usuarios sobre los que ya hayan utilizado la sala con anterioridad.</p>
-
             <p>12.22. La sala polivalente (cine, tv, etc.) se podrá reservar, sin coste, durante periodos de 1 hora, especificando si es para una actividad privada o está abierta a toda la comunidad. La reserva para una actividad comunitaria tendrá siempre prioridad. La sala debe quedar en perfecto estado tras su uso. Se seguirán por analogía las mismas normas que para la sala comunitaria. La reserva siempre deberá hacerse por el vecino.</p>
           </div>
         </div>
@@ -457,7 +448,7 @@
     </main>
   </div>
 
-  <!-- MODAL 1: SOLICITUD DE PAGO (48H) — SOLO DESDE ADMINISTRADOR AL DAR EL VISTO BUENO -->
+  <!-- MODAL 1: SOLICITUD DE PAGO (48H) -->
   <div id="paymentModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
@@ -476,7 +467,7 @@
             <input id="mailToInput" type="email" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-800" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">De (Administración):</label>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">De / CC (Administración):</label>
             <input id="mailFromInput" type="email" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-800" />
           </div>
         </div>
@@ -496,14 +487,14 @@
             Copiar texto
           </button>
           <button id="sendMailBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm transition">
-            Enviar correo
+            Abrir en correo (Outlook / mailto)
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 2: CUENTA / INICIO DE SESIÓN / ACTIVACIÓN -->
+  <!-- MODAL 2: INICIAR SESIÓN O ACTIVAR CUENTA DE PROPIETARIO -->
   <div id="authModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-brand-dark text-white px-5 py-3.5 flex items-center justify-between">
@@ -514,28 +505,29 @@
       </div>
 
       <div class="p-5 space-y-4 text-xs sm:text-sm">
-        <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 space-y-1">
-          <p class="font-bold">Usuario de prueba listo para entrar:</p>
-          <p>Correo: <code class="font-bold">prueba@escalonia15.es</code> — Contraseña: <code class="font-bold">prueba123</code></p>
-          <p class="text-[11px] text-emerald-800">También puedes usar <code class="font-bold">portal1.primeroa@escalonia15.es</code> (Portal 1 · Primero A).</p>
+        <div class="flex gap-2 border-b border-slate-200 pb-2">
+          <button id="modeLoginTab" type="button" class="flex-1 py-1.5 rounded-lg bg-emerald-700 text-white text-xs font-bold">
+            Iniciar sesión
+          </button>
+          <button id="modeActivateTab" type="button" class="flex-1 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold">
+            Activar cuenta
+          </button>
         </div>
 
-        <div class="space-y-3">
+        <!-- MODO LOGIN -->
+        <div id="authLoginFields" class="space-y-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Correo electrónico de la vivienda</label>
-            <input id="loginEmailInput" type="email" placeholder="prueba@escalonia15.es" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Correo electrónico</label>
+            <input id="loginEmailInput" type="email" autocomplete="email" placeholder="vecino@correo.com" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Contraseña</label>
-            <input id="loginPasswordInput" type="password" placeholder="••••••••" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+            <input id="loginPasswordInput" type="password" autocomplete="current-password" placeholder="Tu contraseña" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
           </div>
 
           <div class="flex items-center justify-between text-xs">
             <button id="forgotPasswordBtn" type="button" class="text-emerald-700 hover:underline font-semibold">
               ¿Olvidaste tu contraseña?
-            </button>
-            <button id="activateAccountBtn" type="button" class="text-slate-600 hover:text-slate-900 font-semibold">
-              Activar correo autorizado
             </button>
           </div>
 
@@ -543,17 +535,49 @@
             Entrar
           </button>
         </div>
+
+        <!-- MODO ACTIVACIÓN DE PROPIETARIO -->
+        <div id="authActivateFields" class="hidden space-y-3">
+          <p class="text-xs text-slate-600">
+            Solo para correos previamente autorizados por administración. Crea tu contraseña e indica tu vivienda.
+          </p>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Correo autorizado</label>
+            <input id="actEmailInput" type="email" autocomplete="email" placeholder="vecino@correo.com" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Portal</label>
+              <input id="actPortalInput" type="text" placeholder="Ej. 1" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Piso</label>
+              <input id="actFloorInput" type="text" placeholder="Ej. 2º" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Letra</label>
+              <input id="actLetterInput" type="text" placeholder="Ej. B" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm uppercase" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Crea tu contraseña (mínimo 6 caracteres)</label>
+            <input id="actPasswordInput" type="password" minlength="6" autocomplete="new-password" placeholder="Mínimo 6 caracteres" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+          </div>
+          <button id="activateAccountBtn" type="button" class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm transition">
+            Activar cuenta de propietario
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 3A: PANTALLA DE CONTRASEÑA DE ADMINISTRADOR -->
+  <!-- MODAL 3A: INICIO DE SESIÓN DE ADMINISTRADOR -->
   <div id="adminLoginModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-[1px] hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
         <div>
           <h3 class="text-sm sm:text-base font-bold">Acceso Administrador — Escalonia 15</h3>
-          <p class="text-[11px] text-slate-300">Introduce la contraseña para abrir la interfaz de administración</p>
+          <p class="text-[11px] text-slate-300">Inicia sesión con tu cuenta de administrador</p>
         </div>
         <button id="closeAdminLoginModal" type="button" class="text-slate-300 hover:text-white text-lg font-bold leading-none px-1">
           &times;
@@ -561,43 +585,45 @@
       </div>
 
       <div class="p-5 space-y-4 text-xs sm:text-sm">
-        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700">
-          Contraseña inicial: <code class="font-bold text-slate-900">1234</code>
-        </div>
-
         <div>
-          <label for="adminPinInput" class="block text-xs font-semibold text-slate-700 mb-1">Contraseña de administrador</label>
-          <input id="adminPinInput" type="password" placeholder="1234" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+          <label for="adminEmailInput" class="block text-xs font-semibold text-slate-700 mb-1">Correo de administrador</label>
+          <input id="adminEmailInput" type="email" autocomplete="email" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+        </div>
+        <div>
+          <label for="adminPasswordInput" class="block text-xs font-semibold text-slate-700 mb-1">Contraseña</label>
+          <input id="adminPasswordInput" type="password" autocomplete="current-password" placeholder="Tu contraseña" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
         </div>
 
         <button id="unlockAdminBtn" type="button" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm transition">
-          Entrar
+          Entrar como administrador
         </button>
       </div>
     </div>
   </div>
 
-  <!-- VISTA COMPLETA DEDICADA DE ADMINISTRADOR + CALENDARIO (SIN SCROLL LATERAL) -->
+  <!-- VISTA COMPLETA DEDICADA DE ADMINISTRADOR + CALENDARIO -->
   <section id="adminFullInterface" class="fixed inset-0 z-40 bg-slate-100 hidden flex-col overflow-y-auto">
     <header class="bg-slate-900 text-white sticky top-0 z-20 shadow-md">
       <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-            Administrador
+            Administrador · v1.0
           </span>
-          <h2 class="text-base sm:text-lg font-bold leading-tight">
+          <h2 id="adminHeaderTitle" class="text-base sm:text-lg font-bold leading-tight">
             Administrador — Sala Común Escalonia 15
           </h2>
         </div>
 
         <div class="flex items-center gap-2">
+          <button id="adminLogoutBtn" type="button" class="px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition">
+            Cerrar sesión
+          </button>
           <button id="exitAdminFullBtn" type="button" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">
             &larr; Volver al inicio
           </button>
         </div>
       </div>
 
-      <!-- BOTONES VISIBLES EN TODO MOMENTO (SIN SCROLL LATERAL) -->
       <nav class="bg-slate-950 border-t border-white/10">
         <div class="max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap gap-2">
           <button
@@ -645,13 +671,13 @@
         <div class="border-b border-slate-100 pb-3">
           <h3 class="text-base sm:text-lg font-bold text-slate-900">Reservas por confirmar y control de fianzas</h3>
           <p class="text-xs text-slate-500">
-            Revisa cuántas veces ha reservado ese propietario en el año, da el visto bueno para enviar el correo de pago (48h), confirma o no autoriza la reserva y marca la devolución de fianza.
+            Revisa cuántas veces ha reservado ese propietario en el año, da el visto bueno para abrir el correo de pago (48h), confirma o no autoriza la reserva y marca la devolución de fianza.
           </p>
         </div>
         <div id="adminReservationsList" class="space-y-3"></div>
       </div>
 
-      <!-- PESTAÑA 2: PROGRAMAR ACTO COMUNITARIO (RESERVA DIRECTA DE ADMINISTRADOR SIN PAGO NI FIANZA) -->
+      <!-- PESTAÑA 2: PROGRAMAR ACTO COMUNITARIO -->
       <div id="admin-tab-acto-comunitario" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div class="border-b border-slate-100 pb-3 flex flex-wrap items-center justify-between gap-2">
           <div>
@@ -702,9 +728,10 @@
           <span id="authorizedCountLabel" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold"></span>
         </div>
 
-        <textarea id="bulkEmailsInput" rows="4" placeholder="vecino1@escalonia15.es; vecino2@escalonia15.es; vecino3@escalonia15.es" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs"></textarea>
+        <textarea id="bulkEmailsInput" rows="4" placeholder="vecino1@correo.com; vecino2@correo.com; vecino3@correo.com" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs"></textarea>
 
-        <div class="flex justify-end">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div id="authorizedEmailsPreview" class="flex flex-wrap gap-1.5 text-xs"></div>
           <button id="saveBulkEmailsBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
             Autorizar propietarios
           </button>
@@ -716,7 +743,7 @@
         <div class="border-b border-slate-100 pb-3">
           <h3 class="text-base sm:text-lg font-bold text-slate-900">Plantilla de correo e IBAN</h3>
           <p class="text-xs text-slate-500">
-            Configura el correo remitente de administración, el IBAN, el concepto y el texto base enviado al propietario al dar el visto bueno.
+            Configura el correo de administración, el IBAN, el concepto y el texto base enviado al propietario al dar el visto bueno.
           </p>
         </div>
 
@@ -727,7 +754,7 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">IBAN de cobro / fianza</label>
-            <input id="cfgAdminIban" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+            <input id="cfgAdminIban" type="text" placeholder="ES00 0000 0000 0000 0000 0000" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
           </div>
         </div>
 
@@ -753,18 +780,18 @@
         <div class="border-b border-slate-100 pb-3">
           <h3 class="text-base sm:text-lg font-bold text-slate-900">Dar de alta otro administrador</h3>
           <p class="text-xs text-slate-500">
-            Añade un nuevo correo de administrador y/o actualiza la contraseña de acceso.
+            Registra el correo de otro administrador en la comunidad (recuerda crear su usuario en Firebase Authentication).
           </p>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Correo del nuevo administrador</label>
-            <input id="newAdminEmailInput" type="email" placeholder="otro.admin@escalonia15.es" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+            <input id="newAdminEmailInput" type="email" placeholder="otro.admin@correo.com" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Contraseña de administración</label>
-            <input id="newAdminCodeInput" type="text" placeholder="1234" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+            <label class="block text-xs font-semibold text-slate-700 mb-1">UID en Firebase Auth (opcional)</label>
+            <input id="newAdminUidInput" type="text" placeholder="UID de Firebase Authentication" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
           </div>
         </div>
 
@@ -810,6 +837,9 @@
 
   <script>
     (function () {
+      const ADMIN_UID = "frJdxFWkPgOs7neTSQZEoOpN2Ot2";
+      const ADMIN_EMAIL = "fmartinronco1981@gmail.com";
+
       const firebaseConfig = {
         apiKey: "AIzaSyCB15Exkb3uDkYrSzapnXNGbpHJsb32EHs",
         authDomain: "sala-comun-escalonia.firebaseapp.com",
@@ -821,83 +851,30 @@
         measurementId: "G-KB9PC646M7"
       };
 
-      const RTDB_PATH = 'escalonia15/state';
-      const STORAGE_KEY = 'escalonia15_sala_comun_rtdb_v1';
-      const CHANNEL_NAME = 'escalonia15_rtdb_sync_v1';
-      const PORTALS = Array.from({ length: 18 }, (_, i) => `Portal ${i + 1}`);
-      const UNITS = [
-        'Bajo A', 'Bajo B', 'Bajo C', 'Bajo D',
-        'Primero A', 'Primero B', 'Primero C', 'Primero D',
-        'Segundo A', 'Segundo B', 'Segundo C', 'Segundo D'
-      ];
+      const app = window.firebase.apps.length
+        ? window.firebase.app()
+        : window.firebase.initializeApp(firebaseConfig);
+      const auth = app.auth();
+      const db = app.database();
 
-      let rtdbRef = null;
-      if (window.firebase && typeof window.firebase.initializeApp === 'function') {
-        try {
-          const app = window.firebase.apps.length
-            ? window.firebase.app()
-            : window.firebase.initializeApp(firebaseConfig);
-          rtdbRef = app.database().ref(RTDB_PATH);
-        } catch (err) {
-          rtdbRef = null;
-        }
-      }
+      let activeScreen = "landing";
+      let selectedSlot = null;
+      let authUser = null;
+      let isCurrentUserAdmin = false;
+      let currentUserProfile = null;
+      let pendingScreenAfterLogin = null;
 
-      const syncChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(CHANNEL_NAME) : null;
-      let lastKnownRawState = '';
-      let activeScreen = 'landing'; // 'landing' | 'owner' | 'admin'
-
-      function formatDateISO(d) {
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
-      }
-
-      function formatDateSpanish(isoStr) {
-        const [y, m, d] = isoStr.split('-').map(Number);
-        const dt = new Date(y, m - 1, d);
-        return dt.toLocaleDateString('es-ES', {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric'
-        });
-      }
-
-      function getShiftLabel(shift) {
-        return shift === 'manana' ? 'Mañana' : 'Tarde';
-      }
-
-      function getShiftScheduleText(isoStr, shift) {
-        if (shift === 'manana') return '10:00 a 16:30 h';
-        const [y, m, d] = isoStr.split('-').map(Number);
-        const dayOfWeek = new Date(y, m - 1, d).getDay();
-        if (dayOfWeek === 5 || dayOfWeek === 6) {
-          return '17:30 a 24:00 h (Viernes/Sábado/Víspera)';
-        }
-        return '17:30 a 22:00 h (Domingo a Jueves)';
-      }
-
-      function buildInitialState() {
-        const today = new Date();
-        const dPlus3 = new Date(today);
-        dPlus3.setDate(today.getDate() + 3);
-        const dPlus6 = new Date(today);
-        dPlus6.setDate(today.getDate() + 6);
-
-        return {
-          currentYearMonth: {
-            year: today.getFullYear(),
-            month: today.getMonth()
-          },
-          adminConfig: {
-            adminEmail: 'administracion@escalonia15.es',
-            adminCode: '1234',
-            iban: 'ES76 2100 0813 6101 2345 6789',
-            concept: 'Reserva Sala Común Escalonia 15',
-            mailTemplate:
-`Estimado/a vecino/a ({{PORTAL}} · {{VIVIENDA}}),
+      let state = {
+        currentYearMonth: {
+          year: new Date().getFullYear(),
+          month: new Date().getMonth()
+        },
+        adminConfig: {
+          adminEmail: ADMIN_EMAIL,
+          iban: "",
+          concept: "Reserva Sala Común Escalonia 15",
+          mailTemplate:
+`Estimado/a vecino/a ({{VIVIENDA}}),
 
 La administración ha dado el visto bueno a tu solicitud de reserva en exclusiva de la Sala Común de Escalonia 15:
 
@@ -908,365 +885,248 @@ La administración ha dado el visto bueno a tu solicitud de reserva en exclusiva
 - Concepto: {{CONCEPTO}}
 
 De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 horas para realizar el pago. Una vez recibido, se confirmará definitivamente la reserva.`
-          },
-          admins: ['administracion@escalonia15.es'],
-          users: [
-            {
-              email: 'prueba@escalonia15.es',
-              password: 'prueba123',
-              portal: 'Portal 1',
-              unit: 'Bajo A',
-              active: true
-            },
-            {
-              email: 'portal1.primeroa@escalonia15.es',
-              password: 'vecino123',
-              portal: 'Portal 1',
-              unit: 'Primero A',
-              active: true
-            }
-          ],
-          currentUserEmail: 'prueba@escalonia15.es',
-          reservations: [
-            {
-              id: 'res-init-1',
-              date: formatDateISO(dPlus3),
-              shift: 'tarde',
-              status: 'pendiente',
-              ownerEmail: 'portal1.primeroa@escalonia15.es',
-              portal: 'Portal 1',
-              unit: 'Primero A',
-              eventType: 'Reunión / Celebración familiar',
-              createdByAdmin: false,
-              createdAt: new Date().toISOString(),
-              depositReturned: false,
-              cancelledByOwner: false
-            },
-            {
-              id: 'res-init-2',
-              date: formatDateISO(dPlus6),
-              shift: 'manana',
-              status: 'reservado',
-              ownerEmail: 'portal1.primeroa@escalonia15.es',
-              portal: 'Portal 1',
-              unit: 'Primero A',
-              eventType: 'Acto con fecha fija (Bautizo / Comunión / Evento señalado)',
-              createdByAdmin: false,
-              createdAt: new Date().toISOString(),
-              depositReturned: false,
-              cancelledByOwner: false
-            }
-          ]
-        };
+        },
+        admins: [{ email: ADMIN_EMAIL, uid: ADMIN_UID }],
+        authorizedEmails: {},
+        users: {},
+        reservations: []
+      };
+
+      function normalizeEmailKey(email) {
+        return email.trim().toLowerCase().replace(/\./g, "_dot_").replace(/[@#$[\]]/g, "_");
       }
 
-      function normalizeState(parsed) {
-        const base = buildInitialState();
-        const merged = {
-          ...base,
-          ...(parsed || {}),
-          adminConfig: {
-            ...base.adminConfig,
-            ...((parsed && parsed.adminConfig) || {})
-          }
-        };
-        merged.admins = Array.isArray(merged.admins) ? merged.admins : base.admins;
-        merged.users = Array.isArray(merged.users) ? merged.users : base.users;
-        merged.reservations = Array.isArray(merged.reservations) ? merged.reservations : base.reservations;
-        return merged;
+      function formatDateISO(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
       }
 
-      function loadState() {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) {
-            const initial = buildInitialState();
-            const serialized = JSON.stringify(initial);
-            localStorage.setItem(STORAGE_KEY, serialized);
-            lastKnownRawState = serialized;
-            return initial;
-          }
-          lastKnownRawState = raw;
-          return normalizeState(JSON.parse(raw));
-        } catch (e) {
-          return buildInitialState();
+      function formatDateSpanish(isoStr) {
+        const [y, m, d] = isoStr.split("-").map(Number);
+        const dt = new Date(y, m - 1, d);
+        return dt.toLocaleDateString("es-ES", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric"
+        });
+      }
+
+      function getShiftLabel(shift) {
+        return shift === "manana" ? "Mañana" : "Tarde";
+      }
+
+      function getShiftScheduleText(isoStr, shift) {
+        if (shift === "manana") return "10:00 a 16:30 h";
+        const [y, m, d] = isoStr.split("-").map(Number);
+        const dayOfWeek = new Date(y, m - 1, d).getDay();
+        if (dayOfWeek === 5 || dayOfWeek === 6) {
+          return "17:30 a 24:00 h (Viernes/Sábado/Víspera)";
         }
+        return "17:30 a 22:00 h (Domingo a Jueves)";
       }
-
-      let state = loadState();
-      let selectedSlot = null;
-
-      function applyScreenVisibility() {
-        const landing = document.getElementById('landingScreen');
-        const ownerApp = document.getElementById('ownerApp');
-        const adminFull = document.getElementById('adminFullInterface');
-
-        landing.classList.add('hidden');
-        ownerApp.classList.add('hidden');
-        ownerApp.classList.remove('flex');
-        adminFull.classList.add('hidden');
-        adminFull.classList.remove('flex');
-
-        if (activeScreen === 'owner') {
-          ownerApp.classList.remove('hidden');
-          ownerApp.classList.add('flex');
-        } else if (activeScreen === 'admin') {
-          adminFull.classList.remove('hidden');
-          adminFull.classList.add('flex');
-        } else {
-          landing.classList.remove('hidden');
-        }
-      }
-
-      function refreshAllViews() {
-        updateHeaderAndUserInfo();
-        renderCalendar();
-        renderAdminCalendar();
-        renderMyReservations();
-        renderAdminDashboard();
-      }
-
-      async function pushStateToRTDB(serializedState, eventType = 'UPDATE') {
-        if (!rtdbRef) return;
-        try {
-          await rtdbRef.set({
-            data: JSON.parse(serializedState),
-            lastEvent: eventType,
-            updatedAt: new Date().toISOString()
-          });
-        } catch (err) {
-          // Respaldo local continúa operando sin interrupciones
-        }
-      }
-
-      function saveState(broadcast = true, eventType = 'UPDATE') {
-        const serialized = JSON.stringify(state);
-        lastKnownRawState = serialized;
-        localStorage.setItem(STORAGE_KEY, serialized);
-        refreshAllViews();
-        if (broadcast) {
-          if (syncChannel) {
-            syncChannel.postMessage({ type: 'STATE_UPDATED', eventType, payload: serialized, ts: Date.now() });
-          }
-          window.dispatchEvent(new CustomEvent('escalonia15:live-update', { detail: serialized }));
-          pushStateToRTDB(serialized, eventType);
-        }
-      }
-
-      function syncFromExternalRaw(rawValue) {
-        if (!rawValue || rawValue === lastKnownRawState) return;
-        lastKnownRawState = rawValue;
-        localStorage.setItem(STORAGE_KEY, rawValue);
-        try {
-          state = normalizeState(JSON.parse(rawValue));
-          refreshAllViews();
-        } catch (e) {
-          // ignore malformed sync payload
-        }
-      }
-
-      window.addEventListener('storage', (e) => {
-        if (e.key === STORAGE_KEY && e.newValue) {
-          syncFromExternalRaw(e.newValue);
-        }
-      });
-
-      window.addEventListener('escalonia15:live-update', (e) => {
-        if (e.detail) {
-          syncFromExternalRaw(e.detail);
-        }
-      });
-
-      if (syncChannel) {
-        syncChannel.onmessage = (ev) => {
-          if (ev.data && ev.data.type === 'STATE_UPDATED') {
-            if (ev.data.payload) {
-              syncFromExternalRaw(ev.data.payload);
-            } else {
-              const latest = localStorage.getItem(STORAGE_KEY);
-              if (latest) syncFromExternalRaw(latest);
-            }
-          }
-        };
-      }
-
-      function subscribeRealtimeDatabase() {
-        if (!rtdbRef) return;
-        rtdbRef.on(
-          'value',
-          (snapshot) => {
-            const val = snapshot.val();
-            if (val && val.data) {
-              syncFromExternalRaw(JSON.stringify(val.data));
-            } else if (!val) {
-              pushStateToRTDB(JSON.stringify(state), 'INSERT');
-            }
-          },
-          () => {
-            // Respaldo local activo si hay algún error de permisos o conexión
-          }
-        );
-      }
-
-      // Respaldo continuo entre pestañas / contextos del navegador
-      setInterval(() => {
-        const currentRaw = localStorage.getItem(STORAGE_KEY);
-        if (currentRaw && currentRaw !== lastKnownRawState) {
-          syncFromExternalRaw(currentRaw);
-        }
-      }, 200);
 
       function showToast(message, isError = false) {
-        const box = document.getElementById('toastBox');
-        const inner = document.getElementById('toastInner');
+        const box = document.getElementById("toastBox");
+        const inner = document.getElementById("toastInner");
         inner.textContent = message;
         inner.className = `pointer-events-auto rounded-xl px-4 py-3 text-xs sm:text-sm font-medium shadow-xl border ${
           isError
-            ? 'bg-red-950 text-red-100 border-red-700'
-            : 'bg-slate-900 text-white border-slate-700'
+            ? "bg-red-950 text-red-100 border-red-700"
+            : "bg-slate-900 text-white border-slate-700"
         }`;
-        box.classList.remove('hidden');
+        box.classList.remove("hidden");
         clearTimeout(window.__toastTimer);
         window.__toastTimer = setTimeout(() => {
-          box.classList.add('hidden');
-        }, 3600);
+          box.classList.add("hidden");
+        }, 3800);
       }
 
-      function getCurrentUser() {
-        return state.users.find(u => u.email.toLowerCase() === (state.currentUserEmail || '').toLowerCase()) || state.users[0];
+      function applyScreenVisibility() {
+        const landing = document.getElementById("landingScreen");
+        const ownerApp = document.getElementById("ownerApp");
+        const adminFull = document.getElementById("adminFullInterface");
+
+        landing.classList.add("hidden");
+        ownerApp.classList.add("hidden");
+        ownerApp.classList.remove("flex");
+        adminFull.classList.add("hidden");
+        adminFull.classList.remove("flex");
+
+        if (activeScreen === "owner") {
+          ownerApp.classList.remove("hidden");
+          ownerApp.classList.add("flex");
+        } else if (activeScreen === "admin" && isCurrentUserAdmin) {
+          adminFull.classList.remove("hidden");
+          adminFull.classList.add("flex");
+        } else {
+          activeScreen = "landing";
+          landing.classList.remove("hidden");
+        }
+      }
+
+      function getUserHousingLabel(profile) {
+        if (!profile) return "Vivienda sin completar";
+        if (profile.role === "admin") return "Administración";
+        const parts = [];
+        if (profile.portal) parts.push(`Portal ${profile.portal}`);
+        if (profile.floor) parts.push(`Piso ${profile.floor}`);
+        if (profile.letter) parts.push(`Letra ${profile.letter}`);
+        return parts.length ? parts.join(" · ") : "Vivienda por completar";
       }
 
       function getActiveSlotReservation(dateISO, shift) {
         return state.reservations.find(
-          r => r.date === dateISO && r.shift === shift && (r.status === 'pendiente' || r.status === 'reservado')
+          r => r.date === dateISO && r.shift === shift && (r.status === "pendiente" || r.status === "reservado")
         ) || null;
       }
 
       function getUserRejectedSlotReservation(dateISO, shift, email) {
+        if (!email) return null;
         return state.reservations.find(
-          r => r.date === dateISO && r.shift === shift && r.status === 'no_autorizada' && r.ownerEmail.toLowerCase() === email.toLowerCase()
+          r => r.date === dateISO && r.shift === shift && r.status === "no_autorizada" && (r.ownerEmail || "").toLowerCase() === email.toLowerCase()
         ) || null;
       }
 
       function getUserYearReservationCount(email, year) {
+        if (!email) return 0;
         return state.reservations.filter(r => {
           if (r.createdByAdmin) return false;
-          if (r.ownerEmail.toLowerCase() !== email.toLowerCase()) return false;
-          if (r.status === 'cancelada' || r.status === 'no_autorizada') return false;
-          const resYear = Number(r.date.split('-')[0]);
+          if ((r.ownerEmail || "").toLowerCase() !== email.toLowerCase()) return false;
+          if (r.status === "cancelada" || r.status === "no_autorizada") return false;
+          const resYear = Number(r.date.split("-")[0]);
           return resYear === year;
         }).length;
       }
 
       function getAdminEventsCount() {
-        return state.reservations.filter(r => r.createdByAdmin === true && r.status === 'reservado').length;
+        return state.reservations.filter(r => r.createdByAdmin === true && r.status === "reservado").length;
       }
 
       function updateHeaderAndUserInfo() {
-        const user = getCurrentUser();
-        state.currentUserEmail = user.email;
-        const housingLabel = `${user.portal} · ${user.unit}`;
-        document.getElementById('ownerWelcomeTitle').textContent =
-          `Bienvenido · ${housingLabel}`;
-        document.getElementById('activeUserBanner').textContent =
-          `Propietario: ${user.email} · ${housingLabel}`;
-        document.getElementById('formUserEmail').textContent = user.email;
-        document.getElementById('formUserUnit').textContent = housingLabel;
-
-        const targetYear = selectedSlot ? Number(selectedSlot.date.split('-')[0]) : new Date().getFullYear();
-        const usedCount = getUserYearReservationCount(user.email, targetYear);
-        document.getElementById('formUserCount').textContent = `${usedCount} / 2 (${targetYear})`;
-
-        const limitNotice = document.getElementById('annualLimitNotice');
-        if (usedCount >= 2) {
-          limitNotice.textContent = `Llevas ${usedCount} reservas en el año ${targetYear} (límite habitual: 2). Puedes enviar la solicitud igualmente para que la administración decida.`;
-          limitNotice.classList.remove('hidden');
-        } else {
-          limitNotice.textContent = `Llevas ${usedCount} reserva(s) en el año ${targetYear}.`;
-          limitNotice.classList.remove('hidden');
-        }
-      }
-
-      function updateShiftQuickSelectorUI() {
-        const selectorBox = document.getElementById('shiftQuickSelector');
-        const badge = document.getElementById('selectedShiftBadge');
-        const mananaBtn = document.getElementById('pickShiftMananaBtn');
-        const tardeBtn = document.getElementById('pickShiftTardeBtn');
-
-        if (!selectedSlot) {
-          selectorBox.classList.add('hidden');
+        const btnLogout = document.getElementById("btnOwnerLogout");
+        if (!authUser) {
+          btnLogout.classList.add("hidden");
+          document.getElementById("ownerWelcomeTitle").textContent = "Bienvenido · Sala Común Escalonia 15";
+          document.getElementById("activeUserBanner").textContent = "Inicia sesión o activa tu cuenta de propietario para reservar.";
+          document.getElementById("formUserEmail").textContent = "Sin sesión";
+          document.getElementById("formUserUnit").textContent = "-";
+          document.getElementById("formUserCount").textContent = "0 / 2";
+          document.getElementById("annualLimitNotice").classList.add("hidden");
           return;
         }
 
-        selectorBox.classList.remove('hidden');
-        if (selectedSlot.shift === 'manana') {
-          badge.textContent = 'Mañana';
-          mananaBtn.className = 'py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-emerald-700 text-white shadow-sm';
-          tardeBtn.className = 'py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-slate-100 text-slate-700 hover:bg-slate-200';
+        btnLogout.classList.remove("hidden");
+        const housingLabel = getUserHousingLabel(currentUserProfile);
+        document.getElementById("ownerWelcomeTitle").textContent = `Bienvenido · ${housingLabel}`;
+        document.getElementById("activeUserBanner").textContent = `${authUser.email} · ${housingLabel}`;
+        document.getElementById("formUserEmail").textContent = authUser.email;
+        document.getElementById("formUserUnit").textContent = housingLabel;
+
+        const targetYear = selectedSlot ? Number(selectedSlot.date.split("-")[0]) : new Date().getFullYear();
+        const usedCount = getUserYearReservationCount(authUser.email, targetYear);
+        document.getElementById("formUserCount").textContent = `${usedCount} / 2 (${targetYear})`;
+
+        const limitNotice = document.getElementById("annualLimitNotice");
+        limitNotice.textContent = usedCount >= 2
+          ? `Llevas ${usedCount} reservas en el año ${targetYear} (límite habitual: 2). Puedes enviar la solicitud para revisión de administración.`
+          : `Llevas ${usedCount} reserva(s) en el año ${targetYear}.`;
+        limitNotice.classList.remove("hidden");
+      }
+
+      function updateShiftQuickSelectorUI() {
+        const selectorBox = document.getElementById("shiftQuickSelector");
+        const badge = document.getElementById("selectedShiftBadge");
+        const mananaBtn = document.getElementById("pickShiftMananaBtn");
+        const tardeBtn = document.getElementById("pickShiftTardeBtn");
+
+        if (!selectedSlot) {
+          selectorBox.classList.add("hidden");
+          return;
+        }
+
+        selectorBox.classList.remove("hidden");
+        if (selectedSlot.shift === "manana") {
+          badge.textContent = "Mañana";
+          mananaBtn.className = "py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-emerald-700 text-white shadow-sm";
+          tardeBtn.className = "py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-slate-100 text-slate-700 hover:bg-slate-200";
         } else {
-          badge.textContent = 'Tarde';
-          tardeBtn.className = 'py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-emerald-700 text-white shadow-sm';
-          mananaBtn.className = 'py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-slate-100 text-slate-700 hover:bg-slate-200';
+          badge.textContent = "Tarde";
+          tardeBtn.className = "py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-emerald-700 text-white shadow-sm";
+          mananaBtn.className = "py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-slate-100 text-slate-700 hover:bg-slate-200";
         }
       }
 
       function validateSelection() {
-        const msgBox = document.getElementById('ruleValidationMsg');
-        const btn = document.getElementById('btnSubmitBooking');
-        const accepted = document.getElementById('acceptNormsCheck').checked;
-        const fixedException = document.getElementById('fixedDateExceptionCheck').checked;
+        const msgBox = document.getElementById("ruleValidationMsg");
+        const btn = document.getElementById("btnSubmitBooking");
+        const accepted = document.getElementById("acceptNormsCheck").checked;
+        const fixedException = document.getElementById("fixedDateExceptionCheck").checked;
+
+        if (!authUser) {
+          if (selectedSlot) {
+            msgBox.textContent = "Inicia sesión o activa tu cuenta de propietario para enviar la solicitud.";
+            msgBox.className = "p-2.5 rounded-xl text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-200";
+          } else {
+            msgBox.classList.add("hidden");
+          }
+          btn.disabled = true;
+          return false;
+        }
 
         if (!selectedSlot) {
-          msgBox.classList.add('hidden');
+          msgBox.classList.add("hidden");
           btn.disabled = true;
           return false;
         }
 
         const existing = getActiveSlotReservation(selectedSlot.date, selectedSlot.shift);
         if (existing) {
-          msgBox.textContent = `Este turno ya está ${existing.status === 'reservado' ? 'RESERVADO' : 'PENDIENTE'}.`;
-          msgBox.className = 'p-2.5 rounded-xl text-[11px] font-semibold bg-red-50 text-red-800 border border-red-200';
+          msgBox.textContent = `Este turno ya está ${existing.status === "reservado" ? "RESERVADO" : "PENDIENTE"}.`;
+          msgBox.className = "p-2.5 rounded-xl text-[11px] font-semibold bg-red-50 text-red-800 border border-red-200";
           btn.disabled = true;
           return false;
         }
 
-        const otherShift = selectedSlot.shift === 'manana' ? 'tarde' : 'manana';
+        const otherShift = selectedSlot.shift === "manana" ? "tarde" : "manana";
         const otherRes = getActiveSlotReservation(selectedSlot.date, otherShift);
         if (otherRes) {
-          msgBox.textContent = 'Solo se puede reservar un turno al día (ya existe actividad en el otro turno de esta fecha).';
-          msgBox.className = 'p-2.5 rounded-xl text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200';
+          msgBox.textContent = "Solo se puede reservar un turno al día (ya existe actividad en el otro turno de esta fecha).";
+          msgBox.className = "p-2.5 rounded-xl text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200";
           btn.disabled = true;
           return false;
         }
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const [y, m, d] = selectedSlot.date.split('-').map(Number);
+        const [y, m, d] = selectedSlot.date.split("-").map(Number);
         const chosenDate = new Date(y, m - 1, d);
         const diffDays = Math.round((chosenDate - today) / (1000 * 60 * 60 * 24));
 
         if (diffDays < 0) {
-          msgBox.textContent = 'No se pueden solicitar reservas en fechas pasadas.';
-          msgBox.className = 'p-2.5 rounded-xl text-[11px] font-semibold bg-red-50 text-red-800 border border-red-200';
+          msgBox.textContent = "No se pueden solicitar reservas en fechas pasadas.";
+          msgBox.className = "p-2.5 rounded-xl text-[11px] font-semibold bg-red-50 text-red-800 border border-red-200";
           btn.disabled = true;
           return false;
         }
 
         if (diffDays > 30 && !fixedException) {
-          msgBox.textContent = 'Supera el plazo general de un mes. Marca la excepción de acto con fecha fija (12.1) si aplica.';
-          msgBox.className = 'p-2.5 rounded-xl text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-200';
+          msgBox.textContent = "Supera el plazo general de un mes. Marca la excepción de acto con fecha fija (12.1) si aplica.";
+          msgBox.className = "p-2.5 rounded-xl text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-200";
           btn.disabled = true;
           return false;
         }
 
         if (!accepted) {
-          msgBox.textContent = 'Debes aceptar las Normas de la sala antes de solicitar la reserva.';
-          msgBox.className = 'p-2.5 rounded-xl text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200';
+          msgBox.textContent = "Debes aceptar las Normas de la sala antes de solicitar la reserva.";
+          msgBox.className = "p-2.5 rounded-xl text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200";
           btn.disabled = true;
           return false;
         }
 
-        msgBox.classList.add('hidden');
+        msgBox.classList.add("hidden");
         btn.disabled = false;
         return true;
       }
@@ -1274,16 +1134,15 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       function getShiftClass(dateISO, shift, isAdminView = false) {
         const activeRes = getActiveSlotReservation(dateISO, shift);
         if (activeRes) {
-          return activeRes.status === 'pendiente' ? 'st-pendiente' : 'st-reservado';
+          return activeRes.status === "pendiente" ? "st-pendiente" : "st-reservado";
         }
-        if (!isAdminView) {
-          const user = getCurrentUser();
-          const rejectedMine = getUserRejectedSlotReservation(dateISO, shift, user.email);
+        if (!isAdminView && authUser) {
+          const rejectedMine = getUserRejectedSlotReservation(dateISO, shift, authUser.email);
           if (rejectedMine) {
-            return 'st-no-autorizado';
+            return "st-no-autorizado";
           }
         }
-        return 'st-libre';
+        return "st-libre";
       }
 
       function getShiftHTML(dateISO, shift, isAdminView = false) {
@@ -1291,15 +1150,13 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const prefix = getShiftLabel(shift);
 
         if (activeRes) {
-          if (activeRes.status === 'pendiente') {
-            return `<span class="slot-label">${prefix}: Pendiente</span>`;
-          }
-          return `<span class="slot-label">${prefix}: Reservado</span>`;
+          return activeRes.status === "pendiente"
+            ? `<span class="slot-label">${prefix}: Pendiente</span>`
+            : `<span class="slot-label">${prefix}: Reservado</span>`;
         }
 
-        if (!isAdminView) {
-          const user = getCurrentUser();
-          const rejectedMine = getUserRejectedSlotReservation(dateISO, shift, user.email);
+        if (!isAdminView && authUser) {
+          const rejectedMine = getUserRejectedSlotReservation(dateISO, shift, authUser.email);
           if (rejectedMine) {
             return `<span class="slot-label inline-block px-1.5 py-0.5 rounded bg-red-600 text-white text-[9px] font-extrabold leading-none">No autorizado</span>`;
           }
@@ -1311,15 +1168,15 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       function buildMonthGridInto(grid, isAdminView) {
         const { year, month } = state.currentYearMonth;
         const monthDate = new Date(year, month, 1);
-        grid.innerHTML = '';
+        grid.innerHTML = "";
 
         const firstDayJS = monthDate.getDay();
         const offset = firstDayJS === 0 ? 6 : firstDayJS - 1;
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
         for (let i = 0; i < offset; i++) {
-          const empty = document.createElement('div');
-          empty.className = 'h-[86px] rounded-xl bg-slate-50/50 border border-dashed border-slate-200/70';
+          const empty = document.createElement("div");
+          empty.className = "h-[86px] rounded-xl bg-slate-50/50 border border-dashed border-slate-200/70";
           grid.appendChild(empty);
         }
 
@@ -1327,32 +1184,32 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           const dateObj = new Date(year, month, day);
           const iso = formatDateISO(dateObj);
 
-          const tile = document.createElement('div');
-          tile.className = 'day-tile';
+          const tile = document.createElement("div");
+          tile.className = "day-tile";
 
           if (!isAdminView && selectedSlot && selectedSlot.date === iso) {
-            tile.classList.add('ring-2', 'ring-emerald-700');
+            tile.classList.add("ring-2", "ring-emerald-700");
           }
 
-          const topLeft = document.createElement('div');
-          topLeft.className = `diag-top-left ${getShiftClass(iso, 'manana', isAdminView)}`;
-          topLeft.innerHTML = getShiftHTML(iso, 'manana', isAdminView);
+          const topLeft = document.createElement("div");
+          topLeft.className = `diag-top-left ${getShiftClass(iso, "manana", isAdminView)}`;
+          topLeft.innerHTML = getShiftHTML(iso, "manana", isAdminView);
           if (!isAdminView) {
-            topLeft.addEventListener('click', () => handleSelectSlot(iso, 'manana'));
+            topLeft.addEventListener("click", () => handleSelectSlot(iso, "manana"));
           }
 
-          const bottomRight = document.createElement('div');
-          bottomRight.className = `diag-bottom-right ${getShiftClass(iso, 'tarde', isAdminView)}`;
-          bottomRight.innerHTML = getShiftHTML(iso, 'tarde', isAdminView);
+          const bottomRight = document.createElement("div");
+          bottomRight.className = `diag-bottom-right ${getShiftClass(iso, "tarde", isAdminView)}`;
+          bottomRight.innerHTML = getShiftHTML(iso, "tarde", isAdminView);
           if (!isAdminView) {
-            bottomRight.addEventListener('click', () => handleSelectSlot(iso, 'tarde'));
+            bottomRight.addEventListener("click", () => handleSelectSlot(iso, "tarde"));
           }
 
-          const divider = document.createElement('div');
-          divider.className = 'diag-divider';
+          const divider = document.createElement("div");
+          divider.className = "diag-divider";
 
-          const badge = document.createElement('div');
-          badge.className = 'day-num-badge absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2';
+          const badge = document.createElement("div");
+          badge.className = "day-num-badge absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2";
           badge.textContent = String(day);
 
           tile.appendChild(topLeft);
@@ -1365,14 +1222,13 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
       function renderCalendar() {
         const { year, month } = state.currentYearMonth;
-        const monthText = new Date(year, month, 1).toLocaleDateString('es-ES', {
-          month: 'long',
-          year: 'numeric'
+        const monthText = new Date(year, month, 1).toLocaleDateString("es-ES", {
+          month: "long",
+          year: "numeric"
         }).replace(/^./, c => c.toUpperCase());
 
-        document.getElementById('currentMonthLabel').textContent = monthText;
-        buildMonthGridInto(document.getElementById('calendarGrid'), false);
-
+        document.getElementById("currentMonthLabel").textContent = monthText;
+        buildMonthGridInto(document.getElementById("calendarGrid"), false);
         updateHeaderAndUserInfo();
         updateShiftQuickSelectorUI();
         validateSelection();
@@ -1380,93 +1236,96 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
       function renderAdminCalendar() {
         const { year, month } = state.currentYearMonth;
-        const monthText = new Date(year, month, 1).toLocaleDateString('es-ES', {
-          month: 'long',
-          year: 'numeric'
+        const monthText = new Date(year, month, 1).toLocaleDateString("es-ES", {
+          month: "long",
+          year: "numeric"
         }).replace(/^./, c => c.toUpperCase());
 
-        document.getElementById('adminCurrentMonthLabel').textContent = monthText;
-        buildMonthGridInto(document.getElementById('adminCalendarGrid'), true);
+        document.getElementById("adminCurrentMonthLabel").textContent = monthText;
+        buildMonthGridInto(document.getElementById("adminCalendarGrid"), true);
       }
 
       function handleSelectSlot(dateISO, shift) {
         selectedSlot = { date: dateISO, shift };
         const shiftName = getShiftLabel(shift);
         const schedule = getShiftScheduleText(dateISO, shift);
-        document.getElementById('selectedSlotSummary').innerHTML =
+        document.getElementById("selectedSlotSummary").innerHTML =
           `<strong class="text-slate-900">${formatDateSpanish(dateISO)}</strong><br/>Turno seleccionado: <strong>${shiftName}</strong> (${schedule})`;
         renderCalendar();
       }
 
       function openPaymentModalForReservation(reservation) {
-        const tpl = state.adminConfig.mailTemplate;
+        const tpl = state.adminConfig.mailTemplate || "";
         const shiftLabel = getShiftLabel(reservation.shift);
         const schedule = getShiftScheduleText(reservation.date, reservation.shift);
+        const housing = reservation.housing || "Vivienda";
+        const concept = `${state.adminConfig.concept || "Reserva Sala Común Escalonia 15"} - ${housing}`;
 
         const body = tpl
-          .replace(/\{\{PORTAL\}\}/g, reservation.portal)
-          .replace(/\{\{VIVIENDA\}\}/g, reservation.unit)
+          .replace(/\{\{VIVIENDA\}\}/g, housing)
           .replace(/\{\{FECHA\}\}/g, formatDateSpanish(reservation.date))
           .replace(/\{\{TURNO\}\}/g, shiftLabel)
           .replace(/\{\{HORARIO\}\}/g, schedule)
-          .replace(/\{\{IBAN\}\}/g, state.adminConfig.iban)
-          .replace(/\{\{CONCEPTO\}\}/g, `${state.adminConfig.concept} - ${reservation.portal} ${reservation.unit}`);
+          .replace(/\{\{IBAN\}\}/g, state.adminConfig.iban || "(IBAN pendiente)")
+          .replace(/\{\{CONCEPTO\}\}/g, concept);
 
-        document.getElementById('mailToInput').value = reservation.ownerEmail;
-        document.getElementById('mailFromInput').value = state.adminConfig.adminEmail;
-        document.getElementById('mailSubjectInput').value =
-          `Solicitud de pago (48h) - ${state.adminConfig.concept}`;
-        document.getElementById('mailBodyInput').value = body;
+        document.getElementById("mailToInput").value = reservation.ownerEmail || "";
+        document.getElementById("mailFromInput").value = state.adminConfig.adminEmail || ADMIN_EMAIL;
+        document.getElementById("mailSubjectInput").value =
+          `Solicitud de pago (48h) - ${state.adminConfig.concept || "Reserva Sala Común Escalonia 15"}`;
+        document.getElementById("mailBodyInput").value = body;
 
-        const modal = document.getElementById('paymentModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+        const modal = document.getElementById("paymentModal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
       }
 
       function renderMyReservations() {
-        const user = getCurrentUser();
-        const pendingEl = document.getElementById('pendingReservationsList');
-        const confirmedEl = document.getElementById('confirmedReservationsList');
-        const ownerCancelledBox = document.getElementById('ownerCancelledReservationsBox');
-        const ownerCancelledEl = document.getElementById('ownerCancelledReservationsList');
+        const pendingEl = document.getElementById("pendingReservationsList");
+        const confirmedEl = document.getElementById("confirmedReservationsList");
+        const ownerCancelledBox = document.getElementById("ownerCancelledReservationsBox");
+        const ownerCancelledEl = document.getElementById("ownerCancelledReservationsList");
+
+        if (!authUser) {
+          pendingEl.innerHTML = `<p class="text-xs text-slate-500">Inicia sesión para ver tus reservas pendientes.</p>`;
+          confirmedEl.innerHTML = `<p class="text-xs text-slate-500">Inicia sesión para ver tus reservas confirmadas.</p>`;
+          ownerCancelledBox.classList.add("hidden");
+          return;
+        }
 
         const mine = state.reservations.filter(
-          r => !r.createdByAdmin && r.ownerEmail.toLowerCase() === user.email.toLowerCase()
+          r => !r.createdByAdmin && (r.ownerEmail || "").toLowerCase() === authUser.email.toLowerCase()
         );
-        const pending = mine.filter(r => r.status === 'pendiente');
-        const confirmed = mine.filter(r => r.status === 'reservado');
-        const cancelledByOwner = mine.filter(r => r.status === 'cancelada' && r.cancelledByOwner === true);
+        const pending = mine.filter(r => r.status === "pendiente");
+        const confirmed = mine.filter(r => r.status === "reservado");
+        const cancelledByOwner = mine.filter(r => r.status === "cancelada" && r.cancelledByOwner === true);
 
-        if (!pending.length) {
-          pendingEl.innerHTML = `<p class="text-xs text-slate-500">Sin reservas pendientes.</p>`;
-        } else {
-          pendingEl.innerHTML = pending.map(r => `
-            <div class="p-3 rounded-xl bg-white border border-yellow-200 flex items-center justify-between gap-2 text-xs">
-              <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
-              <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold">
-                Anular
-              </button>
-            </div>
-          `).join('');
-        }
+        pendingEl.innerHTML = pending.length
+          ? pending.map(r => `
+              <div class="p-3 rounded-xl bg-white border border-yellow-200 flex items-center justify-between gap-2 text-xs">
+                <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
+                <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold">
+                  Anular
+                </button>
+              </div>
+            `).join("")
+          : `<p class="text-xs text-slate-500">Sin reservas pendientes.</p>`;
 
-        if (!confirmed.length) {
-          confirmedEl.innerHTML = `<p class="text-xs text-slate-500">Sin reservas confirmadas.</p>`;
-        } else {
-          confirmedEl.innerHTML = confirmed.map(r => `
-            <div class="p-3 rounded-xl bg-white border border-red-200 flex items-center justify-between gap-2 text-xs">
-              <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
-              <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold">
-                Anular
-              </button>
-            </div>
-          `).join('');
-        }
+        confirmedEl.innerHTML = confirmed.length
+          ? confirmed.map(r => `
+              <div class="p-3 rounded-xl bg-white border border-red-200 flex items-center justify-between gap-2 text-xs">
+                <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
+                <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold">
+                  Anular
+                </button>
+              </div>
+            `).join("")
+          : `<p class="text-xs text-slate-500">Sin reservas confirmadas.</p>`;
 
         if (!cancelledByOwner.length) {
-          ownerCancelledBox.classList.add('hidden');
+          ownerCancelledBox.classList.add("hidden");
         } else {
-          ownerCancelledBox.classList.remove('hidden');
+          ownerCancelledBox.classList.remove("hidden");
           ownerCancelledEl.innerHTML = cancelledByOwner.map(r => `
             <div class="p-3 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-2 text-xs">
               <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
@@ -1474,51 +1333,60 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
                 Anulada por propietario
               </span>
             </div>
-          `).join('');
+          `).join("");
         }
 
-        document.querySelectorAll('[data-cancel-res]').forEach(btn => {
-          btn.addEventListener('click', () => {
+        document.querySelectorAll("[data-cancel-res]").forEach(btn => {
+          btn.addEventListener("click", async () => {
             const found = state.reservations.find(item => item.id === btn.dataset.cancelRes);
             if (!found) return;
 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const [y, m, d] = found.date.split('-').map(Number);
+            const [y, m, d] = found.date.split("-").map(Number);
             const resDate = new Date(y, m - 1, d);
             const daysBefore = Math.round((resDate - today) / (1000 * 60 * 60 * 24));
 
-            found.status = 'cancelada';
-            found.cancelledByOwner = true;
-            saveState(true, 'UPDATE');
-
-            if (daysBefore < 7) {
-              showToast('Anulada por propietario fuera del plazo de 7 días: se devuelve la fianza pero no la parte del alquiler.');
-            } else {
-              showToast('Anulada por propietario dentro del plazo de 7 días.');
+            try {
+              await db.ref(`escalonia15/reservations/${found.id}`).update({
+                status: "cancelada",
+                cancelledByOwner: true
+              });
+              showToast(
+                daysBefore < 7
+                  ? "Anulada fuera del plazo de 7 días: se devuelve la fianza pero no la parte del alquiler."
+                  : "Anulada dentro del plazo de 7 días."
+              );
+            } catch (err) {
+              showToast("Error al anular la reserva: " + err.message, true);
             }
           });
         });
       }
 
       function renderAdminDashboard() {
-        document.getElementById('authorizedCountLabel').textContent =
-          `Propietarios autorizados: ${state.users.length}`;
-        document.getElementById('adminCommCounterBadge').textContent =
-          `Actos comunitarios registrados: ${getAdminEventsCount()} (sin límite)`;
-        document.getElementById('cfgAdminEmail').value = state.adminConfig.adminEmail;
-        document.getElementById('cfgAdminIban').value = state.adminConfig.iban;
-        document.getElementById('cfgPaymentConcept').value = state.adminConfig.concept;
-        document.getElementById('cfgMailTemplate').value = state.adminConfig.mailTemplate;
-        document.getElementById('adminsListSummary').innerHTML =
-          `Administradores: <strong>${state.admins.join(', ')}</strong>`;
+        const authItems = Object.values(state.authorizedEmails || {}).filter(x => x && x.authorized);
+        document.getElementById("authorizedCountLabel").textContent =
+          `Correos autorizados: ${authItems.length}`;
+        document.getElementById("authorizedEmailsPreview").innerHTML = authItems
+          .map(item => `<span class="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-300 text-slate-700">${item.email}</span>`)
+          .join("");
 
-        if (!document.getElementById('commDateInput').value) {
-          document.getElementById('commDateInput').value = formatDateISO(new Date());
+        document.getElementById("adminCommCounterBadge").textContent =
+          `Actos comunitarios registrados: ${getAdminEventsCount()} (sin límite)`;
+        document.getElementById("cfgAdminEmail").value = state.adminConfig.adminEmail || ADMIN_EMAIL;
+        document.getElementById("cfgAdminIban").value = state.adminConfig.iban || "";
+        document.getElementById("cfgPaymentConcept").value = state.adminConfig.concept || "";
+        document.getElementById("cfgMailTemplate").value = state.adminConfig.mailTemplate || "";
+        document.getElementById("adminsListSummary").innerHTML =
+          `Administradores: <strong>${(state.admins || []).map(a => a.email || a).join(", ")}</strong>`;
+
+        if (!document.getElementById("commDateInput").value) {
+          document.getElementById("commDateInput").value = formatDateISO(new Date());
         }
 
-        const listEl = document.getElementById('adminReservationsList');
-        const activeList = state.reservations.filter(r => r.status !== 'cancelada' && r.status !== 'no_autorizada');
+        const listEl = document.getElementById("adminReservationsList");
+        const activeList = state.reservations.filter(r => r.status !== "cancelada" && r.status !== "no_autorizada");
         if (!activeList.length) {
           listEl.innerHTML = `<p class="text-xs text-slate-500">No hay reservas pendientes ni confirmadas.</p>`;
           return;
@@ -1530,7 +1398,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
               <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
                 <div class="space-y-0.5">
                   <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
-                  <p class="text-slate-700">${r.eventType || r.unit} — Estado: <strong>RESERVADO</strong></p>
+                  <p class="text-slate-700">${r.eventType || r.housing || "Acto comunitario"} — Estado: <strong>RESERVADO</strong></p>
                   <p class="text-emerald-800 font-semibold">Contador de actos comunitarios: <strong>${getAdminEventsCount()}</strong> (sin límite)</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
@@ -1542,426 +1410,569 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             `;
           }
 
-          const year = Number(r.date.split('-')[0]);
+          const year = Number(r.date.split("-")[0]);
           const yearCount = getUserYearReservationCount(r.ownerEmail, year);
 
           return `
             <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
               <div class="space-y-0.5">
                 <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
-                <p class="text-slate-700">${r.ownerEmail} (${r.portal} · ${r.unit}) — Estado: <strong>${r.status.toUpperCase()}</strong></p>
+                <p class="text-slate-700">${r.ownerEmail} (${r.housing || "Vivienda"}) — Estado: <strong>${(r.status || "").toUpperCase()}</strong></p>
                 <p class="text-emerald-800 font-semibold">Veces reservado este año (${year}): <strong>${yearCount}</strong></p>
               </div>
               <div class="flex flex-wrap items-center gap-2">
                 <button data-visto-bueno="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold">
                   Visto bueno (Correo pago 48h)
                 </button>
-                ${r.status === 'pendiente' ? `
+                ${r.status === "pendiente" ? `
                   <button data-confirm-pay="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold">
                     Confirmar reserva
                   </button>
-                ` : ''}
+                ` : ""}
                 <button data-no-autorizar="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold">
                   No autorizar
                 </button>
                 <button data-refund-dep="${r.id}" type="button" class="px-3 py-1.5 rounded-lg border ${
                   r.depositReturned
-                    ? 'bg-emerald-100 border-emerald-400 text-emerald-950'
-                    : 'bg-white border-slate-300 hover:bg-slate-100 text-slate-800'
+                    ? "bg-emerald-100 border-emerald-400 text-emerald-950"
+                    : "bg-white border-slate-300 hover:bg-slate-100 text-slate-800"
                 } font-bold">
-                  ${r.depositReturned ? 'Fianza devuelta ✓' : 'Fianza devuelta'}
+                  ${r.depositReturned ? "Fianza devuelta ✓" : "Fianza devuelta"}
                 </button>
               </div>
             </div>
           `;
-        }).join('');
+        }).join("");
 
-        listEl.querySelectorAll('[data-admin-cancel]').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const item = state.reservations.find(x => x.id === btn.dataset.adminCancel);
-            if (!item) return;
-            item.status = 'cancelada';
-            item.cancelledByOwner = false;
-            saveState(true, 'UPDATE');
-            showToast('Reserva cancelada.');
+        listEl.querySelectorAll("[data-admin-cancel]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            await db.ref(`escalonia15/reservations/${btn.dataset.adminCancel}`).update({
+              status: "cancelada",
+              cancelledByOwner: false
+            });
+            showToast("Reserva cancelada.");
           });
         });
 
-        listEl.querySelectorAll('[data-visto-bueno]').forEach(btn => {
-          btn.addEventListener('click', () => {
+        listEl.querySelectorAll("[data-visto-bueno]").forEach(btn => {
+          btn.addEventListener("click", () => {
             const item = state.reservations.find(x => x.id === btn.dataset.vistoBueno);
-            if (!item) return;
-            openPaymentModalForReservation(item);
+            if (item) openPaymentModalForReservation(item);
           });
         });
 
-        listEl.querySelectorAll('[data-confirm-pay]').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const item = state.reservations.find(x => x.id === btn.dataset.confirmPay);
-            if (!item) return;
-            item.status = 'reservado';
-            saveState(true, 'UPDATE');
-            showToast(`Reserva confirmada para ${item.ownerEmail}.`);
+        listEl.querySelectorAll("[data-confirm-pay]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            await db.ref(`escalonia15/reservations/${btn.dataset.confirmPay}`).update({
+              status: "reservado"
+            });
+            showToast("Reserva confirmada.");
           });
         });
 
-        listEl.querySelectorAll('[data-no-autorizar]').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const item = state.reservations.find(x => x.id === btn.dataset.noAutorizar);
-            if (!item) return;
-            item.status = 'no_autorizada';
-            item.cancelledByOwner = false;
-            saveState(true, 'UPDATE');
-            showToast(`Reserva de ${item.ownerEmail} marcada como NO AUTORIZADA.`);
+        listEl.querySelectorAll("[data-no-autorizar]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            await db.ref(`escalonia15/reservations/${btn.dataset.noAutorizar}`).update({
+              status: "no_autorizada",
+              cancelledByOwner: false
+            });
+            showToast("Reserva marcada como NO AUTORIZADA.");
           });
         });
 
-        listEl.querySelectorAll('[data-refund-dep]').forEach(btn => {
-          btn.addEventListener('click', () => {
+        listEl.querySelectorAll("[data-refund-dep]").forEach(btn => {
+          btn.addEventListener("click", async () => {
             const item = state.reservations.find(x => x.id === btn.dataset.refundDep);
             if (!item) return;
-            item.depositReturned = !item.depositReturned;
-            saveState(true, 'UPDATE');
-            showToast(item.depositReturned ? 'Fianza marcada como devuelta.' : 'Marca de fianza devuelta quitada.');
+            await db.ref(`escalonia15/reservations/${item.id}`).update({
+              depositReturned: !item.depositReturned
+            });
+            showToast(!item.depositReturned ? "Fianza marcada como devuelta." : "Marca de fianza devuelta quitada.");
           });
         });
       }
 
-      // Entrada desde pantalla inicial
-      document.getElementById('btnEnterOwner').addEventListener('click', () => {
-        state = loadState();
-        activeScreen = 'owner';
+      function refreshAllViews() {
+        updateHeaderAndUserInfo();
+        renderCalendar();
+        renderAdminCalendar();
+        renderMyReservations();
+        renderAdminDashboard();
+      }
+
+      // Escucha en tiempo real de Realtime Database
+      db.ref("escalonia15/adminConfig").on("value", snap => {
+        if (snap.exists()) {
+          state.adminConfig = { ...state.adminConfig, ...snap.val() };
+          if (Array.isArray(snap.val().admins) && snap.val().admins.length) {
+            state.admins = snap.val().admins;
+          }
+          refreshAllViews();
+        }
+      });
+
+      db.ref("escalonia15/authorizedEmails").on("value", snap => {
+        state.authorizedEmails = snap.val() || {};
+        refreshAllViews();
+      });
+
+      db.ref("escalonia15/reservations").on("value", snap => {
+        const rawObj = snap.val() || {};
+        state.reservations = Object.entries(rawObj).map(([id, val]) => ({ id, ...val }));
+        refreshAllViews();
+      });
+
+      // Observador de autenticación real de Firebase
+      auth.onAuthStateChanged(async user => {
+        authUser = user;
+        if (!user) {
+          isCurrentUserAdmin = false;
+          currentUserProfile = null;
+          if (activeScreen === "admin") activeScreen = "landing";
+          applyScreenVisibility();
+          refreshAllViews();
+          return;
+        }
+
+        isCurrentUserAdmin = user.uid === ADMIN_UID;
+        const profSnap = await db.ref(`escalonia15/users/${user.uid}`).once("value");
+        currentUserProfile = profSnap.val();
+
+        if (isCurrentUserAdmin && !currentUserProfile) {
+          currentUserProfile = {
+            email: user.email,
+            role: "admin",
+            portal: "Admin",
+            floor: "-",
+            letter: "-"
+          };
+          await db.ref(`escalonia15/users/${user.uid}`).set(currentUserProfile);
+        }
+
+        if (pendingScreenAfterLogin === "admin" && isCurrentUserAdmin) {
+          activeScreen = "admin";
+        } else if (pendingScreenAfterLogin === "owner") {
+          activeScreen = "owner";
+        }
+        pendingScreenAfterLogin = null;
+
         applyScreenVisibility();
         refreshAllViews();
       });
 
-      document.getElementById('btnBackToLandingFromOwner').addEventListener('click', () => {
-        activeScreen = 'landing';
+      // Botones principales de entrada
+      document.getElementById("btnEnterOwner").addEventListener("click", () => {
+        activeScreen = "owner";
+        applyScreenVisibility();
+        refreshAllViews();
+        if (!authUser) {
+          openAuthModal("login");
+        }
+      });
+
+      document.getElementById("btnBackToLandingFromOwner").addEventListener("click", () => {
+        activeScreen = "landing";
         applyScreenVisibility();
       });
 
+      document.getElementById("btnOwnerLogout").addEventListener("click", () => {
+        auth.signOut();
+        showToast("Sesión cerrada.");
+      });
+
       // Selector de turno en panel derecho
-      document.getElementById('pickShiftMananaBtn').addEventListener('click', () => {
-        if (!selectedSlot) return;
-        handleSelectSlot(selectedSlot.date, 'manana');
+      document.getElementById("pickShiftMananaBtn").addEventListener("click", () => {
+        if (selectedSlot) handleSelectSlot(selectedSlot.date, "manana");
       });
 
-      document.getElementById('pickShiftTardeBtn').addEventListener('click', () => {
-        if (!selectedSlot) return;
-        handleSelectSlot(selectedSlot.date, 'tarde');
+      document.getElementById("pickShiftTardeBtn").addEventListener("click", () => {
+        if (selectedSlot) handleSelectSlot(selectedSlot.date, "tarde");
       });
 
-      // Main navigation tabs
-      document.querySelectorAll('.nav-tab').forEach(tabBtn => {
-        tabBtn.addEventListener('click', () => {
+      // Navegación pestañas propietario
+      document.querySelectorAll(".nav-tab").forEach(tabBtn => {
+        tabBtn.addEventListener("click", () => {
           const target = tabBtn.dataset.tab;
-          document.querySelectorAll('.nav-tab').forEach(b => {
-            b.classList.remove('bg-emerald-700', 'text-white');
-            b.classList.add('bg-white/10', 'text-emerald-100');
+          document.querySelectorAll(".nav-tab").forEach(b => {
+            b.classList.remove("bg-emerald-700", "text-white");
+            b.classList.add("bg-white/10", "text-emerald-100");
           });
-          tabBtn.classList.add('bg-emerald-700', 'text-white');
-          tabBtn.classList.remove('bg-white/10', 'text-emerald-100');
+          tabBtn.classList.add("bg-emerald-700", "text-white");
+          tabBtn.classList.remove("bg-white/10", "text-emerald-100");
 
-          document.querySelectorAll('.tab-panel').forEach(panel => {
-            panel.classList.add('hidden');
-          });
-          document.getElementById(`tab-${target}`).classList.remove('hidden');
-
-          state = loadState();
+          document.querySelectorAll(".tab-panel").forEach(panel => panel.classList.add("hidden"));
+          document.getElementById(`tab-${target}`).classList.remove("hidden");
           refreshAllViews();
         });
       });
 
-      // Admin sub-tabs (botones visibles todo el tiempo)
-      document.querySelectorAll('.admin-tab').forEach(tabBtn => {
-        tabBtn.addEventListener('click', () => {
+      // Navegación pestañas administrador
+      document.querySelectorAll(".admin-tab").forEach(tabBtn => {
+        tabBtn.addEventListener("click", () => {
           const target = tabBtn.dataset.adminTab;
-          document.querySelectorAll('.admin-tab').forEach(b => {
-            b.classList.remove('bg-emerald-600', 'text-white');
-            b.classList.add('bg-white/10', 'text-slate-200');
+          document.querySelectorAll(".admin-tab").forEach(b => {
+            b.classList.remove("bg-emerald-600", "text-white");
+            b.classList.add("bg-white/10", "text-slate-200");
           });
-          tabBtn.classList.add('bg-emerald-600', 'text-white');
-          tabBtn.classList.remove('bg-white/10', 'text-slate-200');
+          tabBtn.classList.add("bg-emerald-600", "text-white");
+          tabBtn.classList.remove("bg-white/10", "text-slate-200");
 
-          document.querySelectorAll('.admin-panel').forEach(panel => {
-            panel.classList.add('hidden');
-          });
-          document.getElementById(`admin-tab-${target}`).classList.remove('hidden');
-          state = loadState();
+          document.querySelectorAll(".admin-panel").forEach(panel => panel.classList.add("hidden"));
+          document.getElementById(`admin-tab-${target}`).classList.remove("hidden");
           refreshAllViews();
         });
       });
 
-      // Month controls (Propietario y Administrador)
+      // Cambio de mes
       function shiftMonthBy(delta) {
         const { year, month } = state.currentYearMonth;
         const targetDate = new Date(year, month + delta, 1);
         state.currentYearMonth = { year: targetDate.getFullYear(), month: targetDate.getMonth() };
-        saveState(true, 'UPDATE');
+        refreshAllViews();
       }
 
-      document.getElementById('prevMonthBtn').addEventListener('click', () => shiftMonthBy(-1));
-      document.getElementById('nextMonthBtn').addEventListener('click', () => shiftMonthBy(1));
-      document.getElementById('adminPrevMonthBtn').addEventListener('click', () => shiftMonthBy(-1));
-      document.getElementById('adminNextMonthBtn').addEventListener('click', () => shiftMonthBy(1));
+      document.getElementById("prevMonthBtn").addEventListener("click", () => shiftMonthBy(-1));
+      document.getElementById("nextMonthBtn").addEventListener("click", () => shiftMonthBy(1));
+      document.getElementById("adminPrevMonthBtn").addEventListener("click", () => shiftMonthBy(-1));
+      document.getElementById("adminNextMonthBtn").addEventListener("click", () => shiftMonthBy(1));
 
-      // Booking submit (Propietario: nunca abre el modal de pago)
-      ['acceptNormsCheck', 'fixedDateExceptionCheck'].forEach(id => {
-        document.getElementById(id).addEventListener('change', validateSelection);
+      // Solicitar reserva de propietario
+      ["acceptNormsCheck", "fixedDateExceptionCheck"].forEach(id => {
+        document.getElementById(id).addEventListener("change", validateSelection);
       });
 
-      document.getElementById('btnSubmitBooking').addEventListener('click', () => {
-        if (!validateSelection() || !selectedSlot) return;
-        const user = getCurrentUser();
-        const eventType = document.getElementById('eventTypeInput').value;
+      document.getElementById("btnSubmitBooking").addEventListener("click", async () => {
+        if (!validateSelection() || !selectedSlot || !authUser) return;
+        const eventType = document.getElementById("eventTypeInput").value;
+        const housing = getUserHousingLabel(currentUserProfile);
 
-        const newReservation = {
-          id: `res-${Date.now()}`,
-          date: selectedSlot.date,
-          shift: selectedSlot.shift,
-          status: 'pendiente',
-          ownerEmail: user.email,
-          portal: user.portal,
-          unit: user.unit,
-          eventType,
-          createdByAdmin: false,
-          createdAt: new Date().toISOString(),
-          depositReturned: false,
-          cancelledByOwner: false
-        };
-
-        state.reservations.push(newReservation);
-        saveState(true, 'INSERT');
-        showToast('Solicitud de reserva enviada. Queda pendiente de revisión por la administración.');
-      });
-
-      // Payment Modal actions (solo administrador)
-      document.getElementById('closePaymentModal').addEventListener('click', () => {
-        const modal = document.getElementById('paymentModal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      });
-
-      document.getElementById('copyMailBtn').addEventListener('click', async () => {
-        const to = document.getElementById('mailToInput').value;
-        const subj = document.getElementById('mailSubjectInput').value;
-        const body = document.getElementById('mailBodyInput').value;
-        const fullText = `Para: ${to}\nAsunto: ${subj}\n\n${body}`;
         try {
-          await navigator.clipboard.writeText(fullText);
-          showToast('Texto copiado.');
+          await db.ref("escalonia15/reservations").push({
+            date: selectedSlot.date,
+            shift: selectedSlot.shift,
+            status: "pendiente",
+            ownerEmail: authUser.email,
+            ownerUid: authUser.uid,
+            housing,
+            eventType,
+            createdByAdmin: false,
+            createdAt: new Date().toISOString(),
+            depositReturned: false,
+            cancelledByOwner: false
+          });
+          showToast("Solicitud de reserva enviada. Queda pendiente de revisión por la administración.");
+        } catch (err) {
+          showToast("No se pudo registrar la reserva: " + err.message, true);
+        }
+      });
+
+      // Modal pago 48h
+      document.getElementById("closePaymentModal").addEventListener("click", () => {
+        const modal = document.getElementById("paymentModal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      });
+
+      document.getElementById("copyMailBtn").addEventListener("click", async () => {
+        const to = document.getElementById("mailToInput").value;
+        const subj = document.getElementById("mailSubjectInput").value;
+        const body = document.getElementById("mailBodyInput").value;
+        try {
+          await navigator.clipboard.writeText(`Para: ${to}\nAsunto: ${subj}\n\n${body}`);
+          showToast("Texto copiado.");
         } catch (e) {
-          showToast('No se pudo copiar.', true);
+          showToast("No se pudo copiar.", true);
         }
       });
 
-      document.getElementById('sendMailBtn').addEventListener('click', () => {
-        const to = encodeURIComponent(document.getElementById('mailToInput').value.trim());
-        const subject = encodeURIComponent(document.getElementById('mailSubjectInput').value.trim());
-        const body = encodeURIComponent(document.getElementById('mailBodyInput').value.trim());
-        window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+      document.getElementById("sendMailBtn").addEventListener("click", () => {
+        const to = encodeURIComponent(document.getElementById("mailToInput").value.trim());
+        const cc = encodeURIComponent(document.getElementById("mailFromInput").value.trim() || ADMIN_EMAIL);
+        const subject = encodeURIComponent(document.getElementById("mailSubjectInput").value.trim());
+        const body = encodeURIComponent(document.getElementById("mailBodyInput").value.trim());
+        window.location.href = `mailto:${to}?cc=${cc}&subject=${subject}&body=${body}`;
       });
 
-      // Auth Modal actions
-      const authModal = document.getElementById('authModal');
-      document.getElementById('btnOpenAuth').addEventListener('click', () => {
-        document.getElementById('loginEmailInput').value = state.currentUserEmail || 'prueba@escalonia15.es';
-        document.getElementById('loginPasswordInput').value = '';
-        authModal.classList.remove('hidden');
-        authModal.classList.add('flex');
-      });
-      document.getElementById('closeAuthModal').addEventListener('click', () => {
-        authModal.classList.add('hidden');
-        authModal.classList.remove('flex');
+      // Modal propietario (Login / Activación)
+      const authModal = document.getElementById("authModal");
+      function openAuthModal(mode = "login") {
+        const loginTab = document.getElementById("modeLoginTab");
+        const actTab = document.getElementById("modeActivateTab");
+        const loginFields = document.getElementById("authLoginFields");
+        const actFields = document.getElementById("authActivateFields");
+
+        if (mode === "activate") {
+          actTab.className = "flex-1 py-1.5 rounded-lg bg-emerald-700 text-white text-xs font-bold";
+          loginTab.className = "flex-1 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold";
+          actFields.classList.remove("hidden");
+          loginFields.classList.add("hidden");
+        } else {
+          loginTab.className = "flex-1 py-1.5 rounded-lg bg-emerald-700 text-white text-xs font-bold";
+          actTab.className = "flex-1 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold";
+          loginFields.classList.remove("hidden");
+          actFields.classList.add("hidden");
+        }
+
+        authModal.classList.remove("hidden");
+        authModal.classList.add("flex");
+      }
+
+      document.getElementById("btnOpenAuth").addEventListener("click", () => openAuthModal("login"));
+      document.getElementById("modeLoginTab").addEventListener("click", () => openAuthModal("login"));
+      document.getElementById("modeActivateTab").addEventListener("click", () => openAuthModal("activate"));
+      document.getElementById("closeAuthModal").addEventListener("click", () => {
+        authModal.classList.add("hidden");
+        authModal.classList.remove("flex");
       });
 
-      document.getElementById('doLoginBtn').addEventListener('click', () => {
-        const email = document.getElementById('loginEmailInput').value.trim().toLowerCase();
-        const pass = document.getElementById('loginPasswordInput').value;
-        const found = state.users.find(u => u.email.toLowerCase() === email);
-
-        if (!found) {
-          showToast('Ese correo no está dado de alta.', true);
+      document.getElementById("doLoginBtn").addEventListener("click", async () => {
+        const email = document.getElementById("loginEmailInput").value.trim();
+        const pass = document.getElementById("loginPasswordInput").value;
+        if (!email || !pass) {
+          showToast("Introduce correo y contraseña.", true);
           return;
         }
-        if (pass && found.password && pass !== found.password) {
-          showToast('Contraseña incorrecta.', true);
-          return;
+        try {
+          await auth.signInWithEmailAndPassword(email, pass);
+          authModal.classList.add("hidden");
+          authModal.classList.remove("flex");
+          showToast("Sesión iniciada.");
+        } catch (err) {
+          showToast("Error al iniciar sesión: " + err.message, true);
         }
-
-        state.currentUserEmail = found.email;
-        saveState(true, 'UPDATE');
-        authModal.classList.add('hidden');
-        authModal.classList.remove('flex');
-        showToast(`Bienvenido · ${found.portal} · ${found.unit}`);
       });
 
-      document.getElementById('forgotPasswordBtn').addEventListener('click', () => {
-        const email = document.getElementById('loginEmailInput').value.trim() || state.currentUserEmail;
-        showToast(`Recuperación enviada a ${email}.`);
-      });
-
-      document.getElementById('activateAccountBtn').addEventListener('click', () => {
-        const email = document.getElementById('loginEmailInput').value.trim().toLowerCase();
-        const pass = document.getElementById('loginPasswordInput').value.trim();
+      document.getElementById("forgotPasswordBtn").addEventListener("click", async () => {
+        const email = document.getElementById("loginEmailInput").value.trim();
         if (!email) {
-          showToast('Introduce un correo autorizado.', true);
+          showToast("Escribe tu correo para enviar el enlace de recuperación.", true);
           return;
         }
-        let existing = state.users.find(u => u.email.toLowerCase() === email);
-        if (!existing) {
-          const idx = state.users.length;
-          existing = {
-            email,
-            password: pass || 'vecino123',
-            portal: PORTALS[idx % PORTALS.length],
-            unit: UNITS[idx % UNITS.length],
-            active: true
-          };
-          state.users.push(existing);
-        } else if (pass) {
-          existing.password = pass;
-          existing.active = true;
+        try {
+          await auth.sendPasswordResetEmail(email);
+          showToast(`Correo de recuperación enviado a ${email}.`);
+        } catch (err) {
+          showToast("No se pudo enviar el correo: " + err.message, true);
         }
-        state.currentUserEmail = existing.email;
-        saveState(true, 'INSERT');
-        authModal.classList.add('hidden');
-        authModal.classList.remove('flex');
-        showToast(`Cuenta activada: ${existing.portal} · ${existing.unit}`);
       });
 
-      // Admin password modal -> dedicated full admin interface + calendar
-      const adminLoginModal = document.getElementById('adminLoginModal');
+      document.getElementById("activateAccountBtn").addEventListener("click", async () => {
+        const email = document.getElementById("actEmailInput").value.trim().toLowerCase();
+        const portal = document.getElementById("actPortalInput").value.trim();
+        const floor = document.getElementById("actFloorInput").value.trim();
+        const letter = document.getElementById("actLetterInput").value.trim().toUpperCase();
+        const pass = document.getElementById("actPasswordInput").value;
 
-      document.getElementById('btnEnterAdmin').addEventListener('click', () => {
-        state = loadState();
-        refreshAllViews();
-        document.getElementById('adminPinInput').value = '';
-        adminLoginModal.classList.remove('hidden');
-        adminLoginModal.classList.add('flex');
+        if (!email || !portal || !floor || !letter || pass.length < 6) {
+          showToast("Completa correo, portal, piso, letra y contraseña (mínimo 6 caracteres).", true);
+          return;
+        }
+        if (email === ADMIN_EMAIL.toLowerCase()) {
+          showToast("Ese correo corresponde a administración.", true);
+          return;
+        }
+
+        try {
+          const snapAuth = await db.ref(`escalonia15/authorizedEmails/${normalizeEmailKey(email)}`).once("value");
+          if (!snapAuth.exists() || !snapAuth.val().authorized) {
+            showToast("Tu correo aún no ha sido autorizado por administración.", true);
+            return;
+          }
+
+          const cred = await auth.createUserWithEmailAndPassword(email, pass);
+          await db.ref(`escalonia15/users/${cred.user.uid}`).set({
+            email,
+            portal,
+            floor,
+            letter,
+            role: "owner",
+            active: true,
+            createdAt: new Date().toISOString()
+          });
+
+          authModal.classList.add("hidden");
+          authModal.classList.remove("flex");
+          showToast("Cuenta activada correctamente.");
+        } catch (err) {
+          showToast("No se pudo activar la cuenta: " + err.message, true);
+        }
       });
 
-      document.getElementById('closeAdminLoginModal').addEventListener('click', () => {
-        adminLoginModal.classList.add('hidden');
-        adminLoginModal.classList.remove('flex');
-      });
+      // Acceso administrador con Firebase Auth
+      const adminLoginModal = document.getElementById("adminLoginModal");
 
-      document.getElementById('unlockAdminBtn').addEventListener('click', () => {
-        const code = document.getElementById('adminPinInput').value.trim();
-        if (code === state.adminConfig.adminCode) {
-          state = loadState();
-          adminLoginModal.classList.add('hidden');
-          adminLoginModal.classList.remove('flex');
-          activeScreen = 'admin';
+      document.getElementById("btnEnterAdmin").addEventListener("click", () => {
+        if (authUser && isCurrentUserAdmin) {
+          activeScreen = "admin";
           applyScreenVisibility();
           refreshAllViews();
-        } else {
-          showToast('Contraseña de administrador incorrecta.', true);
+          return;
+        }
+        document.getElementById("adminEmailInput").value = state.adminConfig.adminEmail || ADMIN_EMAIL;
+        document.getElementById("adminPasswordInput").value = "";
+        adminLoginModal.classList.remove("hidden");
+        adminLoginModal.classList.add("flex");
+      });
+
+      document.getElementById("closeAdminLoginModal").addEventListener("click", () => {
+        adminLoginModal.classList.add("hidden");
+        adminLoginModal.classList.remove("flex");
+      });
+
+      document.getElementById("unlockAdminBtn").addEventListener("click", async () => {
+        const email = document.getElementById("adminEmailInput").value.trim();
+        const pass = document.getElementById("adminPasswordInput").value;
+        if (!email || !pass) {
+          showToast("Introduce correo y contraseña de administrador.", true);
+          return;
+        }
+
+        try {
+          pendingScreenAfterLogin = "admin";
+          const cred = await auth.signInWithEmailAndPassword(email, pass);
+          if (cred.user.uid !== ADMIN_UID) {
+            pendingScreenAfterLogin = null;
+            showToast("Esta cuenta no tiene permisos de administrador.", true);
+            return;
+          }
+          adminLoginModal.classList.add("hidden");
+          adminLoginModal.classList.remove("flex");
+          activeScreen = "admin";
+          applyScreenVisibility();
+          refreshAllViews();
+        } catch (err) {
+          pendingScreenAfterLogin = null;
+          showToast("Error de acceso de administrador: " + err.message, true);
         }
       });
 
-      document.getElementById('exitAdminFullBtn').addEventListener('click', () => {
-        state = loadState();
-        activeScreen = 'landing';
-        applyScreenVisibility();
-        refreshAllViews();
+      document.getElementById("adminLogoutBtn").addEventListener("click", () => {
+        activeScreen = "landing";
+        auth.signOut();
+        showToast("Sesión de administrador cerrada.");
       });
 
-      document.getElementById('createCommEventBtn').addEventListener('click', () => {
-        const dateVal = document.getElementById('commDateInput').value;
-        const shiftVal = document.getElementById('commShiftInput').value;
-        const titleVal = document.getElementById('commTitleInput').value.trim() || 'Acto comunitario';
+      document.getElementById("exitAdminFullBtn").addEventListener("click", () => {
+        activeScreen = "landing";
+        applyScreenVisibility();
+      });
+
+      // Acto comunitario
+      document.getElementById("createCommEventBtn").addEventListener("click", async () => {
+        if (!isCurrentUserAdmin) return;
+        const dateVal = document.getElementById("commDateInput").value;
+        const shiftVal = document.getElementById("commShiftInput").value;
+        const titleVal = document.getElementById("commTitleInput").value.trim() || "Acto comunitario";
 
         if (!dateVal) {
-          showToast('Selecciona una fecha.', true);
+          showToast("Selecciona una fecha.", true);
           return;
         }
         if (getActiveSlotReservation(dateVal, shiftVal)) {
-          showToast('Ya existe una reserva en ese día y turno.', true);
+          showToast("Ya existe una reserva en ese día y turno.", true);
           return;
         }
 
-        state.reservations.push({
-          id: `comm-${Date.now()}`,
-          date: dateVal,
-          shift: shiftVal,
-          status: 'reservado',
-          ownerEmail: state.adminConfig.adminEmail,
-          portal: 'Administración',
-          unit: titleVal,
-          eventType: titleVal,
-          createdByAdmin: true,
-          createdAt: new Date().toISOString(),
-          depositReturned: false,
-          cancelledByOwner: false
-        });
-
-        saveState(true, 'INSERT');
-        document.getElementById('commTitleInput').value = '';
-        showToast('Reserva registrada por administración en estado Reservado.');
+        try {
+          await db.ref("escalonia15/reservations").push({
+            date: dateVal,
+            shift: shiftVal,
+            status: "reservado",
+            ownerEmail: state.adminConfig.adminEmail || ADMIN_EMAIL,
+            ownerUid: authUser.uid,
+            housing: titleVal,
+            eventType: titleVal,
+            createdByAdmin: true,
+            createdAt: new Date().toISOString(),
+            depositReturned: false,
+            cancelledByOwner: false
+          });
+          document.getElementById("commTitleInput").value = "";
+          showToast("Acto comunitario registrado en estado Reservado.");
+        } catch (err) {
+          showToast("Error al registrar acto comunitario: " + err.message, true);
+        }
       });
 
-      document.getElementById('saveBulkEmailsBtn').addEventListener('click', () => {
-        const raw = document.getElementById('bulkEmailsInput').value;
+      // Alta masiva de correos por punto y coma (;)
+      document.getElementById("saveBulkEmailsBtn").addEventListener("click", async () => {
+        if (!isCurrentUserAdmin) return;
+        const raw = document.getElementById("bulkEmailsInput").value;
         const parts = raw
-          .split(';')
+          .split(";")
           .map(s => s.trim().toLowerCase())
-          .filter(Boolean);
+          .filter(e => e.includes("@"));
 
         if (!parts.length) {
-          showToast('Escribe correos separados por ";".', true);
+          showToast('Escribe correos válidos separados por ";".', true);
           return;
         }
 
-        let added = 0;
-        parts.forEach(email => {
-          const exists = state.users.some(u => u.email.toLowerCase() === email);
-          if (!exists) {
-            const idx = state.users.length;
-            state.users.push({
+        try {
+          const updates = {};
+          parts.forEach(email => {
+            updates[normalizeEmailKey(email)] = {
               email,
-              password: '',
-              portal: PORTALS[idx % PORTALS.length],
-              unit: UNITS[idx % UNITS.length],
-              active: false
-            });
-            added++;
-          }
-        });
-
-        saveState(true, 'INSERT');
-        document.getElementById('bulkEmailsInput').value = '';
-        showToast(`${added} propietario(s) autorizado(s).`);
-      });
-
-      document.getElementById('saveTemplateBtn').addEventListener('click', () => {
-        state.adminConfig.adminEmail = document.getElementById('cfgAdminEmail').value.trim() || 'administracion@escalonia15.es';
-        state.adminConfig.iban = document.getElementById('cfgAdminIban').value.trim();
-        state.adminConfig.concept = document.getElementById('cfgPaymentConcept').value.trim();
-        state.adminConfig.mailTemplate = document.getElementById('cfgMailTemplate').value;
-        saveState(true, 'UPDATE');
-        showToast('Plantilla e IBAN guardados.');
-      });
-
-      document.getElementById('addAdminBtn').addEventListener('click', () => {
-        const newEmail = document.getElementById('newAdminEmailInput').value.trim().toLowerCase();
-        const newCode = document.getElementById('newAdminCodeInput').value.trim();
-        if (newEmail && !state.admins.includes(newEmail)) {
-          state.admins.push(newEmail);
+              authorized: true,
+              authorizedAt: new Date().toISOString()
+            };
+          });
+          await db.ref("escalonia15/authorizedEmails").update(updates);
+          document.getElementById("bulkEmailsInput").value = "";
+          showToast(`${parts.length} correo(s) autorizado(s).`);
+        } catch (err) {
+          showToast("Error al autorizar correos: " + err.message, true);
         }
-        if (newCode) {
-          state.adminConfig.adminCode = newCode;
-        }
-        saveState(true, 'UPDATE');
-        document.getElementById('newAdminEmailInput').value = '';
-        document.getElementById('newAdminCodeInput').value = '';
-        showToast('Administrador guardado.');
       });
 
-      // Render inicial y suscripción en tiempo real a Firebase Realtime Database
+      // Guardar plantilla e IBAN
+      document.getElementById("saveTemplateBtn").addEventListener("click", async () => {
+        if (!isCurrentUserAdmin) return;
+        const updatedConfig = {
+          ...state.adminConfig,
+          adminEmail: document.getElementById("cfgAdminEmail").value.trim() || ADMIN_EMAIL,
+          iban: document.getElementById("cfgAdminIban").value.trim(),
+          concept: document.getElementById("cfgPaymentConcept").value.trim(),
+          mailTemplate: document.getElementById("cfgMailTemplate").value,
+          admins: state.admins
+        };
+
+        try {
+          await db.ref("escalonia15/adminConfig").set(updatedConfig);
+          showToast("Plantilla e IBAN guardados.");
+        } catch (err) {
+          showToast("Error al guardar configuración: " + err.message, true);
+        }
+      });
+
+      // Guardar otro administrador
+      document.getElementById("addAdminBtn").addEventListener("click", async () => {
+        if (!isCurrentUserAdmin) return;
+        const newEmail = document.getElementById("newAdminEmailInput").value.trim().toLowerCase();
+        const newUid = document.getElementById("newAdminUidInput").value.trim();
+
+        if (!newEmail) {
+          showToast("Introduce el correo del nuevo administrador.", true);
+          return;
+        }
+
+        const exists = state.admins.some(a => (a.email || a).toLowerCase() === newEmail);
+        if (!exists) {
+          state.admins.push({ email: newEmail, uid: newUid || "" });
+        }
+
+        try {
+          await db.ref("escalonia15/adminConfig/admins").set(state.admins);
+          document.getElementById("newAdminEmailInput").value = "";
+          document.getElementById("newAdminUidInput").value = "";
+          showToast("Administrador guardado.");
+        } catch (err) {
+          showToast("Error al guardar administrador: " + err.message, true);
+        }
+      });
+
       applyScreenVisibility();
       refreshAllViews();
-      subscribeRealtimeDatabase();
     })();
   </script>
 </body>
