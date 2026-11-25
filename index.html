@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reserva Sala Común Escalonia 15 — v1.4</title>
+  <title>Reserva Sala Común Escalonia 15 — v1.5</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -135,7 +135,7 @@
     <div class="max-w-xl w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-7 sm:p-10 text-center shadow-2xl space-y-7">
       <div class="space-y-1">
         <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-emerald-200 px-3 py-1 rounded-full bg-white/10">
-          Versión 1.4 · Tiempo Real
+          Versión 1.5 · Tiempo Real
         </span>
         <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight pt-2">
           Bienvenido a reserva sala común Escalonia 15
@@ -172,7 +172,7 @@
           </div>
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-emerald-300">
-              Reserva Sala Común Escalonia 15 · v1.4
+              Reserva Sala Común Escalonia 15 · v1.5
             </p>
             <h2 id="ownerWelcomeTitle" class="text-base sm:text-lg font-extrabold tracking-tight leading-tight">
               Bienvenido · Vivienda
@@ -187,28 +187,21 @@
           <button
             id="btnOpenSettings"
             type="button"
-            class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-400/40 text-emerald-100 transition"
+            class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-400/40 text-emerald-100 transition cursor-pointer"
           >
             Ajustes
           </button>
           <button
-            id="btnOpenAuth"
-            type="button"
-            class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 border border-white/15 transition"
-          >
-            Iniciar sesión / Cambiar
-          </button>
-          <button
             id="btnOwnerLogout"
             type="button"
-            class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600/80 hover:bg-rose-600 text-white transition"
+            class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white transition cursor-pointer"
           >
             Cerrar sesión
           </button>
           <button
             id="btnBackToLandingFromOwner"
             type="button"
-            class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 border border-white/15 transition"
+            class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 border border-white/15 transition cursor-pointer"
           >
             Inicio
           </button>
@@ -658,7 +651,7 @@
       <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-            Administrador · v1.4
+            Administrador · v1.5
           </span>
           <h2 id="adminHeaderTitle" class="text-base sm:text-lg font-bold leading-tight">
             Administrador — Sala Común Escalonia 15
@@ -666,10 +659,10 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <button id="adminLogoutBtn" type="button" class="px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition">
+          <button id="adminLogoutBtn" type="button" class="px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition cursor-pointer">
             Cerrar sesión
           </button>
-          <button id="exitAdminFullBtn" type="button" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">
+          <button id="exitAdminFullBtn" type="button" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition cursor-pointer">
             &larr; Volver al inicio
           </button>
         </div>
@@ -925,8 +918,10 @@
       let isCurrentUserAdmin = false;
       let currentUserProfile = null;
       let userProfileRef = null;
+      let userProfileListener = null;
       let pendingScreenAfterLogin = null;
       let lastEnteredPassword = "";
+      let isSigningOut = false;
 
       let state = {
         currentYearMonth: {
@@ -1126,7 +1121,7 @@ Administración Escalonia 15`
           btnLogout.classList.add("hidden");
           btnSettings.classList.add("hidden");
           document.getElementById("ownerWelcomeTitle").textContent = "Bienvenido · Sala Común Escalonia 15";
-          document.getElementById("activeUserBanner").textContent = "Inicia sesión con tu correo y contraseña (123456 en el primer acceso).";
+          document.getElementById("activeUserBanner").textContent = "Sin sesión iniciada.";
           document.getElementById("formUserEmail").textContent = "Sin sesión";
           document.getElementById("formUserUnit").textContent = "-";
           document.getElementById("formUserCount").textContent = "0 / 2";
@@ -1632,6 +1627,48 @@ Administración Escalonia 15`
         renderAdminDashboard();
       }
 
+      function detachUserProfileListener() {
+        if (userProfileRef && userProfileListener) {
+          userProfileRef.off("value", userProfileListener);
+        }
+        userProfileRef = null;
+        userProfileListener = null;
+      }
+
+      async function performLogoutToLanding() {
+        isSigningOut = true;
+        detachUserProfileListener();
+        authUser = null;
+        isCurrentUserAdmin = false;
+        currentUserProfile = null;
+        lastEnteredPassword = "";
+        pendingScreenAfterLogin = null;
+        selectedSlot = null;
+        activeScreen = "landing";
+
+        const forceModal = document.getElementById("forcePasswordModal");
+        forceModal.classList.add("hidden");
+        forceModal.classList.remove("flex");
+
+        const settingsModal = document.getElementById("ownerSettingsModal");
+        settingsModal.classList.add("hidden");
+        settingsModal.classList.remove("flex");
+
+        const authModalEl = document.getElementById("authModal");
+        authModalEl.classList.add("hidden");
+        authModalEl.classList.remove("flex");
+
+        applyScreenVisibility();
+        refreshAllViews();
+
+        try {
+          await auth.signOut();
+        } catch (_) {}
+
+        isSigningOut = false;
+        showToast("Sesión cerrada.");
+      }
+
       db.ref("escalonia15/adminConfig").on("value", snap => {
         if (snap.exists()) {
           state.adminConfig = { ...state.adminConfig, ...snap.val() };
@@ -1673,13 +1710,12 @@ Administración Escalonia 15`
         modal.classList.add("flex");
       }
 
-      auth.onAuthStateChanged(async user => {
-        if (userProfileRef) {
-          userProfileRef.off();
-          userProfileRef = null;
-        }
+      auth.onAuthStateChanged(user => {
+        if (isSigningOut) return;
 
+        detachUserProfileListener();
         authUser = user;
+
         if (!user) {
           isCurrentUserAdmin = false;
           currentUserProfile = null;
@@ -1692,8 +1728,9 @@ Administración Escalonia 15`
         const extraAdmins = (state.admins || []).map(a => (a.uid || "").trim()).filter(Boolean);
         isCurrentUserAdmin = user.uid === ADMIN_UID || extraAdmins.includes(user.uid);
 
-        userProfileRef = db.ref(`escalonia15/users/${user.uid}`);
-        userProfileRef.on("value", async profSnap => {
+        const targetRef = db.ref(`escalonia15/users/${user.uid}`);
+        const listener = async profSnap => {
+          if (!auth.currentUser || auth.currentUser.uid !== user.uid || isSigningOut) return;
           currentUserProfile = profSnap.val();
           if (isCurrentUserAdmin && !currentUserProfile) {
             currentUserProfile = {
@@ -1704,7 +1741,9 @@ Administración Escalonia 15`
               letter: "-",
               mustChangePassword: false
             };
-            await userProfileRef.set(currentUserProfile);
+            try {
+              await targetRef.set(currentUserProfile);
+            } catch (_) {}
           }
 
           if (pendingScreenAfterLogin === "admin" && isCurrentUserAdmin) {
@@ -1727,7 +1766,11 @@ Administración Escalonia 15`
           if (needsFirstSetup) {
             openForcePasswordModal();
           }
-        });
+        };
+
+        userProfileRef = targetRef;
+        userProfileListener = listener;
+        targetRef.on("value", listener);
       });
 
       document.getElementById("btnEnterOwner").addEventListener("click", () => {
@@ -1744,11 +1787,7 @@ Administración Escalonia 15`
         applyScreenVisibility();
       });
 
-      document.getElementById("btnOwnerLogout").addEventListener("click", () => {
-        lastEnteredPassword = "";
-        auth.signOut();
-        showToast("Sesión cerrada.");
-      });
+      document.getElementById("btnOwnerLogout").addEventListener("click", performLogoutToLanding);
 
       document.getElementById("btnOpenSettings").addEventListener("click", openOwnerSettingsModal);
       document.getElementById("closeSettingsModal").addEventListener("click", () => {
@@ -1911,11 +1950,12 @@ Administración Escalonia 15`
 
       const authModal = document.getElementById("authModal");
       function openAuthModal() {
+        document.getElementById("loginEmailInput").value = "";
+        document.getElementById("loginPasswordInput").value = "";
         authModal.classList.remove("hidden");
         authModal.classList.add("flex");
       }
 
-      document.getElementById("btnOpenAuth").addEventListener("click", openAuthModal);
       document.getElementById("closeAuthModal").addEventListener("click", () => {
         authModal.classList.add("hidden");
         authModal.classList.remove("flex");
@@ -2046,12 +2086,7 @@ Administración Escalonia 15`
         }
       });
 
-      document.getElementById("adminLogoutBtn").addEventListener("click", () => {
-        activeScreen = "landing";
-        lastEnteredPassword = "";
-        auth.signOut();
-        showToast("Sesión de administrador cerrada.");
-      });
+      document.getElementById("adminLogoutBtn").addEventListener("click", performLogoutToLanding);
 
       document.getElementById("exitAdminFullBtn").addEventListener("click", () => {
         activeScreen = "landing";
