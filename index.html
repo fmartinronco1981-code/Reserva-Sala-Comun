@@ -195,6 +195,19 @@
 
     <!-- TAB 1: CALENDARIO Y RESERVAS -->
     <section id="tab-calendario" class="tab-panel space-y-5">
+      <!-- BANNER DE BIENVENIDA EN GRANDE -->
+      <div class="bg-gradient-to-r from-brand-dark via-brand-primary to-emerald-800 text-white rounded-2xl p-5 sm:p-7 shadow-md border border-emerald-900/40">
+        <span class="inline-block px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white/15 text-emerald-100 mb-2">
+          Comunidad de Vecinos
+        </span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+          Bienvenido a reserva sala común Escalonia 15
+        </h2>
+        <p class="text-xs sm:text-sm text-emerald-100/90 mt-2 max-w-2xl">
+          Consulta la disponibilidad en diagonal por turno de mañana o tarde y solicita tu reserva en exclusiva.
+        </p>
+      </div>
+
       <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
           <span class="font-bold text-slate-700">Turno partido en diagonal (Mañana / Tarde):</span>
@@ -243,7 +256,7 @@
         <!-- Booking Panel -->
         <div class="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4 h-fit">
           <div class="border-b border-slate-100 pb-3">
-            <h2 class="text-base font-bold text-slate-900">Solicitar Reserva en Exclusiva</h2>
+            <h3 class="text-base font-bold text-slate-900">Solicitar Reserva en Exclusiva</h3>
             <p class="text-xs text-slate-500 mt-0.5">
               Cuota: <strong>50,00 €</strong> + Fianza: <strong>100,00 €</strong> (Total: <strong>150,00 €</strong>). Pago en 48 h.
             </p>
@@ -723,7 +736,7 @@
 
   <script>
     (function () {
-      const STORAGE_KEY = 'escalonia15_sala_comun_v8';
+      const STORAGE_KEY = 'escalonia15_sala_comun_v9';
       const CHANNEL_NAME = 'escalonia15_realtime_sync';
       const PORTALS = Array.from({ length: 18 }, (_, i) => `Portal ${i + 1}`);
       const UNITS = [
