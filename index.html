@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reserva Sala Común Escalonia 15</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#0f2922',
+              primary: '#14532d',
+              accent: '#15803d',
+              soft: '#f0fdf4'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root {
+      --bg-app: #f3f6f4;
+      --card-bg: #ffffff;
+      --border-soft: #dce5df;
+      --text-main: #10241c;
+      --text-muted: #52665d;
+    }
+    body {
+      background: var(--bg-app);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .day-tile {
+      position: relative;
+      height: 82px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      user-select: none;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .day-tile:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(15, 41, 34, 0.08);
+    }
+    .diag-top-left {
+      position: absolute;
+      inset: 0;
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 6px 7px;
+      cursor: pointer;
+    }
+    .diag-bottom-right {
+      position: absolute;
+      inset: 0;
+      clip-path: polygon(100% 0, 100% 100%, 0 100%);
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      padding: 6px 7px;
+      cursor: pointer;
+    }
+    .diag-divider {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(to bottom right, transparent calc(50% - 0.75px), rgba(15, 23, 42, 0.28) 50%, transparent calc(50% + 0.75px));
+    }
+    .st-libre {
+      background-color: #dcfce7;
+      color: #14532d;
+    }
+    .st-libre:hover {
+      background-color: #bbf7d0;
+    }
+    .st-pendiente {
+      background-color: #fef9c3;
+      color: #854d0e;
+    }
+    .st-pendiente:hover {
+      background-color: #fef08a;
+    }
+    .st-reservado {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+    .st-reservado:hover {
+      background-color: #fecaca;
+    }
+    .st-bloqueado {
+      background-color: #f1f5f9;
+      color: #64748b;
+      cursor: not-allowed;
+    }
+    .day-num-badge {
+      position: relative;
+      z-index: 4;
+      pointer-events: none;
+      font-weight: 800;
+      font-size: 0.78rem;
+      line-height: 1;
+      padding: 2px 5px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.88);
+      color: #0f172a;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+    .slot-label {
+      font-size: 0.63rem;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOP HEADER -->
+  <header class="bg-brand-dark text-white sticky top-0 z-30 shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-emerald-600/30 border border-emerald-400/40 flex items-center justify-center font-bold text-emerald-200">
+          E15
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight leading-tight">
+            Reserva Sala Común Escalonia 15
+          </h1>
+          <p id="activeUserBanner" class="text-xs text-emerald-200/85">
+            Cargando sesión...
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          id="btnOpenAuth"
+          type="button"
+          class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 border border-white/15 transition"
+        >
+          Cuenta / Cambiar usuario
+        </button>
+        <button
+          id="btnOpenSettings"
+          type="button"
+          class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition flex items-center gap-1.5"
+        >
+          <span>Ajustes</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN NAVIGATION TABS -->
+    <nav class="bg-emerald-950/90 border-t border-white/10">
+      <div class="max-w-6xl mx-auto px-4 flex gap-1 overflow-x-auto">
+        <button
+          type="button"
+          data-tab="calendario"
+          class="nav-tab px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-emerald-400 text-white whitespace-nowrap transition"
+        >
+          Calendario y Reservas
+        </button>
+        <button
+          type="button"
+          data-tab="mis-reservas"
+          class="nav-tab px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-emerald-200/75 hover:text-white whitespace-nowrap transition"
+        >
+          Mis Reservas
+        </button>
+        <button
+          type="button"
+          data-tab="normas"
+          class="nav-tab px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-emerald-200/75 hover:text-white whitespace-nowrap transition"
+        >
+          Normas de la sala
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toastBox" class="fixed bottom-4 right-4 z-50 max-w-sm pointer-events-none hidden">
+    <div id="toastInner" class="pointer-events-auto rounded-xl px-4 py-3 text-xs sm:text-sm font-medium shadow-xl border bg-slate-900 text-white border-slate-700"></div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-5 space-y-5">
+
+    <!-- TAB 1: CALENDARIO Y RESERVAS -->
+    <section id="tab-calendario" class="tab-panel space-y-5">
+      <!-- Legend + Month Selector -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
+          <span class="font-bold text-slate-700">Turno partido en diagonal (Mañana / Tarde):</span>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-900 border border-green-300">
+            <span class="w-2.5 h-2.5 rounded-full bg-green-600"></span> Libre
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-900 border border-yellow-300">
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span> Pendiente de pago
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-900 border border-red-300">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Reservado
+          </span>
+        </div>
+
+        <div class="flex items-center justify-between md:justify-end gap-2">
+          <button id="prevMonthBtn" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
+            &larr; Anterior
+          </button>
+          <div id="currentMonthLabel" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-900 text-xs sm:text-sm font-bold min-w-[155px] text-center"></div>
+          <button id="nextMonthBtn" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
+            Siguiente &rarr;
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- Calendar Grid -->
+        <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <div class="grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold text-slate-500 uppercase mb-2">
+            <div>Lun</div>
+            <div>Mar</div>
+            <div>Mié</div>
+            <div>Jue</div>
+            <div>Vie</div>
+            <div>Sáb</div>
+            <div>Dom</div>
+          </div>
+          <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 sm:gap-2"></div>
+
+          <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
+            <span>Mitad superior izquierda: <strong>Mañana (10:00–16:30)</strong></span>
+            <span>Mitad inferior derecha: <strong>Tarde (17:30–22:00 / V-S-Víspera 24:00)</strong></span>
+          </div>
+        </div>
+
+        <!-- Booking Panel -->
+        <div class="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4 h-fit">
+          <div class="border-b border-slate-100 pb-3">
+            <h2 class="text-base font-bold text-slate-900">Solicitar Reserva en Exclusiva</h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Cuota: <strong>50,00 €</strong> + Fianza: <strong>100,00 €</strong> (Total: <strong>150,00 €</strong>). Pago en 48 h.
+            </p>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <div class="flex justify-between">
+                <span class="text-slate-500">Propietario / Correo:</span>
+                <span id="formUserEmail" class="font-bold text-slate-800 truncate max-w-[190px]">-</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Portal y Vivienda:</span>
+                <span id="formUserUnit" class="font-bold text-slate-800">-</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Reservas este año:</span>
+                <span id="formUserCount" class="font-bold text-emerald-700">0 / 2</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Fecha y turno seleccionado</label>
+              <div id="selectedSlotSummary" class="p-2.5 rounded-xl border border-dashed border-slate-300 bg-slate-50/70 text-slate-600 font-medium">
+                Pulsa en la mitad de Mañana o Tarde de un día en el calendario.
+              </div>
+            </div>
+
+            <div>
+              <label for="eventTypeInput" class="block font-semibold text-slate-700 mb-1">Motivo / Tipo de acto</label>
+              <select id="eventTypeInput" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-white text-slate-800 font-medium">
+                <option value="Reunión / Celebración familiar">Reunión / Celebración familiar</option>
+                <option value="Acto con fecha fija (Bautizo / Comunión / Evento señalado)">Acto con fecha fija (Bautizo / Comunión / Evento señalado)</option>
+                <option value="Acto comunitario">Acto comunitario</option>
+              </select>
+            </div>
+
+            <label class="flex items-start gap-2 pt-1 cursor-pointer select-none">
+              <input id="fixedDateExceptionCheck" type="checkbox" class="mt-0.5 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600" />
+              <span class="text-[11px] text-slate-600 leading-snug">
+                Aplicar excepción de <strong>acto con fecha fija</strong> (punto 12.1) si la fecha supera los 30 días de antelación.
+              </span>
+            </label>
+
+            <label class="flex items-start gap-2 cursor-pointer select-none">
+              <input id="acceptNormsCheck" type="checkbox" class="mt-0.5 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600" />
+              <span class="text-[11px] text-slate-700 leading-snug">
+                Acepto las <strong>Normas de la sala</strong> (50 € alquiler, 100 € fianza, pago en 48 h, anulación con 7 días y revisión del conserje).
+              </span>
+            </label>
+
+            <div id="ruleValidationMsg" class="hidden p-2.5 rounded-xl text-[11px] font-semibold"></div>
+
+            <button
+              id="btnSubmitBooking"
+              type="button"
+              class="w-full py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm shadow-sm transition"
+            >
+              Solicitar reserva y preparar correo de pago
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: MIS RESERVAS -->
+    <section id="tab-mis-reservas" class="tab-panel hidden space-y-4">
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4 mb-4">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900">Mis Reservas</h2>
+            <p class="text-xs text-slate-500">
+              Historial y gestión de tus reservas en la Sala Común Escalonia 15.
+            </p>
+          </div>
+
+          <!-- Fixed assigned Portal & Vivienda for logged-in owner -->
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <div class="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 font-semibold">
+              Portal adjudicado: <span id="myFixedPortal" class="font-extrabold">-</span>
+            </div>
+            <div class="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 font-semibold">
+              Vivienda adjudicada: <span id="myFixedUnit" class="font-extrabold">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="myReservationsList" class="space-y-3"></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: NORMAS DE LA SALA -->
+    <section id="tab-normas" class="tab-panel hidden space-y-5">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-6">
+        <div class="border-b border-slate-200 pb-4">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-900 mb-2">
+            Reglamento de Régimen Interior — Punto 12 y Condiciones Operativas
+          </span>
+          <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">
+            Normas de la Sala — Reserva Sala Común Escalonia 15
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-600 mt-1">
+            Texto normativo íntegro y condiciones de uso, reserva, pago, anulación, revisión por conserjería y devolución de fianza aplicables a la comunidad Escalonia 15 (18 portales, ~200 viviendas).
+          </p>
+        </div>
+
+        <!-- Texto íntegro del Reglamento de Régimen Interior (Punto 12) -->
+        <div class="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed">
+          <h3 class="text-base font-bold text-slate-900">
+            Reglamento de Régimen Interior — Punto 12: Uso y Reserva de la Sala Comunitaria / Gastrobar
+          </h3>
+
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+            <p><strong>12.1. Antelación máxima de reserva:</strong> Las solicitudes de reserva en exclusiva de la sala común podrán realizarse con una antelación máxima de <strong>30 días (un mes)</strong> respecto a la fecha solicitada, quedando excluidos de este límite temporal los <strong>actos con fecha fija</strong> debidamente acreditados (tales como bautizos, comuniones u otras celebraciones señaladas análogas).</p>
+
+            <p><strong>12.2. Turnos diarios y horarios:</strong> Solo podrá reservarse <strong>un único turno por día</strong> (bien el turno de mañana o bien el turno de tarde). Los horarios establecidos son:</p>
+            <ul class="list-disc pl-6 space-y-1">
+              <li><strong>Turno de mañana:</strong> de <strong>10:00 a 16:30 horas</strong>.</li>
+              <li><strong>Turno de tarde (de domingo a jueves):</strong> de <strong>17:30 a 22:00 horas</strong>.</li>
+              <li><strong>Turno de tarde (viernes, sábados y vísperas de festivos):</strong> de <strong>17:30 a 24:00 horas</strong>.</li>
+            </ul>
+
+            <p><strong>12.3. Límite anual y prioridad de uso:</strong> Cada vivienda o solicitante podrá disfrutar de un máximo de <strong>2 reservas al año</strong> (computándose por año natural con reseteo anual). En caso de concurrencia o criterios de asignación, tendrán prioridad los vecinos o viviendas con menor número de usos previos o nuevos usuarios, así como preferencia los <strong>actos comunitarios</strong> organizados por la comunidad.</p>
+
+            <p><strong>12.4. Importes, cuota de uso y fianza:</strong> El uso exclusivo de la sala conlleva una cuota de reserva de <strong>50,00 €</strong> y una fianza reembolsable de <strong>100,00 €</strong> (importe total de <strong>150,00 €</strong>), sin perjuicio de las cuotas o costes de limpieza que correspondan según lo dispuesto en el régimen interior.</p>
+
+            <p><strong>12.5. Plazo de pago (48 horas):</strong> Una vez registrada la solicitud de reserva, el vecino dispone de un plazo máximo de <strong>48 horas</strong> para efectuar el pago correspondiente a la cuenta indicada por la administración. Si transcurridas las 48 horas no consta el abono, la solicitud quedará <strong>anulada automáticamente</strong> y el turno volverá a quedar disponible.</p>
+
+            <p><strong>12.6. Anulación de reservas y plazo de 7 días:</strong> Toda anulación deberá comunicarse con una antelación mínima de <strong>7 días</strong> respecto a la fecha reservada. Si la anulación se realiza dentro de plazo (al menos 7 días antes), se reintegrarán los importes abonados; si se anula fuera de plazo (con menos de 7 días de antelación), se devolverá la <strong>fianza (100,00 €)</strong> pero se perderá la <strong>cuota de alquiler (50,00 €)</strong>.</p>
+
+            <p><strong>12.7. Entrega de llaves, revisión por el conserje y devolución de fianza:</strong> La operativa no contempla entrega de llaves tradicional mediante inventario previo de enseres. Tras la finalización del turno, el <strong>conserje</strong> revisará el estado de la sala y comunicará a la <strong>administración</strong> el resultado de la inspección para que, si todo se encuentra en correcto estado y sin desperfectos ni incidencias, se proceda a la <strong>devolución de la fianza</strong>.</p>
+          </div>
+        </div>
+
+        <!-- Condiciones y operativa acordadas en la conversación -->
+        <div class="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed">
+          <h3 class="text-base font-bold text-slate-900">
+            Condiciones Operativas y Funcionamiento del Sistema (Escalonia 15)
+          </h3>
+
+          <div class="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-2.5">
+            <p><strong>Comunidad y viviendas:</strong> Sistema configurado para la comunidad <strong>Escalonia 15</strong>, compuesta por <strong>18 portales</strong> y aproximadamente <strong>200 viviendas</strong> (con tipologías Bajo, Primero y Segundo, letras A, B, C y D), asignando <strong>un correo electrónico por vivienda</strong>.</p>
+
+            <p><strong>Alta de vecinos y acceso:</strong> La administración realiza el alta masiva pegando los correos electrónicos de las viviendas separados por punto y coma (<code>;</code>). Cada propietario activa su cuenta con su correo autorizado, establece su contraseña (con opción de recuperación «¿Olvidaste tu contraseña?») y entra con su portal y vivienda ya adjudicados de forma fija.</p>
+
+            <p><strong>Calendario visual partido en diagonal:</strong> Cada día del calendario se divide en diagonal en dos mitades —<strong>Mañana</strong> y <strong>Tarde</strong>— con código de color por turno: <strong>verde</strong> para <strong>Libre</strong>, <strong>amarillo</strong> para <strong>Pendiente de pago</strong> y <strong>rojo</strong> para <strong>Reservado</strong>.</p>
+
+            <p><strong>Comunicación de solicitud y pago:</strong> Al solicitar una reserva, el sistema prepara el correo de <strong>Solicitud de Pago (48h)</strong> remitido desde el correo de la administración hacia el correo del propietario, editable antes de enviar (asunto, mensaje, fecha, turno, importe de 50 € de alquiler + 100 € de fianza y plazo de 48 horas), y una vez recibido el pago se emite la confirmación definitiva.</p>
+
+            <p><strong>Modo Administrador y Ajustes:</strong> Desde el botón superior <strong>«Ajustes»</strong> (con acceso restringido y alta de administradores) se gestionan el alta masiva por <code>;</code>, la plantilla editable de correo e IBAN, la confirmación de pagos, el estado de devolución de fianzas tras el aviso del conserje y la configuración de conexión con Firebase.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL 1: SOLICITUD DE PAGO (48H) — EDITABLE ANTES DE ENVIAR -->
+  <div id="paymentModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+        <h3 class="text-sm sm:text-base font-bold flex items-center gap-2">
+          <span>Solicitud de Pago (48h) — Editable antes de enviar</span>
+        </h3>
+        <button id="closePaymentModal" type="button" class="text-slate-300 hover:text-white text-lg font-bold leading-none px-1">
+          &times;
+        </button>
+      </div>
+
+      <div class="p-5 space-y-3.5 text-xs sm:text-sm">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Para (Propietario):</label>
+            <input id="mailToInput" type="email" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-800" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">De (Administración):</label>
+            <input id="mailFromInput" type="email" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-800" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Asunto (puedes modificarlo antes de enviar)</label>
+          <input id="mailSubjectInput" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm font-medium text-slate-900" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Mensaje (editable al momento)</label>
+          <textarea id="mailBodyInput" rows="9" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm text-slate-800 leading-relaxed"></textarea>
+        </div>
+
+        <div class="pt-2 flex flex-wrap items-center justify-end gap-2 border-t border-slate-100">
+          <button id="copyMailBtn" type="button" class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold transition">
+            Copiar texto
+          </button>
+          <button id="sendMailBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm transition">
+            Enviar correo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: CUENTA / INICIO DE SESIÓN / ACTIVACIÓN -->
+  <div id="authModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="bg-brand-dark text-white px-5 py-3.5 flex items-center justify-between">
+        <h3 class="text-sm sm:text-base font-bold">Acceso de Propietarios — Escalonia 15</h3>
+        <button id="closeAuthModal" type="button" class="text-emerald-200 hover:text-white text-lg font-bold leading-none px-1">
+          &times;
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4 text-xs sm:text-sm">
+        <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 space-y-1">
+          <p class="font-bold">Usuario de prueba listo para entrar:</p>
+          <p>Correo: <code class="font-bold">prueba@escalonia15.es</code> — Contraseña: <code class="font-bold">prueba123</code></p>
+          <p class="text-[11px] text-emerald-800">También puedes usar <code class="font-bold">portal1.primeroa@escalonia15.es</code> (Portal 1 · Primero A).</p>
+        </div>
+
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Correo electrónico de la vivienda</label>
+            <input id="loginEmailInput" type="email" placeholder="prueba@escalonia15.es" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Contraseña</label>
+            <input id="loginPasswordInput" type="password" placeholder="••••••••" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+          </div>
+
+          <div class="flex items-center justify-between text-xs">
+            <button id="forgotPasswordBtn" type="button" class="text-emerald-700 hover:underline font-semibold">
+              ¿Olvidaste tu contraseña?
+            </button>
+            <button id="activateAccountBtn" type="button" class="text-slate-600 hover:text-slate-900 font-semibold">
+              Activar correo autorizado
+            </button>
+          </div>
+
+          <button id="doLoginBtn" type="button" class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm transition">
+            Entrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: AJUSTES / ADMINISTRACIÓN -->
+  <div id="settingsModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
+      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between sticky top-0 z-10">
+        <div>
+          <h3 class="text-sm sm:text-base font-bold">Ajustes y Administración — Escalonia 15</h3>
+          <p class="text-[11px] text-slate-300">Alta masiva por (;), plantilla IBAN/correo, gestión de reservas/fianzas y Firebase</p>
+        </div>
+        <button id="closeSettingsModal" type="button" class="text-slate-300 hover:text-white text-lg font-bold leading-none px-1">
+          &times;
+        </button>
+      </div>
+
+      <div class="p-5 space-y-6 text-xs sm:text-sm">
+        <!-- Admin Access Gate -->
+        <div id="adminGateBox" class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <p class="font-bold text-slate-900">Acceso Administrador</p>
+            <p class="text-xs text-slate-600">
+              Clave de acceso inicial: <code class="font-bold">ESCALONIA15-ADMIN</code> (puedes cambiarla o dar de alta administradores).
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <input id="adminPinInput" type="password" placeholder="Clave admin" class="rounded-xl border border-slate-300 px-3 py-1.5 text-xs w-40" />
+            <button id="unlockAdminBtn" type="button" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold">
+              Desbloquear
+            </button>
+          </div>
+        </div>
+
+        <div id="adminPanelContent" class="space-y-6">
+          <!-- 1. Alta masiva (;) -->
+          <div class="p-4 rounded-xl border border-slate-200 space-y-2.5">
+            <h4 class="font-bold text-slate-900">1. Alta masiva de correos de propietarios (separados por ";")</h4>
+            <p class="text-xs text-slate-500">
+              Pega los correos de las viviendas separados por punto y coma (;). Se asigna automáticamente portal y vivienda si no se indican.
+            </p>
+            <textarea id="bulkEmailsInput" rows="3" placeholder="vecino1@escalonia15.es; vecino2@escalonia15.es; vecino3@escalonia15.es" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs"></textarea>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span id="authorizedCountLabel" class="text-xs font-semibold text-emerald-800"></span>
+              <button id="saveBulkEmailsBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
+                Autorizar correos
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Plantilla IBAN y Correo -->
+          <div class="p-4 rounded-xl border border-slate-200 space-y-3">
+            <h4 class="font-bold text-slate-900">2. Plantilla de Correo e IBAN de Administración</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Correo de Administración</label>
+                <input id="cfgAdminEmail" type="email" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">IBAN de cobro / fianza</label>
+                <input id="cfgAdminIban" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Concepto por defecto</label>
+              <input id="cfgPaymentConcept" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Texto base del correo de Solicitud de Pago (48h)</label>
+              <textarea id="cfgMailTemplate" rows="6" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs"></textarea>
+            </div>
+            <div class="flex justify-end">
+              <button id="saveTemplateBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
+                Guardar plantilla
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. Gestión de reservas, pagos y devolución de fianza tras revisión del conserje -->
+          <div class="p-4 rounded-xl border border-slate-200 space-y-3">
+            <h4 class="font-bold text-slate-900">3. Control de Reservas, Pagos (48h) y Devolución de Fianza (Conserje)</h4>
+            <div id="adminReservationsList" class="space-y-2"></div>
+          </div>
+
+          <!-- 4. Dar de alta administrador & Firebase config -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl border border-slate-200 space-y-2.5">
+              <h4 class="font-bold text-slate-900">4. Dar de alta administrador</h4>
+              <input id="newAdminEmailInput" type="email" placeholder="nuevo.admin@escalonia15.es" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+              <input id="newAdminCodeInput" type="text" placeholder="Nueva clave de acceso admin" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+              <button id="addAdminBtn" type="button" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold">
+                Guardar administrador
+              </button>
+            </div>
+
+            <div class="p-4 rounded-xl border border-slate-200 space-y-2.5">
+              <h4 class="font-bold text-slate-900">5. Configuración Firebase (Producción)</h4>
+              <textarea id="firebaseConfigJsonInput" rows="3" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}' class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono"></textarea>
+              <button id="saveFirebaseCfgBtn" type="button" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold">
+                Guardar configuración Firebase
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = 'escalonia15_sala_comun_v1';
+      const PORTALS = Array.from({ length: 18 }, (_, i) => `Portal ${i + 1}`);
+      const UNITS = [
+        'Bajo A', 'Bajo B', 'Bajo C', 'Bajo D',
+        'Primero A', 'Primero B', 'Primero C', 'Primero D',
+        'Segundo A', 'Segundo B', 'Segundo C', 'Segundo D'
+      ];
+
+      function formatDateISO(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      }
+
+      function formatDateSpanish(isoStr) {
+        const [y, m, d] = isoStr.split('-').map(Number);
+        const dt = new Date(y, m - 1, d);
+        return dt.toLocaleDateString('es-ES', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        });
+      }
+
+      function getShiftScheduleText(isoStr, shift) {
+        if (shift === 'manana') return '10:00 a 16:30 h';
+        const [y, m, d] = isoStr.split('-').map(Number);
+        const dayOfWeek = new Date(y, m - 1, d).getDay(); // 0=Dom ... 4=Jue, 5=Vie, 6=Sab
+        if (dayOfWeek === 5 || dayOfWeek === 6) {
+          return '17:30 a 24:00 h (Viernes/Sábado/Víspera)';
+        }
+        return '17:30 a 22:00 h (Domingo a Jueves)';
+      }
+
+      function buildInitialState() {
+        const today = new Date();
+        const dPlus3 = new Date(today);
+        dPlus3.setDate(today.getDate() + 3);
+        const dPlus6 = new Date(today);
+        dPlus6.setDate(today.getDate() + 6);
+
+        return {
+          currentYearMonth: {
+            year: today.getFullYear(),
+            month: today.getMonth()
+          },
+          adminUnlocked: true,
+          adminConfig: {
+            adminEmail: 'administracion@escalonia15.es',
+            adminCode: 'ESCALONIA15-ADMIN',
+            iban: 'ES76 2100 0813 6101 2345 6789',
+            concept: 'Reserva Sala Común Escalonia 15',
+            mailTemplate:
+`Estimado/a vecino/a ({{PORTAL}} · {{VIVIENDA}}),
+
+Hemos registrado tu solicitud de reserva en exclusiva de la Sala Común de Escalonia 15:
+
+- Fecha: {{FECHA}}
+- Turno: {{TURNO}} ({{HORARIO}})
+- Importe total: 150,00 € (50,00 € cuota de exclusividad + 100,00 € fianza reembolsable)
+- IBAN: {{IBAN}}
+- Concepto: {{CONCEPTO}}
+
+De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 horas desde la solicitud para realizar el pago. Una vez recibido, te enviaremos la confirmación definitiva.`
+          },
+          admins: ['administracion@escalonia15.es'],
+          firebaseConfig: '',
+          users: [
+            {
+              email: 'prueba@escalonia15.es',
+              password: 'prueba123',
+              portal: 'Portal 1',
+              unit: 'Bajo A',
+              active: true
+            },
+            {
+              email: 'portal1.primeroa@escalonia15.es',
+              password: 'vecino123',
+              portal: 'Portal 1',
+              unit: 'Primero A',
+              active: true
+            }
+          ],
+          currentUserEmail: 'prueba@escalonia15.es',
+          reservations: [
+            {
+              id: 'res-init-1',
+              date: formatDateISO(dPlus3),
+              shift: 'tarde',
+              status: 'pendiente', // libre | pendiente | reservado
+              ownerEmail: 'portal1.primeroa@escalonia15.es',
+              portal: 'Portal 1',
+              unit: 'Primero A',
+              eventType: 'Reunión / Celebración familiar',
+              createdAt: new Date().toISOString(),
+              conserjeChecked: false,
+              depositRefunded: false
+            },
+            {
+              id: 'res-init-2',
+              date: formatDateISO(dPlus6),
+              shift: 'manana',
+              status: 'reservado',
+              ownerEmail: 'portal1.primeroa@escalonia15.es',
+              portal: 'Portal 1',
+              unit: 'Primero A',
+              eventType: 'Acto con fecha fija (Bautizo / Comunión / Evento señalado)',
+              createdAt: new Date().toISOString(),
+              conserjeChecked: false,
+              depositRefunded: false
+            }
+          ]
+        };
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return buildInitialState();
+          const parsed = JSON.parse(raw);
+          return { ...buildInitialState(), ...parsed };
+        } catch (e) {
+          return buildInitialState();
+        }
+      }
+
+      let state = loadState();
+      let selectedSlot = null; // { date, shift }
+
+      function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+
+      function showToast(message, isError = false) {
+        const box = document.getElementById('toastBox');
+        const inner = document.getElementById('toastInner');
+        inner.textContent = message;
+        inner.className = `pointer-events-auto rounded-xl px-4 py-3 text-xs sm:text-sm font-medium shadow-xl border ${
+          isError
+            ? 'bg-red-950 text-red-100 border-red-700'
+            : 'bg-slate-900 text-white border-slate-700'
+        }`;
+        box.classList.remove('hidden');
+        clearTimeout(window.__toastTimer);
+        window.__toastTimer = setTimeout(() => {
+          box.classList.add('hidden');
+        }, 3600);
+      }
+
+      function getCurrentUser() {
+        return state.users.find(u => u.email.toLowerCase() === (state.currentUserEmail || '').toLowerCase()) || state.users[0];
+      }
+
+      function getSlotReservation(dateISO, shift) {
+        return state.reservations.find(r => r.date === dateISO && r.shift === shift && r.status !== 'cancelada') || null;
+      }
+
+      function getUserYearReservationCount(email, year) {
+        return state.reservations.filter(r => {
+          if (r.ownerEmail.toLowerCase() !== email.toLowerCase()) return false;
+          if (r.status === 'cancelada') return false;
+          const resYear = Number(r.date.split('-')[0]);
+          return resYear === year;
+        }).length;
+      }
+
+      function updateHeaderAndUserInfo() {
+        const user = getCurrentUser();
+        state.currentUserEmail = user.email;
+        document.getElementById('activeUserBanner').textContent =
+          `Sesión activa: ${user.email} · ${user.portal} · ${user.unit}`;
+        document.getElementById('formUserEmail').textContent = user.email;
+        document.getElementById('formUserUnit').textContent = `${user.portal} · ${user.unit}`;
+
+        const targetYear = selectedSlot ? Number(selectedSlot.date.split('-')[0]) : new Date().getFullYear();
+        const usedCount = getUserYearReservationCount(user.email, targetYear);
+        document.getElementById('formUserCount').textContent = `${usedCount} / 2 (${targetYear})`;
+
+        document.getElementById('myFixedPortal').textContent = user.portal;
+        document.getElementById('myFixedUnit').textContent = user.unit;
+      }
+
+      function validateSelection() {
+        const msgBox = document.getElementById('ruleValidationMsg');
+        const btn = document.getElementById('btnSubmitBooking');
+        const user = getCurrentUser();
+        const accepted = document.getElementById('acceptNormsCheck').checked;
+        const fixedException = document.getElementById('fixedDateExceptionCheck').checked;
+
+        if (!selectedSlot) {
+          msgBox.classList.add('hidden');
+          btn.disabled = true;
+          return false;
+        }
+
+        const existing = getSlotReservation(selectedSlot.date, selectedSlot.shift);
+        if (existing) {
+          msgBox.textContent = `Este turno ya está ${existing.status === 'reservado' ? 'RESERVADO' : 'PENDIENTE DE PAGO'}.`;
+          msgBox.className = 'p-2.5 rounded-xl text-[11px] font-semibold bg-red-50 text-red-800 border border-red-200';
+          btn.disabled = true;
+          return false;
+        }
+
+        const otherShift = selectedSlot.shift === 'manana' ? 'tarde' : 'manana';
+        const otherRes = getSlotReservation(selectedSlot.date, otherShift);
+        if (otherRes) {
+          msgBox.textContent = 'Solo se puede reservar un turno al día (ya existe actividad en el otro turno de esta fecha).';
+          msgBox.className = 'p-2.5 rounded-xl text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200';
+          btn.disabled = true;
+          return false;
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const [y, m, d] = selectedSlot.date.split('-').map(Number);
+        const chosenDate = new Date(y, m - 1, d);
+        const diffDays = Math.round((chosenDate - today) / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+          msgBox.textContent = 'No se pueden solicitar reservas en fechas pasadas.';
+          msgBox.className = 'p-2.5 rounded-xl text-[11px] font-semibold bg-red-50 text-red-800 border border-red-200';
+          btn.disabled = true;
+          return false;
+        }
+
+        if (diffDays > 30 && !fixedException) {
+          msgBox.textContent = 'Supera los 30 días de antelación máxima. Marca "acto con fecha fija" (punto 12.1) si aplica.';
+          msgBox.className = 'p-2.5 rounded-xl text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-200';
+          btn.disabled = true;
+          return false;
+        }
+
+        const yearCount = getUserYearReservationCount(user.email, y);
+        if (yearCount >= 2) {
+          msgBox.textContent = `Has alcanzado el límite de 2 reservas anuales para el año ${y}.`;
+          msgBox.className = 'p-2.5 rounded-xl text-[11px] font-semibold bg-red-50 text-red-800 border border-red-200';
+          btn.disabled = true;
+          return false;
+        }
+
+        if (!accepted) {
+          msgBox.textContent = 'Debes aceptar las Normas de la sala antes de solicitar la reserva.';
+          msgBox.className = 'p-2.5 rounded-xl text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200';
+          btn.disabled = true;
+          return false;
+        }
+
+        msgBox.classList.add('hidden');
+        btn.disabled = false;
+        return true;
+      }
+
+      function getShiftClass(dateISO, shift) {
+        const res = getSlotReservation(dateISO, shift);
+        if (!res) return 'st-libre';
+        if (res.status === 'pendiente') return 'st-pendiente';
+        return 'st-reservado';
+      }
+
+      function getShiftLabel(dateISO, shift) {
+        const res = getSlotReservation(dateISO, shift);
+        const prefix = shift === 'manana' ? 'Mañana' : 'Tarde';
+        if (!res) return `${prefix}: Libre`;
+        if (res.status === 'pendiente') return `${prefix}: Pendiente`;
+        return `${prefix}: Reservado`;
+      }
+
+      function renderCalendar() {
+        const { year, month } = state.currentYearMonth;
+        const monthDate = new Date(year, month, 1);
+        document.getElementById('currentMonthLabel').textContent = monthDate.toLocaleDateString('es-ES', {
+          month: 'long',
+          year: 'numeric'
+        }).replace(/^./, c => c.toUpperCase());
+
+        const grid = document.getElementById('calendarGrid');
+        grid.innerHTML = '';
+
+        const firstDayJS = monthDate.getDay(); // 0=Sun..6=Sat
+        const offset = firstDayJS === 0 ? 6 : firstDayJS - 1; // Mon=0..Sun=6
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        for (let i = 0; i < offset; i++) {
+          const empty = document.createElement('div');
+          empty.className = 'h-[82px] rounded-xl bg-slate-50/50 border border-dashed border-slate-200/70';
+          grid.appendChild(empty);
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dateObj = new Date(year, month, day);
+          const iso = formatDateISO(dateObj);
+
+          const tile = document.createElement('div');
+          tile.className = 'day-tile';
+
+          const isSelectedDay = selectedSlot && selectedSlot.date === iso;
+          if (isSelectedDay) {
+            tile.classList.add('ring-2', 'ring-emerald-700');
+          }
+
+          // Top-left: Mañana
+          const topLeft = document.createElement('div');
+          topLeft.className = `diag-top-left ${getShiftClass(iso, 'manana')}`;
+          topLeft.title = `${formatDateSpanish(iso)} — ${getShiftLabel(iso, 'manana')} (${getShiftScheduleText(iso, 'manana')})`;
+          topLeft.innerHTML = `<span class="slot-label">${getShiftLabel(iso, 'manana')}</span>`;
+          topLeft.addEventListener('click', () => handleSelectSlot(iso, 'manana'));
+
+          // Bottom-right: Tarde
+          const bottomRight = document.createElement('div');
+          bottomRight.className = `diag-bottom-right ${getShiftClass(iso, 'tarde')}`;
+          bottomRight.title = `${formatDateSpanish(iso)} — ${getShiftLabel(iso, 'tarde')} (${getShiftScheduleText(iso, 'tarde')})`;
+          bottomRight.innerHTML = `<span class="slot-label">${getShiftLabel(iso, 'tarde')}</span>`;
+          bottomRight.addEventListener('click', () => handleSelectSlot(iso, 'tarde'));
+
+          const divider = document.createElement('div');
+          divider.className = 'diag-divider';
+
+          const badge = document.createElement('div');
+          badge.className = 'day-num-badge absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2';
+          badge.textContent = String(day);
+
+          tile.appendChild(topLeft);
+          tile.appendChild(bottomRight);
+          tile.appendChild(divider);
+          tile.appendChild(badge);
+          grid.appendChild(tile);
+        }
+
+        updateHeaderAndUserInfo();
+        validateSelection();
+      }
+
+      function handleSelectSlot(dateISO, shift) {
+        selectedSlot = { date: dateISO, shift };
+        const shiftName = shift === 'manana' ? 'Mañana' : 'Tarde';
+        const schedule = getShiftScheduleText(dateISO, shift);
+        document.getElementById('selectedSlotSummary').innerHTML =
+          `<strong class="text-slate-900">${formatDateSpanish(dateISO)}</strong><br/>Turno de <strong>${shiftName}</strong> (${schedule})`;
+        renderCalendar();
+      }
+
+      function openPaymentModalForReservation(reservation) {
+        const tpl = state.adminConfig.mailTemplate;
+        const shiftLabel = reservation.shift === 'manana' ? 'Mañana' : 'Tarde';
+        const schedule = getShiftScheduleText(reservation.date, reservation.shift);
+
+        const body = tpl
+          .replace(/\{\{PORTAL\}\}/g, reservation.portal)
+          .replace(/\{\{VIVIENDA\}\}/g, reservation.unit)
+          .replace(/\{\{FECHA\}\}/g, formatDateSpanish(reservation.date))
+          .replace(/\{\{TURNO\}\}/g, shiftLabel)
+          .replace(/\{\{HORARIO\}\}/g, schedule)
+          .replace(/\{\{IBAN\}\}/g, state.adminConfig.iban)
+          .replace(/\{\{CONCEPTO\}\}/g, `${state.adminConfig.concept} - ${reservation.portal} ${reservation.unit}`);
+
+        document.getElementById('mailToInput').value = reservation.ownerEmail;
+        document.getElementById('mailFromInput').value = state.adminConfig.adminEmail;
+        document.getElementById('mailSubjectInput').value =
+          `Solicitud de pago (48h) - ${state.adminConfig.concept}`;
+        document.getElementById('mailBodyInput').value = body;
+
+        const modal = document.getElementById('paymentModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function renderMyReservations() {
+        const user = getCurrentUser();
+        const container = document.getElementById('myReservationsList');
+        const mine = state.reservations.filter(r => r.ownerEmail.toLowerCase() === user.email.toLowerCase());
+
+        if (!mine.length) {
+          container.innerHTML = `
+            <div class="p-6 rounded-xl border border-dashed border-slate-300 text-center text-xs sm:text-sm text-slate-500">
+              Aún no tienes reservas registradas para <strong>${user.portal} · ${user.unit}</strong>.
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = mine.map(r => {
+          const shiftText = r.shift === 'manana' ? 'Mañana' : 'Tarde';
+          const badgeMap = {
+            pendiente: 'bg-yellow-100 text-yellow-900 border-yellow-300',
+            reservado: 'bg-red-100 text-red-900 border-red-300',
+            cancelada: 'bg-slate-100 text-slate-600 border-slate-300'
+          };
+          const statusLabelMap = {
+            pendiente: 'Pendiente de pago (48h)',
+            reservado: 'Reservado / Confirmado',
+            cancelada: 'Anulada'
+          };
+
+          return `
+            <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="space-y-1 text-xs sm:text-sm">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-bold text-slate-900">${formatDateSpanish(r.date)}</span>
+                  <span class="px-2 py-0.5 rounded-full text-[11px] font-bold border ${badgeMap[r.status] || ''}">
+                    ${statusLabelMap[r.status] || r.status}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-600">
+                  Turno: <strong>${shiftText}</strong> (${getShiftScheduleText(r.date, r.shift)}) · Motivo: <strong>${r.eventType}</strong>
+                </p>
+                <p class="text-[11px] text-slate-500">
+                  Adjudicado: <strong>${r.portal} · ${r.unit}</strong> · Revisión conserje: <strong>${r.conserjeChecked ? 'Verificada' : 'Pendiente'}</strong> · Fianza: <strong>${r.depositRefunded ? 'Devuelta' : 'En depósito (100 €)'}</strong>
+                </p>
+              </div>
+              <div class="flex items-center gap-2">
+                ${r.status === 'pendiente' ? `
+                  <button data-reopen-mail="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
+                    Ver correo pago
+                  </button>
+                ` : ''}
+                ${r.status !== 'cancelada' ? `
+                  <button data-cancel-res="${r.id}" type="button" class="px-3 py-1.5 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold">
+                    Anular reserva
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        container.querySelectorAll('[data-reopen-mail]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const found = state.reservations.find(item => item.id === btn.dataset.reopenMail);
+            if (found) openPaymentModalForReservation(found);
+          });
+        });
+
+        container.querySelectorAll('[data-cancel-res]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const found = state.reservations.find(item => item.id === btn.dataset.cancelRes);
+            if (!found) return;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const [y, m, d] = found.date.split('-').map(Number);
+            const resDate = new Date(y, m - 1, d);
+            const daysBefore = Math.round((resDate - today) / (1000 * 60 * 60 * 24));
+
+            found.status = 'cancelada';
+            saveState();
+            renderCalendar();
+            renderMyReservations();
+            renderAdminPanel();
+
+            if (daysBefore < 7) {
+              showToast('Reserva anulada fuera del plazo de 7 días: se devuelve la fianza (100 €) y se retiene la cuota de 50 €.');
+            } else {
+              showToast('Reserva anulada dentro del plazo de 7 días.');
+            }
+          });
+        });
+      }
+
+      function renderAdminPanel() {
+        document.getElementById('authorizedCountLabel').textContent =
+          `Propietarios autorizados: ${state.users.length}`;
+        document.getElementById('cfgAdminEmail').value = state.adminConfig.adminEmail;
+        document.getElementById('cfgAdminIban').value = state.adminConfig.iban;
+        document.getElementById('cfgPaymentConcept').value = state.adminConfig.concept;
+        document.getElementById('cfgMailTemplate').value = state.adminConfig.mailTemplate;
+        document.getElementById('firebaseConfigJsonInput').value = state.firebaseConfig || '';
+
+        const listEl = document.getElementById('adminReservationsList');
+        const activeList = state.reservations.filter(r => r.status !== 'cancelada');
+        if (!activeList.length) {
+          listEl.innerHTML = `<p class="text-xs text-slate-500">No hay reservas activas para gestionar.</p>`;
+          return;
+        }
+
+        listEl.innerHTML = activeList.map(r => `
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+            <div>
+              <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} · ${r.shift === 'manana' ? 'Mañana' : 'Tarde'}</p>
+              <p class="text-slate-600">${r.ownerEmail} (${r.portal} · ${r.unit}) — Estado: <strong>${r.status.toUpperCase()}</strong></p>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5">
+              ${r.status === 'pendiente' ? `
+                <button data-confirm-pay="${r.id}" type="button" class="px-2.5 py-1 rounded-lg bg-emerald-700 text-white font-bold">
+                  Confirmar pago
+                </button>
+              ` : ''}
+              <button data-conserje-ok="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold">
+                ${r.conserjeChecked ? 'Conserje OK ✓' : 'Marcar revisión conserje'}
+              </button>
+              <button data-refund-dep="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-900 hover:bg-emerald-100 font-bold">
+                ${r.depositRefunded ? 'Fianza devuelta ✓' : 'Devolver fianza (100 €)'}
+              </button>
+            </div>
+          </div>
+        `).join('');
+
+        listEl.querySelectorAll('[data-confirm-pay]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const item = state.reservations.find(x => x.id === btn.dataset.confirmPay);
+            if (!item) return;
+            item.status = 'reservado';
+            saveState();
+            renderCalendar();
+            renderMyReservations();
+            renderAdminPanel();
+            showToast(`Pago confirmado para ${item.ownerEmail}. Reserva marcada en ROJO.`);
+          });
+        });
+
+        listEl.querySelectorAll('[data-conserje-ok]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const item = state.reservations.find(x => x.id === btn.dataset.conserjeOk);
+            if (!item) return;
+            item.conserjeChecked = !item.conserjeChecked;
+            saveState();
+            renderMyReservations();
+            renderAdminPanel();
+            showToast('Estado de revisión del conserje actualizado.');
+          });
+        });
+
+        listEl.querySelectorAll('[data-refund-dep]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const item = state.reservations.find(x => x.id === btn.dataset.refundDep);
+            if (!item) return;
+            item.conserjeChecked = true;
+            item.depositRefunded = true;
+            saveState();
+            renderMyReservations();
+            renderAdminPanel();
+            showToast(`Fianza de 100 € registrada como devuelta para ${item.ownerEmail}.`);
+          });
+        });
+      }
+
+      // Tab switching
+      document.querySelectorAll('.nav-tab').forEach(tabBtn => {
+        tabBtn.addEventListener('click', () => {
+          const target = tabBtn.dataset.tab;
+          document.querySelectorAll('.nav-tab').forEach(b => {
+            b.classList.remove('border-emerald-400', 'text-white');
+            b.classList.add('border-transparent', 'text-emerald-200/75');
+          });
+          tabBtn.classList.add('border-emerald-400', 'text-white');
+          tabBtn.classList.remove('border-transparent', 'text-emerald-200/75');
+
+          document.querySelectorAll('.tab-panel').forEach(panel => {
+            panel.classList.add('hidden');
+          });
+          document.getElementById(`tab-${target}`).classList.remove('hidden');
+
+          if (target === 'mis-reservas') renderMyReservations();
+          if (target === 'calendario') renderCalendar();
+        });
+      });
+
+      // Month controls
+      document.getElementById('prevMonthBtn').addEventListener('click', () => {
+        const { year, month } = state.currentYearMonth;
+        const prev = new Date(year, month - 1, 1);
+        state.currentYearMonth = { year: prev.getFullYear(), month: prev.getMonth() };
+        saveState();
+        renderCalendar();
+      });
+
+      document.getElementById('nextMonthBtn').addEventListener('click', () => {
+        const { year, month } = state.currentYearMonth;
+        const next = new Date(year, month + 1, 1);
+        state.currentYearMonth = { year: next.getFullYear(), month: next.getMonth() };
+        saveState();
+        renderCalendar();
+      });
+
+      // Form listeners
+      ['acceptNormsCheck', 'fixedDateExceptionCheck'].forEach(id => {
+        document.getElementById(id).addEventListener('change', validateSelection);
+      });
+
+      document.getElementById('btnSubmitBooking').addEventListener('click', () => {
+        if (!validateSelection() || !selectedSlot) return;
+        const user = getCurrentUser();
+        const eventType = document.getElementById('eventTypeInput').value;
+
+        const newReservation = {
+          id: `res-${Date.now()}`,
+          date: selectedSlot.date,
+          shift: selectedSlot.shift,
+          status: 'pendiente',
+          ownerEmail: user.email,
+          portal: user.portal,
+          unit: user.unit,
+          eventType,
+          createdAt: new Date().toISOString(),
+          conserjeChecked: false,
+          depositRefunded: false
+        };
+
+        state.reservations.push(newReservation);
+        saveState();
+        renderCalendar();
+        renderMyReservations();
+        renderAdminPanel();
+        openPaymentModalForReservation(newReservation);
+        showToast('Solicitud registrada en AMARILLO (Pendiente de pago 48h). Revisa y envía el correo.');
+      });
+
+      // Payment Modal actions
+      document.getElementById('closePaymentModal').addEventListener('click', () => {
+        const modal = document.getElementById('paymentModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      });
+
+      document.getElementById('copyMailBtn').addEventListener('click', async () => {
+        const to = document.getElementById('mailToInput').value;
+        const subj = document.getElementById('mailSubjectInput').value;
+        const body = document.getElementById('mailBodyInput').value;
+        const fullText = `Para: ${to}\nAsunto: ${subj}\n\n${body}`;
+        try {
+          await navigator.clipboard.writeText(fullText);
+          showToast('Texto del correo copiado al portapapeles.');
+        } catch (e) {
+          showToast('No se pudo copiar automáticamente.', true);
+        }
+      });
+
+      document.getElementById('sendMailBtn').addEventListener('click', () => {
+        const to = encodeURIComponent(document.getElementById('mailToInput').value.trim());
+        const subject = encodeURIComponent(document.getElementById('mailSubjectInput').value.trim());
+        const body = encodeURIComponent(document.getElementById('mailBodyInput').value.trim());
+        window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+        showToast('Abriendo cliente de correo con la solicitud de pago (48h).');
+      });
+
+      // Auth Modal actions
+      const authModal = document.getElementById('authModal');
+      document.getElementById('btnOpenAuth').addEventListener('click', () => {
+        document.getElementById('loginEmailInput').value = state.currentUserEmail || 'prueba@escalonia15.es';
+        document.getElementById('loginPasswordInput').value = '';
+        authModal.classList.remove('hidden');
+        authModal.classList.add('flex');
+      });
+      document.getElementById('closeAuthModal').addEventListener('click', () => {
+        authModal.classList.add('hidden');
+        authModal.classList.remove('flex');
+      });
+
+      document.getElementById('doLoginBtn').addEventListener('click', () => {
+        const email = document.getElementById('loginEmailInput').value.trim().toLowerCase();
+        const pass = document.getElementById('loginPasswordInput').value;
+        const found = state.users.find(u => u.email.toLowerCase() === email);
+
+        if (!found) {
+          showToast('Ese correo no está dado de alta en Escalonia 15.', true);
+          return;
+        }
+        if (pass && found.password && pass !== found.password) {
+          showToast('Contraseña incorrecta.', true);
+          return;
+        }
+
+        state.currentUserEmail = found.email;
+        saveState();
+        updateHeaderAndUserInfo();
+        renderCalendar();
+        renderMyReservations();
+        authModal.classList.add('hidden');
+        authModal.classList.remove('flex');
+        showToast(`Sesión iniciada como ${found.email} (${found.portal} · ${found.unit}).`);
+      });
+
+      document.getElementById('forgotPasswordBtn').addEventListener('click', () => {
+        const email = document.getElementById('loginEmailInput').value.trim() || state.currentUserEmail;
+        showToast(`Enlace de restablecimiento enviado a ${email}.`);
+      });
+
+      document.getElementById('activateAccountBtn').addEventListener('click', () => {
+        const email = document.getElementById('loginEmailInput').value.trim().toLowerCase();
+        const pass = document.getElementById('loginPasswordInput').value.trim();
+        if (!email) {
+          showToast('Introduce tu correo autorizado para activar tu cuenta.', true);
+          return;
+        }
+        let existing = state.users.find(u => u.email.toLowerCase() === email);
+        if (!existing) {
+          const idx = state.users.length;
+          existing = {
+            email,
+            password: pass || 'vecino123',
+            portal: PORTALS[idx % PORTALS.length],
+            unit: UNITS[idx % UNITS.length],
+            active: true
+          };
+          state.users.push(existing);
+        } else if (pass) {
+          existing.password = pass;
+          existing.active = true;
+        }
+        state.currentUserEmail = existing.email;
+        saveState();
+        updateHeaderAndUserInfo();
+        renderCalendar();
+        renderMyReservations();
+        authModal.classList.add('hidden');
+        authModal.classList.remove('flex');
+        showToast(`Cuenta activada para ${existing.email} (${existing.portal} · ${existing.unit}).`);
+      });
+
+      // Settings Modal actions
+      const settingsModal = document.getElementById('settingsModal');
+      document.getElementById('btnOpenSettings').addEventListener('click', () => {
+        renderAdminPanel();
+        settingsModal.classList.remove('hidden');
+        settingsModal.classList.add('flex');
+      });
+      document.getElementById('closeSettingsModal').addEventListener('click', () => {
+        settingsModal.classList.add('hidden');
+        settingsModal.classList.remove('flex');
+      });
+
+      document.getElementById('unlockAdminBtn').addEventListener('click', () => {
+        const code = document.getElementById('adminPinInput').value.trim();
+        if (code === state.adminConfig.adminCode) {
+          state.adminUnlocked = true;
+          saveState();
+          showToast('Modo Administrador desbloqueado.');
+        } else {
+          showToast('Clave de administrador incorrecta.', true);
+        }
+      });
+
+      document.getElementById('saveBulkEmailsBtn').addEventListener('click', () => {
+        const raw = document.getElementById('bulkEmailsInput').value;
+        const parts = raw
+          .split(';')
+          .map(s => s.trim().toLowerCase())
+          .filter(Boolean);
+
+        if (!parts.length) {
+          showToast('Escribe al menos un correo separado por ";".', true);
+          return;
+        }
+
+        let added = 0;
+        parts.forEach(email => {
+          const exists = state.users.some(u => u.email.toLowerCase() === email);
+          if (!exists) {
+            const idx = state.users.length;
+            state.users.push({
+              email,
+              password: '',
+              portal: PORTALS[idx % PORTALS.length],
+              unit: UNITS[idx % UNITS.length],
+              active: false
+            });
+            added++;
+          }
+        });
+
+        saveState();
+        renderAdminPanel();
+        document.getElementById('bulkEmailsInput').value = '';
+        showToast(`Alta masiva completada: ${added} correo(s) nuevo(s) autorizado(s).`);
+      });
+
+      document.getElementById('saveTemplateBtn').addEventListener('click', () => {
+        state.adminConfig.adminEmail = document.getElementById('cfgAdminEmail').value.trim() || 'administracion@escalonia15.es';
+        state.adminConfig.iban = document.getElementById('cfgAdminIban').value.trim();
+        state.adminConfig.concept = document.getElementById('cfgPaymentConcept').value.trim();
+        state.adminConfig.mailTemplate = document.getElementById('cfgMailTemplate').value;
+        saveState();
+        showToast('Plantilla de correo e IBAN guardada.');
+      });
+
+      document.getElementById('addAdminBtn').addEventListener('click', () => {
+        const newEmail = document.getElementById('newAdminEmailInput').value.trim().toLowerCase();
+        const newCode = document.getElementById('newAdminCodeInput').value.trim();
+        if (newEmail && !state.admins.includes(newEmail)) {
+          state.admins.push(newEmail);
+        }
+        if (newCode) {
+          state.adminConfig.adminCode = newCode;
+        }
+        saveState();
+        document.getElementById('newAdminEmailInput').value = '';
+        document.getElementById('newAdminCodeInput').value = '';
+        showToast('Administrador y configuración guardados.');
+      });
+
+      document.getElementById('saveFirebaseCfgBtn').addEventListener('click', () => {
+        const rawJson = document.getElementById('firebaseConfigJsonInput').value.trim();
+        state.firebaseConfig = rawJson;
+        saveState();
+        showToast('Configuración de Firebase guardada.');
+      });
+
+      // Initial render
+      renderCalendar();
+      renderMyReservations();
+      renderAdminPanel();
+    })();
+  </script>
+</body>
+</html>
