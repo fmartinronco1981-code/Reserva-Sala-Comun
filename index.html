@@ -36,7 +36,7 @@
     }
     .day-tile {
       position: relative;
-      height: 82px;
+      height: 86px;
       border-radius: 12px;
       overflow: hidden;
       border: 1px solid #cbd5e1;
@@ -95,6 +95,10 @@
     .st-reservado:hover {
       background-color: #fecaca;
     }
+    .st-no-autorizado {
+      background-color: #fecaca;
+      color: #7f1d1d;
+    }
     .day-num-badge {
       position: relative;
       z-index: 4;
@@ -104,12 +108,12 @@
       line-height: 1;
       padding: 2px 5px;
       border-radius: 6px;
-      background: rgba(255, 255, 255, 0.88);
+      background: rgba(255, 255, 255, 0.9);
       color: #0f172a;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
     }
     .slot-label {
-      font-size: 0.63rem;
+      font-size: 0.62rem;
       font-weight: 700;
       line-height: 1.1;
       letter-spacing: -0.01em;
@@ -198,10 +202,10 @@
             <span class="w-2.5 h-2.5 rounded-full bg-green-600"></span> Libre
           </span>
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-900 border border-yellow-300">
-            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span> Pendiente de pago
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span> Pendiente
           </span>
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-900 border border-red-300">
-            <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Reservado
+            <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Reservado / No autorizado
           </span>
         </div>
 
@@ -256,15 +260,33 @@
                 <span id="formUserUnit" class="font-bold text-slate-800">-</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-slate-500">Reservas este año:</span>
+                <span class="text-slate-500">Reservas anuales en el año:</span>
                 <span id="formUserCount" class="font-bold text-emerald-700">0 / 2</span>
               </div>
             </div>
 
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Fecha y turno seleccionado</label>
+            <div class="space-y-2">
+              <label class="block font-semibold text-slate-700">Fecha y turno seleccionado</label>
               <div id="selectedSlotSummary" class="p-2.5 rounded-xl border border-dashed border-slate-300 bg-slate-50/70 text-slate-600 font-medium">
-                Pulsa en la mitad de Mañana o Tarde de un día en el calendario.
+                Pulsa un día en el calendario (mitad de Mañana o Tarde).
+              </div>
+
+              <!-- Pestañita / selector directo de turno para confirmar -->
+              <div id="shiftQuickSelector" class="hidden grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200">
+                <button
+                  id="pickShiftMananaBtn"
+                  type="button"
+                  class="py-1.5 px-2 rounded-lg text-xs font-bold transition text-center"
+                >
+                  Turno mañana
+                </button>
+                <button
+                  id="pickShiftTardeBtn"
+                  type="button"
+                  class="py-1.5 px-2 rounded-lg text-xs font-bold transition text-center"
+                >
+                  Turno tarde
+                </button>
               </div>
             </div>
 
@@ -289,6 +311,8 @@
                 Acepto las <strong>Normas de la sala</strong> (50 € alquiler, 100 € fianza, pago en 48 h, anulación con 7 días y revisión del conserje).
               </span>
             </label>
+
+            <div id="annualLimitNotice" class="hidden p-2.5 rounded-xl text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-300"></div>
 
             <div id="ruleValidationMsg" class="hidden p-2.5 rounded-xl text-[11px] font-semibold"></div>
 
@@ -332,6 +356,16 @@
             <h3 class="text-sm font-bold text-red-950">Reserva confirmada</h3>
             <div id="confirmedReservationsList" class="space-y-2"></div>
           </div>
+        </div>
+
+        <div id="rejectedReservationsBox" class="hidden rounded-xl border border-red-300 bg-red-50/60 p-4 space-y-2">
+          <h3 class="text-sm font-bold text-red-900">Solicitudes no autorizadas</h3>
+          <div id="rejectedReservationsList" class="space-y-2"></div>
+        </div>
+
+        <div id="ownerCancelledReservationsBox" class="hidden rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
+          <h3 class="text-sm font-bold text-slate-800">Anuladas por propietario</h3>
+          <div id="ownerCancelledReservationsList" class="space-y-2"></div>
         </div>
       </div>
     </section>
@@ -389,15 +423,13 @@
             <p><strong>Alta de vecinos y acceso:</strong> La administración realiza el alta masiva pegando los correos electrónicos de las viviendas separados por punto y coma (<code>;</code>). Cada propietario activa su cuenta con su correo autorizado, establece su contraseña (con opción de recuperación «¿Olvidaste tu contraseña?») y entra con su portal y vivienda ya adjudicados de forma fija.</p>
 
             <p><strong>Calendario visual partido en diagonal:</strong> Cada día del calendario se divide en diagonal en dos mitades —<strong>Mañana</strong> y <strong>Tarde</strong>— con código de color por turno: <strong>verde</strong> para <strong>Libre</strong>, <strong>amarillo</strong> para <strong>Pendiente de pago</strong> y <strong>rojo</strong> para <strong>Reservado</strong>.</p>
-
-            <p><strong>Comunicación de solicitud y visto bueno:</strong> Al solicitar una reserva, la reserva queda en <strong>Pendiente de pago (48h)</strong> sin mostrar el recuadro de pago al propietario; es el <strong>administrador</strong> quien, al dar el visto bueno, abre/prepara la <strong>Solicitud de Pago (48h)</strong> de la administración hacia el propietario, y al confirmarse el pago pasa a <strong>Reservado</strong>.</p>
           </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- MODAL 1: SOLICITUD DE PAGO (48H) — EDITABLE ANTES DE ENVIAR (ADMINISTRACIÓN -> PROPIETARIO) -->
+  <!-- MODAL 1: SOLICITUD DE PAGO (48H) — SOLO DESDE ADMINISTRADOR AL DAR EL VISTO BUENO -->
   <div id="paymentModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
@@ -517,7 +549,7 @@
     </div>
   </div>
 
-  <!-- VISTA COMPLETA DEDICADA DE ADMINISTRADOR (TRAS VALIDAR CONTRASEÑA) -->
+  <!-- VISTA COMPLETA DEDICADA DE ADMINISTRADOR (SIN VENTANA FLOTANTE NI SCROLL LATERAL) -->
   <section id="adminFullInterface" class="fixed inset-0 z-40 bg-slate-100 hidden flex-col overflow-y-auto">
     <header class="bg-slate-900 text-white sticky top-0 z-20 shadow-md">
       <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
@@ -537,7 +569,7 @@
         </div>
       </div>
 
-      <!-- BOTONES VISIBLES TODO EL TIEMPO (SIN SCROLL LATERAL) -->
+      <!-- BOTONES VISIBLES EN TODO MOMENTO (SIN SCROLL LATERAL) -->
       <nav class="bg-slate-950 border-t border-white/10">
         <div class="max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap gap-2">
           <button
@@ -585,7 +617,7 @@
         <div class="border-b border-slate-100 pb-3">
           <h3 class="text-base sm:text-lg font-bold text-slate-900">Reservas por confirmar y control de fianzas</h3>
           <p class="text-xs text-slate-500">
-            Revisa el contador anual de reservas de cada propietario, da el visto bueno / prepara el correo de pago (48h), confirma o no autoriza reservas y marca la devolución de fianza.
+            Revisa cuántas veces ha reservado ese propietario en el año, da el visto bueno para enviar el correo de pago (48h), confirma o no autoriza la reserva y marca la devolución de fianza.
           </p>
         </div>
         <div id="adminReservationsList" class="space-y-3"></div>
@@ -715,13 +747,16 @@
 
   <script>
     (function () {
-      const STORAGE_KEY = 'escalonia15_sala_comun_v5';
+      const STORAGE_KEY = 'escalonia15_sala_comun_v7';
+      const CHANNEL_NAME = 'escalonia15_realtime_sync';
       const PORTALS = Array.from({ length: 18 }, (_, i) => `Portal ${i + 1}`);
       const UNITS = [
         'Bajo A', 'Bajo B', 'Bajo C', 'Bajo D',
         'Primero A', 'Primero B', 'Primero C', 'Primero D',
         'Segundo A', 'Segundo B', 'Segundo C', 'Segundo D'
       ];
+
+      const syncChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(CHANNEL_NAME) : null;
 
       function formatDateISO(d) {
         const y = d.getFullYear();
@@ -810,7 +845,8 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
               unit: 'Primero A',
               eventType: 'Reunión / Celebración familiar',
               createdAt: new Date().toISOString(),
-              depositReturned: false
+              depositReturned: false,
+              cancelledByOwner: false
             },
             {
               id: 'res-init-2',
@@ -822,7 +858,8 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
               unit: 'Primero A',
               eventType: 'Acto con fecha fija (Bautizo / Comunión / Evento señalado)',
               createdAt: new Date().toISOString(),
-              depositReturned: false
+              depositReturned: false,
+              cancelledByOwner: false
             }
           ]
         };
@@ -849,8 +886,35 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       let state = loadState();
       let selectedSlot = null;
 
-      function saveState() {
+      function refreshAllViews() {
+        updateHeaderAndUserInfo();
+        renderCalendar();
+        renderMyReservations();
+        renderAdminDashboard();
+      }
+
+      function saveState(broadcast = true) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        refreshAllViews();
+        if (broadcast && syncChannel) {
+          syncChannel.postMessage({ type: 'STATE_UPDATED', ts: Date.now() });
+        }
+      }
+
+      window.addEventListener('storage', (e) => {
+        if (e.key === STORAGE_KEY) {
+          state = loadState();
+          refreshAllViews();
+        }
+      });
+
+      if (syncChannel) {
+        syncChannel.onmessage = (ev) => {
+          if (ev.data && ev.data.type === 'STATE_UPDATED') {
+            state = loadState();
+            refreshAllViews();
+          }
+        };
       }
 
       function showToast(message, isError = false) {
@@ -873,8 +937,16 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         return state.users.find(u => u.email.toLowerCase() === (state.currentUserEmail || '').toLowerCase()) || state.users[0];
       }
 
-      function getSlotReservation(dateISO, shift) {
-        return state.reservations.find(r => r.date === dateISO && r.shift === shift && r.status !== 'cancelada' && r.status !== 'no_autorizada') || null;
+      function getActiveSlotReservation(dateISO, shift) {
+        return state.reservations.find(
+          r => r.date === dateISO && r.shift === shift && (r.status === 'pendiente' || r.status === 'reservado')
+        ) || null;
+      }
+
+      function getUserRejectedSlotReservation(dateISO, shift, email) {
+        return state.reservations.find(
+          r => r.date === dateISO && r.shift === shift && r.status === 'no_autorizada' && r.ownerEmail.toLowerCase() === email.toLowerCase()
+        ) || null;
       }
 
       function getUserYearReservationCount(email, year) {
@@ -898,14 +970,42 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const usedCount = getUserYearReservationCount(user.email, targetYear);
         document.getElementById('formUserCount').textContent = `${usedCount} / 2 (${targetYear})`;
 
+        const limitNotice = document.getElementById('annualLimitNotice');
+        if (usedCount >= 2) {
+          limitNotice.textContent = `Llevas ${usedCount} reservas anuales en el año ${targetYear} (límite habitual: 2). Puedes enviar la solicitud para que la administración la revise.`;
+          limitNotice.classList.remove('hidden');
+        } else {
+          limitNotice.textContent = `Llevas ${usedCount} reserva(s) anual(es) en el año ${targetYear}.`;
+          limitNotice.classList.remove('hidden');
+        }
+
         document.getElementById('myFixedPortal').textContent = user.portal;
         document.getElementById('myFixedUnit').textContent = user.unit;
+      }
+
+      function updateShiftQuickSelectorUI() {
+        const selectorBox = document.getElementById('shiftQuickSelector');
+        const mananaBtn = document.getElementById('pickShiftMananaBtn');
+        const tardeBtn = document.getElementById('pickShiftTardeBtn');
+
+        if (!selectedSlot) {
+          selectorBox.classList.add('hidden');
+          return;
+        }
+
+        selectorBox.classList.remove('hidden');
+        if (selectedSlot.shift === 'manana') {
+          mananaBtn.className = 'py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-emerald-700 text-white shadow-sm';
+          tardeBtn.className = 'py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-transparent text-slate-700 hover:bg-white';
+        } else {
+          tardeBtn.className = 'py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-emerald-700 text-white shadow-sm';
+          mananaBtn.className = 'py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-transparent text-slate-700 hover:bg-white';
+        }
       }
 
       function validateSelection() {
         const msgBox = document.getElementById('ruleValidationMsg');
         const btn = document.getElementById('btnSubmitBooking');
-        const user = getCurrentUser();
         const accepted = document.getElementById('acceptNormsCheck').checked;
         const fixedException = document.getElementById('fixedDateExceptionCheck').checked;
 
@@ -915,16 +1015,16 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           return false;
         }
 
-        const existing = getSlotReservation(selectedSlot.date, selectedSlot.shift);
+        const existing = getActiveSlotReservation(selectedSlot.date, selectedSlot.shift);
         if (existing) {
-          msgBox.textContent = `Este turno ya está ${existing.status === 'reservado' ? 'RESERVADO' : 'PENDIENTE DE PAGO'}.`;
+          msgBox.textContent = `Este turno ya está ${existing.status === 'reservado' ? 'RESERVADO' : 'PENDIENTE'}.`;
           msgBox.className = 'p-2.5 rounded-xl text-[11px] font-semibold bg-red-50 text-red-800 border border-red-200';
           btn.disabled = true;
           return false;
         }
 
         const otherShift = selectedSlot.shift === 'manana' ? 'tarde' : 'manana';
-        const otherRes = getSlotReservation(selectedSlot.date, otherShift);
+        const otherRes = getActiveSlotReservation(selectedSlot.date, otherShift);
         if (otherRes) {
           msgBox.textContent = 'Solo se puede reservar un turno al día (ya existe actividad en el otro turno de esta fecha).';
           msgBox.className = 'p-2.5 rounded-xl text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200';
@@ -952,14 +1052,6 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           return false;
         }
 
-        const yearCount = getUserYearReservationCount(user.email, y);
-        if (yearCount >= 2) {
-          msgBox.textContent = `Has alcanzado el límite de 2 reservas anuales para el año ${y}.`;
-          msgBox.className = 'p-2.5 rounded-xl text-[11px] font-semibold bg-red-50 text-red-800 border border-red-200';
-          btn.disabled = true;
-          return false;
-        }
-
         if (!accepted) {
           msgBox.textContent = 'Debes aceptar las Normas de la sala antes de solicitar la reserva.';
           msgBox.className = 'p-2.5 rounded-xl text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200';
@@ -973,18 +1065,36 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       }
 
       function getShiftClass(dateISO, shift) {
-        const res = getSlotReservation(dateISO, shift);
-        if (!res) return 'st-libre';
-        if (res.status === 'pendiente') return 'st-pendiente';
-        return 'st-reservado';
+        const user = getCurrentUser();
+        const activeRes = getActiveSlotReservation(dateISO, shift);
+        if (activeRes) {
+          return activeRes.status === 'pendiente' ? 'st-pendiente' : 'st-reservado';
+        }
+        const rejectedMine = getUserRejectedSlotReservation(dateISO, shift, user.email);
+        if (rejectedMine) {
+          return 'st-no-autorizado';
+        }
+        return 'st-libre';
       }
 
-      function getShiftLabel(dateISO, shift) {
-        const res = getSlotReservation(dateISO, shift);
+      function getShiftHTML(dateISO, shift) {
+        const user = getCurrentUser();
+        const activeRes = getActiveSlotReservation(dateISO, shift);
         const prefix = shift === 'manana' ? 'Mañana' : 'Tarde';
-        if (!res) return `${prefix}: Libre`;
-        if (res.status === 'pendiente') return `${prefix}: Pendiente`;
-        return `${prefix}: Reservado`;
+
+        if (activeRes) {
+          if (activeRes.status === 'pendiente') {
+            return `<span class="slot-label">${prefix}: Pendiente</span>`;
+          }
+          return `<span class="slot-label">${prefix}: Reservado</span>`;
+        }
+
+        const rejectedMine = getUserRejectedSlotReservation(dateISO, shift, user.email);
+        if (rejectedMine) {
+          return `<span class="slot-label inline-block px-1 py-0.5 rounded bg-red-600 text-white text-[9px] font-extrabold leading-none">No autorizado</span>`;
+        }
+
+        return `<span class="slot-label">${prefix}: Libre</span>`;
       }
 
       function renderCalendar() {
@@ -1004,7 +1114,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
         for (let i = 0; i < offset; i++) {
           const empty = document.createElement('div');
-          empty.className = 'h-[82px] rounded-xl bg-slate-50/50 border border-dashed border-slate-200/70';
+          empty.className = 'h-[86px] rounded-xl bg-slate-50/50 border border-dashed border-slate-200/70';
           grid.appendChild(empty);
         }
 
@@ -1021,14 +1131,12 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
           const topLeft = document.createElement('div');
           topLeft.className = `diag-top-left ${getShiftClass(iso, 'manana')}`;
-          topLeft.title = `${formatDateSpanish(iso)} — ${getShiftLabel(iso, 'manana')} (${getShiftScheduleText(iso, 'manana')})`;
-          topLeft.innerHTML = `<span class="slot-label">${getShiftLabel(iso, 'manana')}</span>`;
+          topLeft.innerHTML = getShiftHTML(iso, 'manana');
           topLeft.addEventListener('click', () => handleSelectSlot(iso, 'manana'));
 
           const bottomRight = document.createElement('div');
           bottomRight.className = `diag-bottom-right ${getShiftClass(iso, 'tarde')}`;
-          bottomRight.title = `${formatDateSpanish(iso)} — ${getShiftLabel(iso, 'tarde')} (${getShiftScheduleText(iso, 'tarde')})`;
-          bottomRight.innerHTML = `<span class="slot-label">${getShiftLabel(iso, 'tarde')}</span>`;
+          bottomRight.innerHTML = getShiftHTML(iso, 'tarde');
           bottomRight.addEventListener('click', () => handleSelectSlot(iso, 'tarde'));
 
           const divider = document.createElement('div');
@@ -1046,6 +1154,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         }
 
         updateHeaderAndUserInfo();
+        updateShiftQuickSelectorUI();
         validateSelection();
       }
 
@@ -1087,12 +1196,18 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const user = getCurrentUser();
         const pendingEl = document.getElementById('pendingReservationsList');
         const confirmedEl = document.getElementById('confirmedReservationsList');
+        const rejectedBox = document.getElementById('rejectedReservationsBox');
+        const rejectedEl = document.getElementById('rejectedReservationsList');
+        const ownerCancelledBox = document.getElementById('ownerCancelledReservationsBox');
+        const ownerCancelledEl = document.getElementById('ownerCancelledReservationsList');
 
         const mine = state.reservations.filter(
-          r => r.ownerEmail.toLowerCase() === user.email.toLowerCase() && r.status !== 'cancelada' && r.status !== 'no_autorizada'
+          r => r.ownerEmail.toLowerCase() === user.email.toLowerCase()
         );
         const pending = mine.filter(r => r.status === 'pendiente');
         const confirmed = mine.filter(r => r.status === 'reservado');
+        const rejected = mine.filter(r => r.status === 'no_autorizada');
+        const cancelledByOwner = mine.filter(r => r.status === 'cancelada' && r.cancelledByOwner === true);
 
         if (!pending.length) {
           pendingEl.innerHTML = `<p class="text-xs text-slate-500">Sin reservas pendientes.</p>`;
@@ -1126,6 +1241,40 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           `).join('');
         }
 
+        if (!rejected.length) {
+          rejectedBox.classList.add('hidden');
+        } else {
+          rejectedBox.classList.remove('hidden');
+          rejectedEl.innerHTML = rejected.map(r => `
+            <div class="p-3 rounded-xl bg-white border border-red-300 flex items-center justify-between gap-2 text-xs">
+              <div>
+                <p class="font-bold text-slate-900">${formatDateSpanish(r.date)}</p>
+                <p class="text-slate-600">${r.shift === 'manana' ? 'Mañana' : 'Tarde'}</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-lg bg-red-600 text-white text-xs font-bold">
+                No autorizado
+              </span>
+            </div>
+          `).join('');
+        }
+
+        if (!cancelledByOwner.length) {
+          ownerCancelledBox.classList.add('hidden');
+        } else {
+          ownerCancelledBox.classList.remove('hidden');
+          ownerCancelledEl.innerHTML = cancelledByOwner.map(r => `
+            <div class="p-3 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-2 text-xs">
+              <div>
+                <p class="font-bold text-slate-900">${formatDateSpanish(r.date)}</p>
+                <p class="text-slate-600">${r.shift === 'manana' ? 'Mañana' : 'Tarde'}</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-800 text-xs font-bold">
+                Anulada por propietario
+              </span>
+            </div>
+          `).join('');
+        }
+
         document.querySelectorAll('[data-cancel-res]').forEach(btn => {
           btn.addEventListener('click', () => {
             const found = state.reservations.find(item => item.id === btn.dataset.cancelRes);
@@ -1138,15 +1287,13 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             const daysBefore = Math.round((resDate - today) / (1000 * 60 * 60 * 24));
 
             found.status = 'cancelada';
+            found.cancelledByOwner = true;
             saveState();
-            renderCalendar();
-            renderMyReservations();
-            renderAdminDashboard();
 
             if (daysBefore < 7) {
-              showToast('Reserva anulada fuera del plazo de 7 días: se devuelve la fianza (100 €) y se retiene la cuota de 50 €.');
+              showToast('Anulada por propietario fuera del plazo de 7 días: se devuelve la fianza (100 €) y se retiene la cuota de 50 €.');
             } else {
-              showToast('Reserva anulada dentro del plazo de 7 días.');
+              showToast('Anulada por propietario dentro del plazo de 7 días.');
             }
           });
         });
@@ -1169,7 +1316,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const listEl = document.getElementById('adminReservationsList');
         const activeList = state.reservations.filter(r => r.status !== 'cancelada' && r.status !== 'no_autorizada');
         if (!activeList.length) {
-          listEl.innerHTML = `<p class="text-xs text-slate-500">No hay reservas activas.</p>`;
+          listEl.innerHTML = `<p class="text-xs text-slate-500">No hay reservas pendientes ni confirmadas.</p>`;
           return;
         }
 
@@ -1222,9 +1369,6 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             if (!item) return;
             item.status = 'reservado';
             saveState();
-            renderCalendar();
-            renderMyReservations();
-            renderAdminDashboard();
             showToast(`Reserva confirmada para ${item.ownerEmail}.`);
           });
         });
@@ -1234,11 +1378,9 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             const item = state.reservations.find(x => x.id === btn.dataset.noAutorizar);
             if (!item) return;
             item.status = 'no_autorizada';
+            item.cancelledByOwner = false;
             saveState();
-            renderCalendar();
-            renderMyReservations();
-            renderAdminDashboard();
-            showToast(`Reserva de ${item.ownerEmail} marcada como NO AUTORIZADA y turno liberado.`);
+            showToast(`Reserva de ${item.ownerEmail} marcada como NO AUTORIZADA.`);
           });
         });
 
@@ -1248,11 +1390,21 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             if (!item) return;
             item.depositReturned = !item.depositReturned;
             saveState();
-            renderAdminDashboard();
             showToast(item.depositReturned ? 'Fianza marcada como devuelta.' : 'Marca de fianza devuelta quitada.');
           });
         });
       }
+
+      // Selector de turno en panel derecho
+      document.getElementById('pickShiftMananaBtn').addEventListener('click', () => {
+        if (!selectedSlot) return;
+        handleSelectSlot(selectedSlot.date, 'manana');
+      });
+
+      document.getElementById('pickShiftTardeBtn').addEventListener('click', () => {
+        if (!selectedSlot) return;
+        handleSelectSlot(selectedSlot.date, 'tarde');
+      });
 
       // Main navigation tabs
       document.querySelectorAll('.nav-tab').forEach(tabBtn => {
@@ -1270,12 +1422,11 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           });
           document.getElementById(`tab-${target}`).classList.remove('hidden');
 
-          if (target === 'mis-reservas') renderMyReservations();
-          if (target === 'calendario') renderCalendar();
+          refreshAllViews();
         });
       });
 
-      // Admin sub-tabs (visible buttons, no horizontal scroll)
+      // Admin sub-tabs (botones visibles todo el tiempo)
       document.querySelectorAll('.admin-tab').forEach(tabBtn => {
         tabBtn.addEventListener('click', () => {
           const target = tabBtn.dataset.adminTab;
@@ -1290,6 +1441,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             panel.classList.add('hidden');
           });
           document.getElementById(`admin-tab-${target}`).classList.remove('hidden');
+          renderAdminDashboard();
         });
       });
 
@@ -1298,19 +1450,17 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const { year, month } = state.currentYearMonth;
         const prev = new Date(year, month - 1, 1);
         state.currentYearMonth = { year: prev.getFullYear(), month: prev.getMonth() };
-        saveState();
-        renderCalendar();
+        saveState(false);
       });
 
       document.getElementById('nextMonthBtn').addEventListener('click', () => {
         const { year, month } = state.currentYearMonth;
         const next = new Date(year, month + 1, 1);
         state.currentYearMonth = { year: next.getFullYear(), month: next.getMonth() };
-        saveState();
-        renderCalendar();
+        saveState(false);
       });
 
-      // Booking submit (no payment modal for owner)
+      // Booking submit (Propietario: nunca abre el modal de pago)
       ['acceptNormsCheck', 'fixedDateExceptionCheck'].forEach(id => {
         document.getElementById(id).addEventListener('change', validateSelection);
       });
@@ -1330,18 +1480,16 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           unit: user.unit,
           eventType,
           createdAt: new Date().toISOString(),
-          depositReturned: false
+          depositReturned: false,
+          cancelledByOwner: false
         };
 
         state.reservations.push(newReservation);
         saveState();
-        renderCalendar();
-        renderMyReservations();
-        renderAdminDashboard();
-        showToast('Reserva solicitada. Queda pendiente de confirmación.');
+        showToast('Solicitud de reserva enviada. Queda pendiente de revisión por la administración.');
       });
 
-      // Payment Modal actions (opened only when admin gives visto bueno)
+      // Payment Modal actions (solo administrador)
       document.getElementById('closePaymentModal').addEventListener('click', () => {
         const modal = document.getElementById('paymentModal');
         modal.classList.add('hidden');
@@ -1396,10 +1544,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         }
 
         state.currentUserEmail = found.email;
-        saveState();
-        updateHeaderAndUserInfo();
-        renderCalendar();
-        renderMyReservations();
+        saveState(false);
         authModal.classList.add('hidden');
         authModal.classList.remove('flex');
         showToast(`Sesión iniciada: ${found.email}`);
@@ -1434,9 +1579,6 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         }
         state.currentUserEmail = existing.email;
         saveState();
-        updateHeaderAndUserInfo();
-        renderCalendar();
-        renderMyReservations();
         authModal.classList.add('hidden');
         authModal.classList.remove('flex');
         showToast(`Cuenta activada: ${existing.email}`);
@@ -1447,6 +1589,8 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       const adminFullInterface = document.getElementById('adminFullInterface');
 
       document.getElementById('btnOpenAdmin').addEventListener('click', () => {
+        state = loadState();
+        refreshAllViews();
         document.getElementById('adminPinInput').value = '';
         adminLoginModal.classList.remove('hidden');
         adminLoginModal.classList.add('flex');
@@ -1460,9 +1604,10 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       document.getElementById('unlockAdminBtn').addEventListener('click', () => {
         const code = document.getElementById('adminPinInput').value.trim();
         if (code === state.adminConfig.adminCode) {
+          state = loadState();
           adminLoginModal.classList.add('hidden');
           adminLoginModal.classList.remove('flex');
-          renderAdminDashboard();
+          refreshAllViews();
           adminFullInterface.classList.remove('hidden');
           adminFullInterface.classList.add('flex');
         } else {
@@ -1471,6 +1616,8 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       });
 
       document.getElementById('exitAdminFullBtn').addEventListener('click', () => {
+        state = loadState();
+        refreshAllViews();
         adminFullInterface.classList.add('hidden');
         adminFullInterface.classList.remove('flex');
       });
@@ -1484,7 +1631,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           showToast('Selecciona una fecha.', true);
           return;
         }
-        if (getSlotReservation(dateVal, shiftVal)) {
+        if (getActiveSlotReservation(dateVal, shiftVal)) {
           showToast('Ya existe una reserva en ese día y turno.', true);
           return;
         }
@@ -1499,12 +1646,11 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           unit: titleVal,
           eventType: `Acto comunitario: ${titleVal}`,
           createdAt: new Date().toISOString(),
-          depositReturned: false
+          depositReturned: false,
+          cancelledByOwner: false
         });
 
         saveState();
-        renderCalendar();
-        renderAdminDashboard();
         document.getElementById('commTitleInput').value = '';
         showToast('Acto comunitario registrado.');
       });
@@ -1538,7 +1684,6 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         });
 
         saveState();
-        renderAdminDashboard();
         document.getElementById('bulkEmailsInput').value = '';
         showToast(`${added} propietario(s) autorizado(s).`);
       });
@@ -1564,14 +1709,11 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         saveState();
         document.getElementById('newAdminEmailInput').value = '';
         document.getElementById('newAdminCodeInput').value = '';
-        renderAdminDashboard();
         showToast('Administrador guardado.');
       });
 
-      // Initial render
-      renderCalendar();
-      renderMyReservations();
-      renderAdminDashboard();
+      // Render inicial
+      refreshAllViews();
     })();
   </script>
 </body>
