@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reserva Sala Común Escalonia 15 — v1.3</title>
+  <title>Reserva Sala Común Escalonia 15 — v1.4</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -135,7 +135,7 @@
     <div class="max-w-xl w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-7 sm:p-10 text-center shadow-2xl space-y-7">
       <div class="space-y-1">
         <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-emerald-200 px-3 py-1 rounded-full bg-white/10">
-          Versión 1.3 · Tiempo Real
+          Versión 1.4 · Tiempo Real
         </span>
         <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight pt-2">
           Bienvenido a reserva sala común Escalonia 15
@@ -172,7 +172,7 @@
           </div>
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-emerald-300">
-              Reserva Sala Común Escalonia 15 · v1.3
+              Reserva Sala Común Escalonia 15 · v1.4
             </p>
             <h2 id="ownerWelcomeTitle" class="text-base sm:text-lg font-extrabold tracking-tight leading-tight">
               Bienvenido · Vivienda
@@ -540,12 +540,12 @@
     </div>
   </div>
 
-  <!-- MODAL 2B: CAMBIO OBLIGATORIO DE CONTRASEÑA Y VIVIENDA EN PRIMER ACCESO -->
+  <!-- MODAL 2B: PRIMER ACCESO (VIVIENDA UNA SOLA VEZ + CAMBIO DE CONTRASEÑA) -->
   <div id="forcePasswordModal" class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-[1px] hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-emerald-900 text-white px-5 py-3.5">
-        <h3 class="text-sm sm:text-base font-bold">Cambio de contraseña y datos de vivienda</h3>
-        <p class="text-[11px] text-emerald-200">Selecciona tu vivienda y establece tu contraseña personal</p>
+        <h3 class="text-sm sm:text-base font-bold">Primer acceso: vivienda y nueva contraseña</h3>
+        <p class="text-[11px] text-emerald-200">Confirma tu vivienda (solo se solicita una vez) y cambia tu contraseña</p>
       </div>
 
       <div class="p-5 space-y-3.5 text-xs sm:text-sm">
@@ -584,49 +584,29 @@
         </div>
 
         <button id="saveNewPasswordBtn" type="button" class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm transition">
-          Confirmar datos y cambiar contraseña
+          Confirmar que está correcto
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 2C: AJUSTES DE PROPIETARIO (CAMBIAR CONTRASEÑA Y VIVIENDA) -->
+  <!-- MODAL 2C: AJUSTES DE PROPIETARIO (SOLO CAMBIAR CONTRASEÑA) -->
   <div id="ownerSettingsModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-brand-dark text-white px-5 py-3.5 flex items-center justify-between">
-        <h3 class="text-sm sm:text-base font-bold">Ajustes de Propietario</h3>
+        <h3 class="text-sm sm:text-base font-bold">Ajustes · Cambiar contraseña</h3>
         <button id="closeSettingsModal" type="button" class="text-emerald-200 hover:text-white text-lg font-bold leading-none px-1">
           &times;
         </button>
       </div>
 
       <div class="p-5 space-y-3.5 text-xs sm:text-sm">
-        <div class="grid grid-cols-3 gap-2">
-          <div>
-            <label for="settingsPortalSelect" class="block text-xs font-semibold text-slate-700 mb-1">Portal</label>
-            <select id="settingsPortalSelect" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs bg-white font-medium"></select>
-          </div>
-          <div>
-            <label for="settingsFloorSelect" class="block text-xs font-semibold text-slate-700 mb-1">Piso</label>
-            <select id="settingsFloorSelect" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs bg-white font-medium">
-              <option value="Bajo">Bajo</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-            </select>
-          </div>
-          <div>
-            <label for="settingsLetterSelect" class="block text-xs font-semibold text-slate-700 mb-1">Letra</label>
-            <select id="settingsLetterSelect" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs bg-white font-medium">
-              <option value="A">A</option>
-              <option value="B">B</option>
-              <option value="C">C</option>
-              <option value="D">D</option>
-            </select>
-          </div>
-        </div>
+        <p class="text-xs text-slate-600">
+          Vivienda asignada: <strong id="settingsFixedUnitLabel">-</strong>
+        </p>
 
         <div>
-          <label for="settingsNewPassInput" class="block text-xs font-semibold text-slate-700 mb-1">Nueva contraseña (opcional si solo cambias vivienda)</label>
+          <label for="settingsNewPassInput" class="block text-xs font-semibold text-slate-700 mb-1">Nueva contraseña (mínimo 6 caracteres)</label>
           <input id="settingsNewPassInput" type="password" minlength="6" autocomplete="new-password" placeholder="Mínimo 6 caracteres" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
         </div>
 
@@ -636,7 +616,7 @@
         </div>
 
         <button id="saveSettingsBtn" type="button" class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm transition">
-          Confirmar cambios
+          Confirmar contraseña
         </button>
       </div>
     </div>
@@ -678,7 +658,7 @@
       <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-            Administrador · v1.3
+            Administrador · v1.4
           </span>
           <h2 id="adminHeaderTitle" class="text-base sm:text-lg font-bold leading-tight">
             Administrador — Sala Común Escalonia 15
@@ -976,13 +956,12 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         reservations: []
       };
 
-      function populatePortalSelects() {
+      function populatePortalSelect() {
         const optionsHtml = Array.from({ length: 18 }, (_, i) => {
           const n = String(i + 1);
           return `<option value="${n}">${n}</option>`;
         }).join("");
         document.getElementById("firstPortalSelect").innerHTML = optionsHtml;
-        document.getElementById("settingsPortalSelect").innerHTML = optionsHtml;
       }
 
       function normalizeEmailKey(email) {
@@ -1105,6 +1084,10 @@ Administración Escalonia 15`
         if (profile.floor) parts.push(`Piso ${profile.floor}`);
         if (profile.letter) parts.push(`Letra ${profile.letter}`);
         return parts.length ? parts.join(" · ") : "Vivienda por completar";
+      }
+
+      function hasCompleteHousing(profile) {
+        return Boolean(profile && profile.portal && profile.floor && profile.letter);
       }
 
       function getActiveSlotReservation(dateISO, shift) {
@@ -1683,9 +1666,7 @@ Administración Escalonia 15`
 
       function openOwnerSettingsModal() {
         const modal = document.getElementById("ownerSettingsModal");
-        document.getElementById("settingsPortalSelect").value = (currentUserProfile && currentUserProfile.portal) || "1";
-        document.getElementById("settingsFloorSelect").value = (currentUserProfile && currentUserProfile.floor) || "Bajo";
-        document.getElementById("settingsLetterSelect").value = (currentUserProfile && currentUserProfile.letter) || "A";
+        document.getElementById("settingsFixedUnitLabel").textContent = getUserHousingLabel(currentUserProfile);
         document.getElementById("settingsNewPassInput").value = "";
         document.getElementById("settingsConfirmPassInput").value = "";
         modal.classList.remove("hidden");
@@ -1736,7 +1717,14 @@ Administración Escalonia 15`
           applyScreenVisibility();
           refreshAllViews();
 
-          if (!isCurrentUserAdmin && (!currentUserProfile || currentUserProfile.mustChangePassword === true || lastEnteredPassword === INITIAL_OWNER_PASS)) {
+          const needsFirstSetup = !isCurrentUserAdmin && (
+            !currentUserProfile ||
+            currentUserProfile.mustChangePassword === true ||
+            !hasCompleteHousing(currentUserProfile) ||
+            lastEnteredPassword === INITIAL_OWNER_PASS
+          );
+
+          if (needsFirstSetup) {
             openForcePasswordModal();
           }
         });
@@ -1771,49 +1759,32 @@ Administración Escalonia 15`
 
       document.getElementById("saveSettingsBtn").addEventListener("click", async () => {
         if (!authUser) return;
-        const portal = document.getElementById("settingsPortalSelect").value;
-        const floor = document.getElementById("settingsFloorSelect").value;
-        const letter = document.getElementById("settingsLetterSelect").value;
         const p1 = document.getElementById("settingsNewPassInput").value;
         const p2 = document.getElementById("settingsConfirmPassInput").value;
 
-        if (p1 || p2) {
-          if (p1.length < 6) {
-            showToast("La nueva contraseña debe tener al menos 6 caracteres.", true);
-            return;
-          }
-          if (p1 !== p2) {
-            showToast("Las contraseñas no coinciden.", true);
-            return;
-          }
+        if (!p1 || p1.length < 6) {
+          showToast("La nueva contraseña debe tener al menos 6 caracteres.", true);
+          return;
+        }
+        if (p1 !== p2) {
+          showToast("Las contraseñas no coinciden.", true);
+          return;
         }
 
         try {
-          if (p1) {
-            await authUser.updatePassword(p1);
-            lastEnteredPassword = p1;
-          }
-          const updatedProfile = {
-            ...(currentUserProfile || {}),
-            email: authUser.email,
-            portal,
-            floor,
-            letter,
-            role: "owner",
-            active: true,
+          await authUser.updatePassword(p1);
+          lastEnteredPassword = p1;
+          await db.ref(`escalonia15/users/${authUser.uid}`).update({
             mustChangePassword: false,
             updatedAt: new Date().toISOString()
-          };
-          await db.ref(`escalonia15/users/${authUser.uid}`).set(updatedProfile);
-          currentUserProfile = updatedProfile;
-          refreshAllViews();
+          });
 
           const modal = document.getElementById("ownerSettingsModal");
           modal.classList.add("hidden");
           modal.classList.remove("flex");
-          showToast("Ajustes guardados.");
+          showToast("Contraseña actualizada.");
         } catch (err) {
-          showToast("Error al guardar ajustes: " + err.message, true);
+          showToast("Error al cambiar la contraseña: " + err.message, true);
         }
       });
 
@@ -2019,7 +1990,7 @@ Administración Escalonia 15`
           modal.classList.add("hidden");
           modal.classList.remove("flex");
           refreshAllViews();
-          showToast("Datos confirmados y contraseña actualizada.");
+          showToast("Vivienda confirmada y contraseña actualizada.");
         } catch (err) {
           showToast("No se pudo actualizar la contraseña: " + err.message, true);
         }
@@ -2249,7 +2220,7 @@ Administración Escalonia 15`
         }
       });
 
-      populatePortalSelects();
+      populatePortalSelect();
       applyScreenVisibility();
       refreshAllViews();
     })();
