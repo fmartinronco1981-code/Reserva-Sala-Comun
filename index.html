@@ -155,25 +155,25 @@
 
     <!-- MAIN NAVIGATION TABS -->
     <nav class="bg-emerald-950/90 border-t border-white/10">
-      <div class="max-w-6xl mx-auto px-4 flex gap-1 overflow-x-auto">
+      <div class="max-w-6xl mx-auto px-4 py-2 flex flex-wrap gap-2">
         <button
           type="button"
           data-tab="calendario"
-          class="nav-tab px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-emerald-400 text-white whitespace-nowrap transition"
+          class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-emerald-700 text-white transition"
         >
           Calendario y Reservas
         </button>
         <button
           type="button"
           data-tab="mis-reservas"
-          class="nav-tab px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-emerald-200/75 hover:text-white whitespace-nowrap transition"
+          class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-white/10 text-emerald-100 hover:bg-white/20 transition"
         >
           Mis Reservas
         </button>
         <button
           type="button"
           data-tab="normas"
-          class="nav-tab px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-emerald-200/75 hover:text-white whitespace-nowrap transition"
+          class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-white/10 text-emerald-100 hover:bg-white/20 transition"
         >
           Normas de la sala
         </button>
@@ -391,8 +391,6 @@
             <p><strong>Calendario visual partido en diagonal:</strong> Cada día del calendario se divide en diagonal en dos mitades —<strong>Mañana</strong> y <strong>Tarde</strong>— con código de color por turno: <strong>verde</strong> para <strong>Libre</strong>, <strong>amarillo</strong> para <strong>Pendiente de pago</strong> y <strong>rojo</strong> para <strong>Reservado</strong>.</p>
 
             <p><strong>Comunicación de solicitud y visto bueno:</strong> Al solicitar una reserva, la reserva queda en <strong>Pendiente de pago (48h)</strong> sin mostrar el recuadro de pago al propietario; es el <strong>administrador</strong> quien, al dar el visto bueno, abre/prepara la <strong>Solicitud de Pago (48h)</strong> de la administración hacia el propietario, y al confirmarse el pago pasa a <strong>Reservado</strong>.</p>
-
-            <p><strong>Interfaz de Administrador:</strong> Desde el botón superior <strong>«Administrador»</strong> se accede primero a la clave (<code>1234</code> por defecto) y después a una interfaz completa con pestañas separadas para <strong>Reservas por confirmar y control de fianzas</strong> (con contador de reservas anuales del propietario, visto bueno/correo, confirmación de pago y botón de <strong>Fianza devuelta</strong>), <strong>Programar acto comunitario</strong>, <strong>Alta de propietarios</strong>, <strong>Plantilla de correo e IBAN</strong> y <strong>Dar de alta otro administrador</strong>.</p>
           </div>
         </div>
       </div>
@@ -539,41 +537,41 @@
         </div>
       </div>
 
-      <!-- PESTAÑAS SEPARADAS DEL ADMINISTRADOR -->
+      <!-- BOTONES VISIBLES TODO EL TIEMPO (SIN SCROLL LATERAL) -->
       <nav class="bg-slate-950 border-t border-white/10">
-        <div class="max-w-6xl mx-auto px-4 flex gap-1 overflow-x-auto">
+        <div class="max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap gap-2">
           <button
             type="button"
             data-admin-tab="reservas-fianzas"
-            class="admin-tab px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-emerald-400 text-white whitespace-nowrap transition"
+            class="admin-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-emerald-600 text-white transition"
           >
             Reservas por confirmar y control de fianzas
           </button>
           <button
             type="button"
             data-admin-tab="acto-comunitario"
-            class="admin-tab px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-300 hover:text-white whitespace-nowrap transition"
+            class="admin-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
           >
             Programar acto comunitario
           </button>
           <button
             type="button"
             data-admin-tab="alta-propietarios"
-            class="admin-tab px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-300 hover:text-white whitespace-nowrap transition"
+            class="admin-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
           >
             Alta de propietarios
           </button>
           <button
             type="button"
             data-admin-tab="plantilla-iban"
-            class="admin-tab px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-300 hover:text-white whitespace-nowrap transition"
+            class="admin-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
           >
             Plantilla de correo e IBAN
           </button>
           <button
             type="button"
             data-admin-tab="nuevo-admin"
-            class="admin-tab px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-300 hover:text-white whitespace-nowrap transition"
+            class="admin-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
           >
             Dar de alta otro administrador
           </button>
@@ -587,7 +585,7 @@
         <div class="border-b border-slate-100 pb-3">
           <h3 class="text-base sm:text-lg font-bold text-slate-900">Reservas por confirmar y control de fianzas</h3>
           <p class="text-xs text-slate-500">
-            Revisa el contador anual de reservas de cada propietario, da el visto bueno / prepara el correo de pago (48h), confirma pagos y marca la devolución de fianza.
+            Revisa el contador anual de reservas de cada propietario, da el visto bueno / prepara el correo de pago (48h), confirma o no autoriza reservas y marca la devolución de fianza.
           </p>
         </div>
         <div id="adminReservationsList" class="space-y-3"></div>
@@ -717,7 +715,7 @@
 
   <script>
     (function () {
-      const STORAGE_KEY = 'escalonia15_sala_comun_v4';
+      const STORAGE_KEY = 'escalonia15_sala_comun_v5';
       const PORTALS = Array.from({ length: 18 }, (_, i) => `Portal ${i + 1}`);
       const UNITS = [
         'Bajo A', 'Bajo B', 'Bajo C', 'Bajo D',
@@ -876,13 +874,13 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       }
 
       function getSlotReservation(dateISO, shift) {
-        return state.reservations.find(r => r.date === dateISO && r.shift === shift && r.status !== 'cancelada') || null;
+        return state.reservations.find(r => r.date === dateISO && r.shift === shift && r.status !== 'cancelada' && r.status !== 'no_autorizada') || null;
       }
 
       function getUserYearReservationCount(email, year) {
         return state.reservations.filter(r => {
           if (r.ownerEmail.toLowerCase() !== email.toLowerCase()) return false;
-          if (r.status === 'cancelada') return false;
+          if (r.status === 'cancelada' || r.status === 'no_autorizada') return false;
           const resYear = Number(r.date.split('-')[0]);
           return resYear === year;
         }).length;
@@ -1091,7 +1089,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const confirmedEl = document.getElementById('confirmedReservationsList');
 
         const mine = state.reservations.filter(
-          r => r.ownerEmail.toLowerCase() === user.email.toLowerCase() && r.status !== 'cancelada'
+          r => r.ownerEmail.toLowerCase() === user.email.toLowerCase() && r.status !== 'cancelada' && r.status !== 'no_autorizada'
         );
         const pending = mine.filter(r => r.status === 'pendiente');
         const confirmed = mine.filter(r => r.status === 'reservado');
@@ -1169,7 +1167,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         }
 
         const listEl = document.getElementById('adminReservationsList');
-        const activeList = state.reservations.filter(r => r.status !== 'cancelada');
+        const activeList = state.reservations.filter(r => r.status !== 'cancelada' && r.status !== 'no_autorizada');
         if (!activeList.length) {
           listEl.innerHTML = `<p class="text-xs text-slate-500">No hay reservas activas.</p>`;
           return;
@@ -1195,6 +1193,9 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
                     Confirmar reserva
                   </button>
                 ` : ''}
+                <button data-no-autorizar="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold">
+                  No autorizar
+                </button>
                 <button data-refund-dep="${r.id}" type="button" class="px-3 py-1.5 rounded-lg border ${
                   r.depositReturned
                     ? 'bg-emerald-100 border-emerald-400 text-emerald-950'
@@ -1228,6 +1229,19 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           });
         });
 
+        listEl.querySelectorAll('[data-no-autorizar]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const item = state.reservations.find(x => x.id === btn.dataset.noAutorizar);
+            if (!item) return;
+            item.status = 'no_autorizada';
+            saveState();
+            renderCalendar();
+            renderMyReservations();
+            renderAdminDashboard();
+            showToast(`Reserva de ${item.ownerEmail} marcada como NO AUTORIZADA y turno liberado.`);
+          });
+        });
+
         listEl.querySelectorAll('[data-refund-dep]').forEach(btn => {
           btn.addEventListener('click', () => {
             const item = state.reservations.find(x => x.id === btn.dataset.refundDep);
@@ -1245,11 +1259,11 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         tabBtn.addEventListener('click', () => {
           const target = tabBtn.dataset.tab;
           document.querySelectorAll('.nav-tab').forEach(b => {
-            b.classList.remove('border-emerald-400', 'text-white');
-            b.classList.add('border-transparent', 'text-emerald-200/75');
+            b.classList.remove('bg-emerald-700', 'text-white');
+            b.classList.add('bg-white/10', 'text-emerald-100');
           });
-          tabBtn.classList.add('border-emerald-400', 'text-white');
-          tabBtn.classList.remove('border-transparent', 'text-emerald-200/75');
+          tabBtn.classList.add('bg-emerald-700', 'text-white');
+          tabBtn.classList.remove('bg-white/10', 'text-emerald-100');
 
           document.querySelectorAll('.tab-panel').forEach(panel => {
             panel.classList.add('hidden');
@@ -1261,16 +1275,16 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         });
       });
 
-      // Admin sub-tabs
+      // Admin sub-tabs (visible buttons, no horizontal scroll)
       document.querySelectorAll('.admin-tab').forEach(tabBtn => {
         tabBtn.addEventListener('click', () => {
           const target = tabBtn.dataset.adminTab;
           document.querySelectorAll('.admin-tab').forEach(b => {
-            b.classList.remove('border-emerald-400', 'text-white');
-            b.classList.add('border-transparent', 'text-slate-300');
+            b.classList.remove('bg-emerald-600', 'text-white');
+            b.classList.add('bg-white/10', 'text-slate-200');
           });
-          tabBtn.classList.add('border-emerald-400', 'text-white');
-          tabBtn.classList.remove('border-transparent', 'text-slate-300');
+          tabBtn.classList.add('bg-emerald-600', 'text-white');
+          tabBtn.classList.remove('bg-white/10', 'text-slate-200');
 
           document.querySelectorAll('.admin-panel').forEach(panel => {
             panel.classList.add('hidden');
