@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reserva Sala Común Escalonia 15 — v1.1</title>
+  <title>Reserva Sala Común Escalonia 15 — v1.2</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -135,7 +135,7 @@
     <div class="max-w-xl w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-7 sm:p-10 text-center shadow-2xl space-y-7">
       <div class="space-y-1">
         <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-emerald-200 px-3 py-1 rounded-full bg-white/10">
-          Versión 1.1 · Producción
+          Versión 1.2 · Producción
         </span>
         <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight pt-2">
           Bienvenido a reserva sala común Escalonia 15
@@ -172,7 +172,7 @@
           </div>
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-emerald-300">
-              Reserva Sala Común Escalonia 15 · v1.1
+              Reserva Sala Común Escalonia 15 · v1.2
             </p>
             <h2 id="ownerWelcomeTitle" class="text-base sm:text-lg font-extrabold tracking-tight leading-tight">
               Bienvenido · Vivienda
@@ -610,7 +610,7 @@
       <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-            Administrador · v1.1
+            Administrador · v1.2
           </span>
           <h2 id="adminHeaderTitle" class="text-base sm:text-lg font-bold leading-tight">
             Administrador — Sala Común Escalonia 15
@@ -735,9 +735,14 @@
 
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div id="authorizedEmailsPreview" class="flex flex-wrap gap-1.5 text-xs"></div>
-          <button id="saveBulkEmailsBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
-            Autorizar y abrir correo (123456)
-          </button>
+          <div class="flex items-center gap-2">
+            <a id="manualMailtoLink" href="#" class="hidden px-3 py-2 rounded-xl border border-emerald-700 text-emerald-800 hover:bg-emerald-50 text-xs font-bold">
+              Abrir correo manualmente
+            </a>
+            <button id="saveBulkEmailsBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
+              Autorizar y abrir correo (123456)
+            </button>
+          </div>
         </div>
       </div>
 
@@ -861,10 +866,10 @@
       const auth = app.auth();
       const db = app.database();
 
-      // App secundaria para crear cuentas de vecinos sin cerrar la sesión del administrador
       const secondaryApp = window.firebase.apps.find(a => a.name === "SecondaryAuthApp")
         || window.firebase.initializeApp(firebaseConfig, "SecondaryAuthApp");
       const secondaryAuth = secondaryApp.auth();
+      const secondaryDb = secondaryApp.database();
 
       let activeScreen = "landing";
       let selectedSlot = null;
@@ -951,11 +956,11 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         clearTimeout(window.__toastTimer);
         window.__toastTimer = setTimeout(() => {
           box.classList.add("hidden");
-        }, 4000);
+        }, 4200);
       }
 
-      function openOutlookInvite(emails) {
-        const to = encodeURIComponent(emails.join(";"));
+      function buildMailtoUrl(emails) {
+        const to = encodeURIComponent(emails.join(","));
         const cc = encodeURIComponent(state.adminConfig.adminEmail || ADMIN_EMAIL);
         const subject = encodeURIComponent("Acceso Reserva Sala Común Escalonia 15");
         const appUrl = window.location.href.split("#")[0];
@@ -974,7 +979,21 @@ Al entrar por primera vez se te pedirá cambiar la contraseña por una personal.
 Un saludo,
 Administración Escalonia 15`
         );
-        window.location.href = `mailto:${to}?cc=${cc}&subject=${subject}&body=${body}`;
+        return `mailto:${to}?cc=${cc}&subject=${subject}&body=${body}`;
+      }
+
+      function openOutlookInvite(emails) {
+        const url = buildMailtoUrl(emails);
+        const manualLink = document.getElementById("manualMailtoLink");
+        manualLink.href = url;
+        manualLink.classList.remove("hidden");
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
       }
 
       function applyScreenVisibility() {
@@ -1576,7 +1595,8 @@ Administración Escalonia 15`
           return;
         }
 
-        isCurrentUserAdmin = user.uid === ADMIN_UID;
+        const extraAdmins = (state.admins || []).map(a => (a.uid || "").trim()).filter(Boolean);
+        isCurrentUserAdmin = user.uid === ADMIN_UID || extraAdmins.includes(user.uid);
         const profSnap = await db.ref(`escalonia15/users/${user.uid}`).once("value");
         currentUserProfile = profSnap.val();
 
@@ -1709,7 +1729,6 @@ Administración Escalonia 15`
         }
       });
 
-      // Modal pago 48h
       document.getElementById("closePaymentModal").addEventListener("click", () => {
         const modal = document.getElementById("paymentModal");
         modal.classList.add("hidden");
@@ -1733,10 +1752,14 @@ Administración Escalonia 15`
         const cc = encodeURIComponent(document.getElementById("mailFromInput").value.trim() || ADMIN_EMAIL);
         const subject = encodeURIComponent(document.getElementById("mailSubjectInput").value.trim());
         const body = encodeURIComponent(document.getElementById("mailBodyInput").value.trim());
-        window.location.href = `mailto:${to}?cc=${cc}&subject=${subject}&body=${body}`;
+        const a = document.createElement("a");
+        a.href = `mailto:${to}?cc=${cc}&subject=${subject}&body=${body}`;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
       });
 
-      // Modal propietario (Login)
       const authModal = document.getElementById("authModal");
       function openAuthModal() {
         authModal.classList.remove("hidden");
@@ -1781,7 +1804,6 @@ Administración Escalonia 15`
         }
       });
 
-      // Guardar nueva contraseña en primer acceso
       document.getElementById("saveNewPasswordBtn").addEventListener("click", async () => {
         if (!authUser) return;
         const portal = document.getElementById("firstPortalInput").value.trim();
@@ -1829,7 +1851,6 @@ Administración Escalonia 15`
         }
       });
 
-      // Acceso administrador con Firebase Auth
       const adminLoginModal = document.getElementById("adminLoginModal");
 
       document.getElementById("btnEnterAdmin").addEventListener("click", () => {
@@ -1862,11 +1883,13 @@ Administración Escalonia 15`
           pendingScreenAfterLogin = "admin";
           lastEnteredPassword = pass;
           const cred = await auth.signInWithEmailAndPassword(email, pass);
-          if (cred.user.uid !== ADMIN_UID) {
+          const extraAdmins = (state.admins || []).map(a => (a.uid || "").trim()).filter(Boolean);
+          if (cred.user.uid !== ADMIN_UID && !extraAdmins.includes(cred.user.uid)) {
             pendingScreenAfterLogin = null;
             showToast("Esta cuenta no tiene permisos de administrador.", true);
             return;
           }
+          isCurrentUserAdmin = true;
           adminLoginModal.classList.add("hidden");
           adminLoginModal.classList.remove("flex");
           activeScreen = "admin";
@@ -1890,9 +1913,11 @@ Administración Escalonia 15`
         applyScreenVisibility();
       });
 
-      // Acto comunitario
       document.getElementById("createCommEventBtn").addEventListener("click", async () => {
-        if (!isCurrentUserAdmin) return;
+        if (!authUser) {
+          showToast("Sesión de administrador no iniciada.", true);
+          return;
+        }
         const dateVal = document.getElementById("commDateInput").value;
         const shiftVal = document.getElementById("commShiftInput").value;
         const titleVal = document.getElementById("commTitleInput").value.trim() || "Acto comunitario";
@@ -1929,7 +1954,10 @@ Administración Escalonia 15`
 
       // Alta de propietarios por ";" + creación en Auth con 123456 + abrir Outlook (mailto)
       document.getElementById("saveBulkEmailsBtn").addEventListener("click", async () => {
-        if (!isCurrentUserAdmin) return;
+        if (!authUser) {
+          showToast("Debes tener iniciada la sesión de administrador.", true);
+          return;
+        }
         const raw = document.getElementById("bulkEmailsInput").value;
         const parts = raw
           .split(";")
@@ -1940,6 +1968,10 @@ Administración Escalonia 15`
           showToast('Escribe uno o varios correos válidos separados por ";".', true);
           return;
         }
+
+        const btn = document.getElementById("saveBulkEmailsBtn");
+        btn.disabled = true;
+        btn.textContent = "Procesando...";
 
         try {
           const updates = {};
@@ -1954,7 +1986,7 @@ Administración Escalonia 15`
 
             try {
               const secCred = await secondaryAuth.createUserWithEmailAndPassword(email, INITIAL_OWNER_PASS);
-              await db.ref(`escalonia15/users/${secCred.user.uid}`).set({
+              await secondaryDb.ref(`escalonia15/users/${secCred.user.uid}`).set({
                 email,
                 role: "owner",
                 active: true,
@@ -1963,24 +1995,30 @@ Administración Escalonia 15`
               });
               await secondaryAuth.signOut();
             } catch (authErr) {
+              try { await secondaryAuth.signOut(); } catch (_) {}
               if (authErr.code !== "auth/email-already-in-use") {
-                throw authErr;
+                showToast(`Aviso Auth (${email}): ${authErr.message}`, true);
               }
             }
           }
 
           await db.ref("escalonia15/authorizedEmails").update(updates);
           document.getElementById("bulkEmailsInput").value = "";
-          showToast(`${parts.length} propietario(s) autorizado(s). Abriendo correo...`);
           openOutlookInvite(parts);
+          showToast(`${parts.length} propietario(s) autorizado(s) con clave ${INITIAL_OWNER_PASS}. Abriendo correo...`);
         } catch (err) {
           showToast("Error al autorizar propietario: " + err.message, true);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = `Autorizar y abrir correo (${INITIAL_OWNER_PASS})`;
         }
       });
 
-      // Guardar plantilla e IBAN
       document.getElementById("saveTemplateBtn").addEventListener("click", async () => {
-        if (!isCurrentUserAdmin) return;
+        if (!authUser) {
+          showToast("Sesión de administrador no iniciada.", true);
+          return;
+        }
         const updatedConfig = {
           ...state.adminConfig,
           adminEmail: document.getElementById("cfgAdminEmail").value.trim() || ADMIN_EMAIL,
@@ -1998,9 +2036,11 @@ Administración Escalonia 15`
         }
       });
 
-      // Guardar otro administrador
       document.getElementById("addAdminBtn").addEventListener("click", async () => {
-        if (!isCurrentUserAdmin) return;
+        if (!authUser) {
+          showToast("Sesión de administrador no iniciada.", true);
+          return;
+        }
         const newEmail = document.getElementById("newAdminEmailInput").value.trim().toLowerCase();
         const newUid = document.getElementById("newAdminUidInput").value.trim();
 
