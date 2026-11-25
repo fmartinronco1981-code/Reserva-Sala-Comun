@@ -260,7 +260,7 @@
                 <span id="formUserUnit" class="font-bold text-slate-800">-</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-slate-500">Reservas anuales en el año:</span>
+                <span class="text-slate-500">Reservas en el año:</span>
                 <span id="formUserCount" class="font-bold text-emerald-700">0 / 2</span>
               </div>
             </div>
@@ -268,25 +268,31 @@
             <div class="space-y-2">
               <label class="block font-semibold text-slate-700">Fecha y turno seleccionado</label>
               <div id="selectedSlotSummary" class="p-2.5 rounded-xl border border-dashed border-slate-300 bg-slate-50/70 text-slate-600 font-medium">
-                Pulsa un día en el calendario (mitad de Mañana o Tarde).
+                Pulsa un día en el calendario para elegir entre Turno mañana y Turno tarde.
               </div>
 
-              <!-- Pestañita / selector directo de turno para confirmar -->
-              <div id="shiftQuickSelector" class="hidden grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200">
-                <button
-                  id="pickShiftMananaBtn"
-                  type="button"
-                  class="py-1.5 px-2 rounded-lg text-xs font-bold transition text-center"
-                >
-                  Turno mañana
-                </button>
-                <button
-                  id="pickShiftTardeBtn"
-                  type="button"
-                  class="py-1.5 px-2 rounded-lg text-xs font-bold transition text-center"
-                >
-                  Turno tarde
-                </button>
+              <!-- Ventanita / pestañita interactiva de turno para elegir o confirmar -->
+              <div id="shiftQuickSelector" class="hidden rounded-xl bg-emerald-50/70 border border-emerald-200 p-2 space-y-1.5">
+                <div class="flex items-center justify-between text-[11px] font-semibold text-emerald-950 px-0.5">
+                  <span>Elegir turno de la fecha:</span>
+                  <span id="selectedShiftBadge" class="px-2 py-0.5 rounded-md bg-white border border-emerald-200 text-emerald-800 font-bold"></span>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-white border border-emerald-200/80">
+                  <button
+                    id="pickShiftMananaBtn"
+                    type="button"
+                    class="py-1.5 px-2 rounded-lg text-xs font-bold transition text-center"
+                  >
+                    Turno mañana
+                  </button>
+                  <button
+                    id="pickShiftTardeBtn"
+                    type="button"
+                    class="py-1.5 px-2 rounded-lg text-xs font-bold transition text-center"
+                  >
+                    Turno tarde
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -331,19 +337,8 @@
     <!-- TAB 2: MIS RESERVAS -->
     <section id="tab-mis-reservas" class="tab-panel hidden space-y-4">
       <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-5">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4">
-          <div>
-            <h2 class="text-base sm:text-lg font-bold text-slate-900">Mis Reservas</h2>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-2 text-xs">
-            <div class="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 font-semibold">
-              Portal adjudicado: <span id="myFixedPortal" class="font-extrabold">-</span>
-            </div>
-            <div class="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 font-semibold">
-              Vivienda adjudicada: <span id="myFixedUnit" class="font-extrabold">-</span>
-            </div>
-          </div>
+        <div class="border-b border-slate-100 pb-3">
+          <h2 class="text-base sm:text-lg font-bold text-slate-900">Mis Reservas</h2>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -358,11 +353,6 @@
           </div>
         </div>
 
-        <div id="rejectedReservationsBox" class="hidden rounded-xl border border-red-300 bg-red-50/60 p-4 space-y-2">
-          <h3 class="text-sm font-bold text-red-900">Solicitudes no autorizadas</h3>
-          <div id="rejectedReservationsList" class="space-y-2"></div>
-        </div>
-
         <div id="ownerCancelledReservationsBox" class="hidden rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
           <h3 class="text-sm font-bold text-slate-800">Anuladas por propietario</h3>
           <div id="ownerCancelledReservationsList" class="space-y-2"></div>
@@ -375,13 +365,13 @@
       <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-6">
         <div class="border-b border-slate-200 pb-4">
           <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-900 mb-2">
-            Reglamento de Régimen Interior — Punto 12 y Condiciones Operativas
+            Reglamento de Régimen Interior — Punto 12
           </span>
           <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">
             Normas de la Sala — Reserva Sala Común Escalonia 15
           </h2>
           <p class="text-xs sm:text-sm text-slate-600 mt-1">
-            Texto normativo íntegro y condiciones de uso, reserva, pago, anulación, revisión por conserjería y devolución de fianza aplicables a la comunidad Escalonia 15 (18 portales, ~200 viviendas).
+            Texto normativo íntegro y condiciones de uso, reserva, pago, anulación, revisión por conserjería y devolución de fianza aplicables a la comunidad Escalonia 15.
           </p>
         </div>
 
@@ -400,29 +390,15 @@
               <li><strong>Turno de tarde (viernes, sábados y vísperas de festivos):</strong> de <strong>17:30 a 24:00 horas</strong>.</li>
             </ul>
 
-            <p><strong>12.3. Límite anual y prioridad de uso:</strong> Cada vivienda o solicitante podrá disfrutar de un máximo de <strong>2 reservas al año</strong> (computándose por año natural con reseteo anual). En caso de concurrencia o criterios de asignación, tendrán prioridad los vecinos o viviendas con menor número de usos previos o nuevos usuarios, así como preferencia los <strong>actos comunitarios</strong> organizados por la comunidad (gestionados por la administración).</p>
+            <p><strong>12.3. Límite anual y prioridad de uso:</strong> Cada vivienda o solicitante podrá disfrutar de un máximo de <strong>2 reservas al año</strong> (computándose por año natural con reseteo anual). En caso de concurrencia o criterios de asignación, tendrán prioridad los vecinos o viviendas con menor número de usos previos o nuevos usuarios, así como preferencia los <strong>actos comunitarios</strong> organizados por la comunidad.</p>
 
             <p><strong>12.4. Importes, cuota de uso y fianza:</strong> El uso exclusivo de la sala conlleva una cuota de reserva de <strong>50,00 €</strong> y una fianza reembolsable de <strong>100,00 €</strong> (importe total de <strong>150,00 €</strong>), sin perjuicio de las cuotas o costes de limpieza que correspondan según lo dispuesto en el régimen interior.</p>
 
-            <p><strong>12.5. Plazo de pago (48 horas):</strong> Una vez registrada la solicitud de reserva, el vecino dispone de un plazo máximo de <strong>48 horas</strong> para efectuar el pago correspondiente a la cuenta indicada por la administración. Si transcurridas las 48 horas no consta el abono, la solicitud quedará <strong>anulada automáticamente</strong> y el turno volverá a quedar disponible.</p>
+            <p><strong>12.5. Plazo de pago (48 horas):</strong> Una vez registrada la solicitud de reserva, el vecino dispone de un plazo máximo de <strong>48 horas</strong> para efectuar el pago correspondiente a la cuenta indicada. Si transcurridas las 48 horas no consta el abono, la solicitud quedará <strong>anulada automáticamente</strong> y el turno volverá a quedar disponible.</p>
 
             <p><strong>12.6. Anulación de reservas y plazo de 7 días:</strong> Toda anulación deberá comunicarse con una antelación mínima de <strong>7 días</strong> respecto a la fecha reservada. Si la anulación se realiza dentro de plazo (al menos 7 días antes), se reintegrarán los importes abonados; si se anula fuera de plazo (con menos de 7 días de antelación), se devolverá la <strong>fianza (100,00 €)</strong> pero se perderá la <strong>cuota de alquiler (50,00 €)</strong>.</p>
 
-            <p><strong>12.7. Entrega de llaves, revisión por el conserje y devolución de fianza:</strong> La operativa no contempla entrega de llaves tradicional mediante inventario previo de enseres. Tras la finalización del turno, el <strong>conserje</strong> revisará el estado de la sala y comunicará a la <strong>administración</strong> el resultado de la inspección para que, si todo se encuentra en correcto estado y sin desperfectos ni incidencias, se proceda a la <strong>devolución de la fianza</strong>.</p>
-          </div>
-        </div>
-
-        <div class="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed">
-          <h3 class="text-base font-bold text-slate-900">
-            Condiciones Operativas y Funcionamiento del Sistema (Escalonia 15)
-          </h3>
-
-          <div class="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-2.5">
-            <p><strong>Comunidad y viviendas:</strong> Sistema configurado para la comunidad <strong>Escalonia 15</strong>, compuesta por <strong>18 portales</strong> y aproximadamente <strong>200 viviendas</strong> (con tipologías Bajo, Primero y Segundo, letras A, B, C y D), asignando <strong>un correo electrónico por vivienda</strong>.</p>
-
-            <p><strong>Alta de vecinos y acceso:</strong> La administración realiza el alta masiva pegando los correos electrónicos de las viviendas separados por punto y coma (<code>;</code>). Cada propietario activa su cuenta con su correo autorizado, establece su contraseña (con opción de recuperación «¿Olvidaste tu contraseña?») y entra con su portal y vivienda ya adjudicados de forma fija.</p>
-
-            <p><strong>Calendario visual partido en diagonal:</strong> Cada día del calendario se divide en diagonal en dos mitades —<strong>Mañana</strong> y <strong>Tarde</strong>— con código de color por turno: <strong>verde</strong> para <strong>Libre</strong>, <strong>amarillo</strong> para <strong>Pendiente de pago</strong> y <strong>rojo</strong> para <strong>Reservado</strong>.</p>
+            <p><strong>12.7. Entrega de llaves, revisión por el conserje y devolución de fianza:</strong> La operativa no contempla entrega de llaves tradicional mediante inventario previo de enseres. Tras la finalización del turno, el <strong>conserje</strong> revisará el estado de la sala y comunicará el resultado de la inspección para que, si todo se encuentra en correcto estado y sin desperfectos ni incidencias, se proceda a la <strong>devolución de la fianza</strong>.</p>
           </div>
         </div>
       </div>
@@ -747,7 +723,7 @@
 
   <script>
     (function () {
-      const STORAGE_KEY = 'escalonia15_sala_comun_v7';
+      const STORAGE_KEY = 'escalonia15_sala_comun_v8';
       const CHANNEL_NAME = 'escalonia15_realtime_sync';
       const PORTALS = Array.from({ length: 18 }, (_, i) => `Portal ${i + 1}`);
       const UNITS = [
@@ -972,19 +948,17 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
         const limitNotice = document.getElementById('annualLimitNotice');
         if (usedCount >= 2) {
-          limitNotice.textContent = `Llevas ${usedCount} reservas anuales en el año ${targetYear} (límite habitual: 2). Puedes enviar la solicitud para que la administración la revise.`;
+          limitNotice.textContent = `Llevas ${usedCount} reservas en el año ${targetYear} (límite habitual: 2). Puedes enviar la solicitud igualmente para que la administración decida.`;
           limitNotice.classList.remove('hidden');
         } else {
-          limitNotice.textContent = `Llevas ${usedCount} reserva(s) anual(es) en el año ${targetYear}.`;
+          limitNotice.textContent = `Llevas ${usedCount} reserva(s) en el año ${targetYear}.`;
           limitNotice.classList.remove('hidden');
         }
-
-        document.getElementById('myFixedPortal').textContent = user.portal;
-        document.getElementById('myFixedUnit').textContent = user.unit;
       }
 
       function updateShiftQuickSelectorUI() {
         const selectorBox = document.getElementById('shiftQuickSelector');
+        const badge = document.getElementById('selectedShiftBadge');
         const mananaBtn = document.getElementById('pickShiftMananaBtn');
         const tardeBtn = document.getElementById('pickShiftTardeBtn');
 
@@ -995,11 +969,13 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
         selectorBox.classList.remove('hidden');
         if (selectedSlot.shift === 'manana') {
+          badge.textContent = 'Mañana';
           mananaBtn.className = 'py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-emerald-700 text-white shadow-sm';
-          tardeBtn.className = 'py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-transparent text-slate-700 hover:bg-white';
+          tardeBtn.className = 'py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-slate-100 text-slate-700 hover:bg-slate-200';
         } else {
+          badge.textContent = 'Tarde';
           tardeBtn.className = 'py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-emerald-700 text-white shadow-sm';
-          mananaBtn.className = 'py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-transparent text-slate-700 hover:bg-white';
+          mananaBtn.className = 'py-1.5 px-2 rounded-lg text-xs font-bold transition text-center bg-slate-100 text-slate-700 hover:bg-slate-200';
         }
       }
 
@@ -1091,7 +1067,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
         const rejectedMine = getUserRejectedSlotReservation(dateISO, shift, user.email);
         if (rejectedMine) {
-          return `<span class="slot-label inline-block px-1 py-0.5 rounded bg-red-600 text-white text-[9px] font-extrabold leading-none">No autorizado</span>`;
+          return `<span class="slot-label inline-block px-1.5 py-0.5 rounded bg-red-600 text-white text-[9px] font-extrabold leading-none">No autorizado</span>`;
         }
 
         return `<span class="slot-label">${prefix}: Libre</span>`;
@@ -1163,7 +1139,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const shiftName = shift === 'manana' ? 'Mañana' : 'Tarde';
         const schedule = getShiftScheduleText(dateISO, shift);
         document.getElementById('selectedSlotSummary').innerHTML =
-          `<strong class="text-slate-900">${formatDateSpanish(dateISO)}</strong><br/>Turno de <strong>${shiftName}</strong> (${schedule})`;
+          `<strong class="text-slate-900">${formatDateSpanish(dateISO)}</strong><br/>Turno seleccionado: <strong>${shiftName}</strong> (${schedule})`;
         renderCalendar();
       }
 
@@ -1196,8 +1172,6 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const user = getCurrentUser();
         const pendingEl = document.getElementById('pendingReservationsList');
         const confirmedEl = document.getElementById('confirmedReservationsList');
-        const rejectedBox = document.getElementById('rejectedReservationsBox');
-        const rejectedEl = document.getElementById('rejectedReservationsList');
         const ownerCancelledBox = document.getElementById('ownerCancelledReservationsBox');
         const ownerCancelledEl = document.getElementById('ownerCancelledReservationsList');
 
@@ -1206,7 +1180,6 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         );
         const pending = mine.filter(r => r.status === 'pendiente');
         const confirmed = mine.filter(r => r.status === 'reservado');
-        const rejected = mine.filter(r => r.status === 'no_autorizada');
         const cancelledByOwner = mine.filter(r => r.status === 'cancelada' && r.cancelledByOwner === true);
 
         if (!pending.length) {
@@ -1214,10 +1187,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         } else {
           pendingEl.innerHTML = pending.map(r => `
             <div class="p-3 rounded-xl bg-white border border-yellow-200 flex items-center justify-between gap-2 text-xs">
-              <div>
-                <p class="font-bold text-slate-900">${formatDateSpanish(r.date)}</p>
-                <p class="text-slate-600">${r.shift === 'manana' ? 'Mañana' : 'Tarde'} (${getShiftScheduleText(r.date, r.shift)})</p>
-              </div>
+              <p class="font-bold text-slate-900">${formatDateSpanish(r.date)}</p>
               <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold">
                 Anular
               </button>
@@ -1230,30 +1200,10 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         } else {
           confirmedEl.innerHTML = confirmed.map(r => `
             <div class="p-3 rounded-xl bg-white border border-red-200 flex items-center justify-between gap-2 text-xs">
-              <div>
-                <p class="font-bold text-slate-900">${formatDateSpanish(r.date)}</p>
-                <p class="text-slate-600">${r.shift === 'manana' ? 'Mañana' : 'Tarde'} (${getShiftScheduleText(r.date, r.shift)})</p>
-              </div>
+              <p class="font-bold text-slate-900">${formatDateSpanish(r.date)}</p>
               <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold">
                 Anular
               </button>
-            </div>
-          `).join('');
-        }
-
-        if (!rejected.length) {
-          rejectedBox.classList.add('hidden');
-        } else {
-          rejectedBox.classList.remove('hidden');
-          rejectedEl.innerHTML = rejected.map(r => `
-            <div class="p-3 rounded-xl bg-white border border-red-300 flex items-center justify-between gap-2 text-xs">
-              <div>
-                <p class="font-bold text-slate-900">${formatDateSpanish(r.date)}</p>
-                <p class="text-slate-600">${r.shift === 'manana' ? 'Mañana' : 'Tarde'}</p>
-              </div>
-              <span class="px-2.5 py-1 rounded-lg bg-red-600 text-white text-xs font-bold">
-                No autorizado
-              </span>
             </div>
           `).join('');
         }
@@ -1264,10 +1214,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           ownerCancelledBox.classList.remove('hidden');
           ownerCancelledEl.innerHTML = cancelledByOwner.map(r => `
             <div class="p-3 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-2 text-xs">
-              <div>
-                <p class="font-bold text-slate-900">${formatDateSpanish(r.date)}</p>
-                <p class="text-slate-600">${r.shift === 'manana' ? 'Mañana' : 'Tarde'}</p>
-              </div>
+              <p class="font-bold text-slate-900">${formatDateSpanish(r.date)}</p>
               <span class="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-800 text-xs font-bold">
                 Anulada por propietario
               </span>
