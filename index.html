@@ -385,14 +385,14 @@
 
             <p><strong>Comunicación de solicitud y pago:</strong> Al solicitar una reserva, el sistema prepara el correo de <strong>Solicitud de Pago (48h)</strong> remitido desde el correo de la administración hacia el correo del propietario, editable antes de enviar (asunto, mensaje, fecha, turno, importe de 50 € de alquiler + 100 € de fianza y plazo de 48 horas), y una vez recibido el pago se emite la confirmación definitiva.</p>
 
-            <p><strong>Modo Administrador:</strong> Desde el botón superior <strong>«Administrador»</strong> (con clave de acceso) se gestionan el alta masiva por <code>;</code>, la programación de actos comunitarios, la plantilla editable de correo e IBAN, la confirmación de pagos, el estado de devolución de fianzas tras el aviso del conserje y la configuración de conexión con Firebase.</p>
+            <p><strong>Modo Administrador:</strong> Desde el botón superior <strong>«Administrador»</strong> (con clave de acceso) se accede a una interfaz de administración con reservas por confirmar, programación de actos comunitarios, alta de propietarios por <code>;</code>, plantilla de correo e IBAN y alta de otro administrador.</p>
           </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- MODAL 1: SOLICITUD DE PAGO (48H) — EDITABLE ANTES DE ENVIAR -->
+  <!-- MODAL 1: SOLICITUD DE PAGO (48H) — EDITABLE ANTES DE ENVIAR (DE ADMINISTRACIÓN A PROPIETARIO) -->
   <div id="paymentModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
@@ -482,43 +482,72 @@
     </div>
   </div>
 
-  <!-- MODAL 3: ADMINISTRADOR -->
-  <div id="adminModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
-      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between sticky top-0 z-10">
+  <!-- MODAL 3A: PANTALLA DE ACCESO CON CLAVE DE ADMINISTRADOR -->
+  <div id="adminLoginModal" class="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-[1px] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
         <div>
-          <h3 class="text-sm sm:text-base font-bold">Panel de Administrador — Escalonia 15</h3>
-          <p class="text-[11px] text-slate-300">Clave de acceso: <code class="font-bold">1234</code> · Alta masiva (;), actos comunitarios, plantilla IBAN/correo y fianzas</p>
+          <h3 class="text-sm sm:text-base font-bold">Acceso Administrador — Escalonia 15</h3>
+          <p class="text-[11px] text-slate-300">Introduce la clave de acceso para abrir el panel de gestión</p>
         </div>
-        <button id="closeAdminModal" type="button" class="text-slate-300 hover:text-white text-lg font-bold leading-none px-1">
+        <button id="closeAdminLoginModal" type="button" class="text-slate-300 hover:text-white text-lg font-bold leading-none px-1">
           &times;
         </button>
       </div>
 
-      <div class="p-5 space-y-6 text-xs sm:text-sm">
-        <!-- Admin Access Gate -->
-        <div id="adminGateBox" class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <p class="font-bold text-slate-900">Acceso Administrador</p>
-            <p id="adminLockStatusText" class="text-xs text-slate-600">
-              Introduce la clave de administrador (por defecto <code class="font-bold">1234</code>).
-            </p>
-          </div>
-          <div class="flex items-center gap-2">
-            <input id="adminPinInput" type="password" placeholder="Clave (1234)" class="rounded-xl border border-slate-300 px-3 py-1.5 text-xs w-36" />
-            <button id="unlockAdminBtn" type="button" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold">
-              Desbloquear
-            </button>
-            <button id="lockAdminBtn" type="button" class="px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold">
-              Bloquear
-            </button>
-          </div>
+      <div class="p-5 space-y-4 text-xs sm:text-sm">
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700">
+          Clave inicial de prueba: <code class="font-bold text-slate-900">1234</code>
         </div>
 
-        <div id="adminPanelContent" class="space-y-6">
+        <div>
+          <label for="adminPinInput" class="block text-xs font-semibold text-slate-700 mb-1">Clave de administrador</label>
+          <input id="adminPinInput" type="password" placeholder="1234" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+        </div>
+
+        <button id="unlockAdminBtn" type="button" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm transition">
+          Entrar al panel de Administrador
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3B: INTERFAZ DEDICADA DE ADMINISTRADOR (TRAS VALIDAR CLAVE) -->
+  <div id="adminDashboardModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-[1px] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200">
+      <div class="bg-slate-900 text-white px-5 py-4 flex flex-wrap items-center justify-between gap-2 sticky top-0 z-10">
+        <div>
+          <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200 mb-1">
+            Panel de Gestión de Administración
+          </span>
+          <h3 class="text-base sm:text-lg font-bold leading-tight">Administración — Sala Común Escalonia 15</h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="lockAdminBtn" type="button" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold">
+            Cerrar sesión admin
+          </button>
+          <button id="closeAdminDashboardModal" type="button" class="text-slate-300 hover:text-white text-xl font-bold leading-none px-1.5">
+            &times;
+          </button>
+        </div>
+      </div>
+
+      <div class="p-5 sm:p-6 space-y-6 text-xs sm:text-sm">
+
+        <!-- SECCIÓN 1: RESERVAS POR CONFIRMAR + FIANZAS + ACTO COMUNITARIO -->
+        <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+            <div>
+              <h4 class="text-sm sm:text-base font-bold text-slate-900">1. Reservas por Confirmar y Control de Fianzas</h4>
+              <p class="text-xs text-slate-500">Confirma pagos en el plazo de 48 h, marca la revisión del conserje y registra la devolución de fianza (100 €).</p>
+            </div>
+          </div>
+
+          <div id="adminReservationsList" class="space-y-2.5"></div>
+
           <!-- Acto comunitario exclusivo de administración -->
-          <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-3">
-            <h4 class="font-bold text-slate-900">0. Reservar Acto Comunitario (exclusivo Administración)</h4>
+          <div class="pt-4 border-t border-slate-200 space-y-3">
+            <h5 class="text-xs sm:text-sm font-bold text-emerald-950">Programar Acto Comunitario (exclusivo Administración)</h5>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha</label>
@@ -542,83 +571,95 @@
               </button>
             </div>
           </div>
+        </div>
 
-          <!-- 1. Alta masiva (;) -->
-          <div class="p-4 rounded-xl border border-slate-200 space-y-2.5">
-            <h4 class="font-bold text-slate-900">1. Alta masiva de correos de propietarios (separados por ";")</h4>
-            <p class="text-xs text-slate-500">
-              Pega los correos de las viviendas separados por punto y coma (;). Se asigna automáticamente portal y vivienda si no se indican.
-            </p>
-            <textarea id="bulkEmailsInput" rows="3" placeholder="vecino1@escalonia15.es; vecino2@escalonia15.es; vecino3@escalonia15.es" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs"></textarea>
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <span id="authorizedCountLabel" class="text-xs font-semibold text-emerald-800"></span>
-              <button id="saveBulkEmailsBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
-                Autorizar correos
-              </button>
-            </div>
-          </div>
-
-          <!-- 2. Plantilla IBAN y Correo -->
-          <div class="p-4 rounded-xl border border-slate-200 space-y-3">
-            <h4 class="font-bold text-slate-900">2. Plantilla de Correo e IBAN de Administración</h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Correo de Administración</label>
-                <input id="cfgAdminEmail" type="email" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">IBAN de cobro / fianza</label>
-                <input id="cfgAdminIban" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
-              </div>
-            </div>
+        <!-- SECCIÓN 2: ALTA DE PROPIETARIOS -->
+        <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Concepto por defecto</label>
-              <input id="cfgPaymentConcept" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+              <h4 class="text-sm sm:text-base font-bold text-slate-900">2. Alta de Propietarios (Alta Masiva con ";")</h4>
+              <p class="text-xs text-slate-500">Pega los correos electrónicos de los propietarios separados por punto y coma (<code>;</code>) para autorizarlos.</p>
             </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Texto base del correo de Solicitud de Pago (48h)</label>
-              <textarea id="cfgMailTemplate" rows="6" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs"></textarea>
-            </div>
-            <div class="flex justify-end">
-              <button id="saveTemplateBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
-                Guardar plantilla
-              </button>
-            </div>
+            <span id="authorizedCountLabel" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold"></span>
           </div>
 
-          <!-- 3. Gestión de reservas, pagos y devolución de fianza tras revisión del conserje -->
-          <div class="p-4 rounded-xl border border-slate-200 space-y-3">
-            <h4 class="font-bold text-slate-900">3. Control de Reservas, Pagos (48h) y Devolución de Fianza (Conserje)</h4>
-            <div id="adminReservationsList" class="space-y-2"></div>
-          </div>
+          <textarea id="bulkEmailsInput" rows="3" placeholder="vecino1@escalonia15.es; vecino2@escalonia15.es; vecino3@escalonia15.es" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs"></textarea>
 
-          <!-- 4. Dar de alta administrador & Firebase config -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-4 rounded-xl border border-slate-200 space-y-2.5">
-              <h4 class="font-bold text-slate-900">4. Dar de alta administrador</h4>
-              <input id="newAdminEmailInput" type="email" placeholder="nuevo.admin@escalonia15.es" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
-              <input id="newAdminCodeInput" type="text" placeholder="Nueva clave de acceso admin" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
-              <button id="addAdminBtn" type="button" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold">
-                Guardar administrador
-              </button>
-            </div>
-
-            <div class="p-4 rounded-xl border border-slate-200 space-y-2.5">
-              <h4 class="font-bold text-slate-900">5. Configuración Firebase (Producción)</h4>
-              <textarea id="firebaseConfigJsonInput" rows="3" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}' class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono"></textarea>
-              <button id="saveFirebaseCfgBtn" type="button" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold">
-                Guardar configuración Firebase
-              </button>
-            </div>
+          <div class="flex justify-end">
+            <button id="saveBulkEmailsBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
+              Autorizar propietarios
+            </button>
           </div>
         </div>
+
+        <!-- SECCIÓN 3: PLANTILLA DE CORREO E IBAN -->
+        <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 space-y-3">
+          <div>
+            <h4 class="text-sm sm:text-base font-bold text-slate-900">3. Plantilla de Correo e IBAN</h4>
+            <p class="text-xs text-slate-500">Configura el correo remitente de administración, el IBAN, el concepto y el texto base enviado al propietario.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Correo de Administración</label>
+              <input id="cfgAdminEmail" type="email" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">IBAN de cobro / fianza</label>
+              <input id="cfgAdminIban" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Concepto por defecto</label>
+            <input id="cfgPaymentConcept" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Texto base del correo de Solicitud de Pago (48h)</label>
+            <textarea id="cfgMailTemplate" rows="6" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs"></textarea>
+          </div>
+
+          <div class="flex justify-end">
+            <button id="saveTemplateBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
+              Guardar plantilla e IBAN
+            </button>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 4: DAR DE ALTA OTRO ADMINISTRADOR -->
+        <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 space-y-3">
+          <div>
+            <h4 class="text-sm sm:text-base font-bold text-slate-900">4. Dar de Alta Otro Administrador</h4>
+            <p class="text-xs text-slate-500">Añade un nuevo administrador y/o actualiza la clave de acceso del panel de administración.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Correo del nuevo administrador</label>
+              <input id="newAdminEmailInput" type="email" placeholder="otro.admin@escalonia15.es" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Clave de acceso de administración</label>
+              <input id="newAdminCodeInput" type="text" placeholder="1234" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div id="adminsListSummary" class="text-xs text-slate-600"></div>
+            <button id="addAdminBtn" type="button" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold">
+              Guardar administrador
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 
   <script>
     (function () {
-      const STORAGE_KEY = 'escalonia15_sala_comun_v2';
+      const STORAGE_KEY = 'escalonia15_sala_comun_v3';
       const PORTALS = Array.from({ length: 18 }, (_, i) => `Portal ${i + 1}`);
       const UNITS = [
         'Bajo A', 'Bajo B', 'Bajo C', 'Bajo D',
@@ -666,7 +707,7 @@
             year: today.getFullYear(),
             month: today.getMonth()
           },
-          adminUnlocked: false,
+          adminSessionActive: false,
           adminConfig: {
             adminEmail: 'administracion@escalonia15.es',
             adminCode: '1234',
@@ -686,7 +727,6 @@ Hemos registrado tu solicitud de reserva en exclusiva de la Sala Común de Escal
 De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 horas desde la solicitud para realizar el pago. Una vez recibido, te enviaremos la confirmación definitiva.`
           },
           admins: ['administracion@escalonia15.es'],
-          firebaseConfig: '',
           users: [
             {
               email: 'prueba@escalonia15.es',
@@ -1071,7 +1111,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             saveState();
             renderCalendar();
             renderMyReservations();
-            renderAdminPanel();
+            renderAdminDashboard();
 
             if (daysBefore < 7) {
               showToast('Reserva anulada fuera del plazo de 7 días: se devuelve la fianza (100 €) y se retiene la cuota de 50 €.');
@@ -1082,27 +1122,15 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         });
       }
 
-      function syncAdminLockUI() {
-        const panel = document.getElementById('adminPanelContent');
-        const statusEl = document.getElementById('adminLockStatusText');
-        if (state.adminUnlocked) {
-          panel.classList.remove('opacity-40', 'pointer-events-none', 'select-none');
-          statusEl.innerHTML = `<span class="text-emerald-700 font-bold">Desbloqueado</span> — Tienes acceso completo a la gestión de administrador.`;
-        } else {
-          panel.classList.add('opacity-40', 'pointer-events-none', 'select-none');
-          statusEl.innerHTML = `<span class="text-amber-700 font-bold">Bloqueado</span> — Introduce la clave (<code class="font-bold">${state.adminConfig.adminCode}</code>) y pulsa Desbloquear.`;
-        }
-      }
-
-      function renderAdminPanel() {
-        syncAdminLockUI();
+      function renderAdminDashboard() {
         document.getElementById('authorizedCountLabel').textContent =
           `Propietarios autorizados: ${state.users.length}`;
         document.getElementById('cfgAdminEmail').value = state.adminConfig.adminEmail;
         document.getElementById('cfgAdminIban').value = state.adminConfig.iban;
         document.getElementById('cfgPaymentConcept').value = state.adminConfig.concept;
         document.getElementById('cfgMailTemplate').value = state.adminConfig.mailTemplate;
-        document.getElementById('firebaseConfigJsonInput').value = state.firebaseConfig || '';
+        document.getElementById('adminsListSummary').innerHTML =
+          `Administradores registrados: <strong>${state.admins.join(', ')}</strong>`;
 
         if (!document.getElementById('commDateInput').value) {
           document.getElementById('commDateInput').value = formatDateISO(new Date());
@@ -1111,23 +1139,23 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const listEl = document.getElementById('adminReservationsList');
         const activeList = state.reservations.filter(r => r.status !== 'cancelada');
         if (!activeList.length) {
-          listEl.innerHTML = `<p class="text-xs text-slate-500">No hay reservas activas para gestionar.</p>`;
+          listEl.innerHTML = `<p class="text-xs text-slate-500">No hay reservas por confirmar ni activas.</p>`;
           return;
         }
 
         listEl.innerHTML = activeList.map(r => `
-          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div class="p-3 rounded-xl bg-white border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
             <div>
               <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} · ${r.shift === 'manana' ? 'Mañana' : 'Tarde'}</p>
               <p class="text-slate-600">${r.ownerEmail} (${r.portal} · ${r.unit}) · ${r.eventType} — Estado: <strong>${r.status.toUpperCase()}</strong></p>
             </div>
             <div class="flex flex-wrap items-center gap-1.5">
               ${r.status === 'pendiente' ? `
-                <button data-confirm-pay="${r.id}" type="button" class="px-2.5 py-1 rounded-lg bg-emerald-700 text-white font-bold">
+                <button data-confirm-pay="${r.id}" type="button" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold">
                   Confirmar pago
                 </button>
               ` : ''}
-              <button data-conserje-ok="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 font-bold">
+              <button data-conserje-ok="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 font-bold">
                 ${r.conserjeChecked ? 'Conserje OK ✓' : 'Marcar revisión conserje'}
               </button>
               <button data-refund-dep="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-900 hover:bg-emerald-100 font-bold">
@@ -1145,7 +1173,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             saveState();
             renderCalendar();
             renderMyReservations();
-            renderAdminPanel();
+            renderAdminDashboard();
             showToast(`Pago confirmado para ${item.ownerEmail}. Reserva marcada en ROJO.`);
           });
         });
@@ -1157,7 +1185,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             item.conserjeChecked = !item.conserjeChecked;
             saveState();
             renderMyReservations();
-            renderAdminPanel();
+            renderAdminDashboard();
             showToast('Estado de revisión del conserje actualizado.');
           });
         });
@@ -1170,10 +1198,36 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             item.depositRefunded = true;
             saveState();
             renderMyReservations();
-            renderAdminPanel();
+            renderAdminDashboard();
             showToast(`Fianza de 100 € registrada como devuelta para ${item.ownerEmail}.`);
           });
         });
+      }
+
+      function openAdminLoginModal() {
+        document.getElementById('adminPinInput').value = '';
+        const modal = document.getElementById('adminLoginModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closeAdminLoginModal() {
+        const modal = document.getElementById('adminLoginModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      function openAdminDashboardModal() {
+        renderAdminDashboard();
+        const modal = document.getElementById('adminDashboardModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closeAdminDashboardModal() {
+        const modal = document.getElementById('adminDashboardModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
       }
 
       // Tab switching
@@ -1242,7 +1296,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         saveState();
         renderCalendar();
         renderMyReservations();
-        renderAdminPanel();
+        renderAdminDashboard();
         openPaymentModalForReservation(newReservation);
         showToast('Solicitud registrada en AMARILLO (Pendiente de pago 48h). Revisa y envía el correo.');
       });
@@ -1349,43 +1403,39 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         showToast(`Cuenta activada para ${existing.email} (${existing.portal} · ${existing.unit}).`);
       });
 
-      // Admin Modal actions
-      const adminModal = document.getElementById('adminModal');
+      // Admin Login & Dedicated Dashboard actions
       document.getElementById('btnOpenAdmin').addEventListener('click', () => {
-        document.getElementById('adminPinInput').value = '';
-        renderAdminPanel();
-        adminModal.classList.remove('hidden');
-        adminModal.classList.add('flex');
+        if (state.adminSessionActive) {
+          openAdminDashboardModal();
+        } else {
+          openAdminLoginModal();
+        }
       });
-      document.getElementById('closeAdminModal').addEventListener('click', () => {
-        adminModal.classList.add('hidden');
-        adminModal.classList.remove('flex');
-      });
+
+      document.getElementById('closeAdminLoginModal').addEventListener('click', closeAdminLoginModal);
+      document.getElementById('closeAdminDashboardModal').addEventListener('click', closeAdminDashboardModal);
 
       document.getElementById('unlockAdminBtn').addEventListener('click', () => {
         const code = document.getElementById('adminPinInput').value.trim();
         if (code === state.adminConfig.adminCode) {
-          state.adminUnlocked = true;
+          state.adminSessionActive = true;
           saveState();
-          syncAdminLockUI();
-          showToast('Modo Administrador desbloqueado.');
+          closeAdminLoginModal();
+          openAdminDashboardModal();
+          showToast('Bienvenido al panel de Administrador.');
         } else {
           showToast('Clave de administrador incorrecta.', true);
         }
       });
 
       document.getElementById('lockAdminBtn').addEventListener('click', () => {
-        state.adminUnlocked = false;
+        state.adminSessionActive = false;
         saveState();
-        syncAdminLockUI();
-        showToast('Modo Administrador bloqueado.');
+        closeAdminDashboardModal();
+        showToast('Sesión de administrador cerrada.');
       });
 
       document.getElementById('createCommEventBtn').addEventListener('click', () => {
-        if (!state.adminUnlocked) {
-          showToast('Desbloquea primero el Modo Administrador.', true);
-          return;
-        }
         const dateVal = document.getElementById('commDateInput').value;
         const shiftVal = document.getElementById('commShiftInput').value;
         const titleVal = document.getElementById('commTitleInput').value.trim() || 'Acto comunitario';
@@ -1415,7 +1465,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
         saveState();
         renderCalendar();
-        renderAdminPanel();
+        renderAdminDashboard();
         document.getElementById('commTitleInput').value = '';
         showToast(`Acto comunitario registrado en ROJO para el ${formatDateSpanish(dateVal)}.`);
       });
@@ -1449,9 +1499,9 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         });
 
         saveState();
-        renderAdminPanel();
+        renderAdminDashboard();
         document.getElementById('bulkEmailsInput').value = '';
-        showToast(`Alta masiva completada: ${added} correo(s) nuevo(s) autorizado(s).`);
+        showToast(`Alta masiva completada: ${added} propietario(s) nuevo(s) autorizado(s).`);
       });
 
       document.getElementById('saveTemplateBtn').addEventListener('click', () => {
@@ -1475,21 +1525,14 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         saveState();
         document.getElementById('newAdminEmailInput').value = '';
         document.getElementById('newAdminCodeInput').value = '';
-        syncAdminLockUI();
+        renderAdminDashboard();
         showToast('Administrador y clave guardados.');
-      });
-
-      document.getElementById('saveFirebaseCfgBtn').addEventListener('click', () => {
-        const rawJson = document.getElementById('firebaseConfigJsonInput').value.trim();
-        state.firebaseConfig = rawJson;
-        saveState();
-        showToast('Configuración de Firebase guardada.');
       });
 
       // Initial render
       renderCalendar();
       renderMyReservations();
-      renderAdminPanel();
+      renderAdminDashboard();
     })();
   </script>
 </body>
