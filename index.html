@@ -95,11 +95,6 @@
     .st-reservado:hover {
       background-color: #fecaca;
     }
-    .st-bloqueado {
-      background-color: #f1f5f9;
-      color: #64748b;
-      cursor: not-allowed;
-    }
     .day-num-badge {
       position: relative;
       z-index: 4;
@@ -149,11 +144,11 @@
           Cuenta / Cambiar usuario
         </button>
         <button
-          id="btnOpenSettings"
+          id="btnOpenAdmin"
           type="button"
           class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition flex items-center gap-1.5"
         >
-          <span>Ajustes</span>
+          <span>Administrador</span>
         </button>
       </div>
     </div>
@@ -196,7 +191,6 @@
 
     <!-- TAB 1: CALENDARIO Y RESERVAS -->
     <section id="tab-calendario" class="tab-panel space-y-5">
-      <!-- Legend + Month Selector -->
       <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
           <span class="font-bold text-slate-700">Turno partido en diagonal (Mañana / Tarde):</span>
@@ -279,7 +273,6 @@
               <select id="eventTypeInput" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-white text-slate-800 font-medium">
                 <option value="Reunión / Celebración familiar">Reunión / Celebración familiar</option>
                 <option value="Acto con fecha fija (Bautizo / Comunión / Evento señalado)">Acto con fecha fija (Bautizo / Comunión / Evento señalado)</option>
-                <option value="Acto comunitario">Acto comunitario</option>
               </select>
             </div>
 
@@ -322,7 +315,6 @@
             </p>
           </div>
 
-          <!-- Fixed assigned Portal & Vivienda for logged-in owner -->
           <div class="flex flex-wrap items-center gap-2 text-xs">
             <div class="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 font-semibold">
               Portal adjudicado: <span id="myFixedPortal" class="font-extrabold">-</span>
@@ -352,7 +344,6 @@
           </p>
         </div>
 
-        <!-- Texto íntegro del Reglamento de Régimen Interior (Punto 12) -->
         <div class="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed">
           <h3 class="text-base font-bold text-slate-900">
             Reglamento de Régimen Interior — Punto 12: Uso y Reserva de la Sala Comunitaria / Gastrobar
@@ -368,7 +359,7 @@
               <li><strong>Turno de tarde (viernes, sábados y vísperas de festivos):</strong> de <strong>17:30 a 24:00 horas</strong>.</li>
             </ul>
 
-            <p><strong>12.3. Límite anual y prioridad de uso:</strong> Cada vivienda o solicitante podrá disfrutar de un máximo de <strong>2 reservas al año</strong> (computándose por año natural con reseteo anual). En caso de concurrencia o criterios de asignación, tendrán prioridad los vecinos o viviendas con menor número de usos previos o nuevos usuarios, así como preferencia los <strong>actos comunitarios</strong> organizados por la comunidad.</p>
+            <p><strong>12.3. Límite anual y prioridad de uso:</strong> Cada vivienda o solicitante podrá disfrutar de un máximo de <strong>2 reservas al año</strong> (computándose por año natural con reseteo anual). En caso de concurrencia o criterios de asignación, tendrán prioridad los vecinos o viviendas con menor número de usos previos o nuevos usuarios, así como preferencia los <strong>actos comunitarios</strong> organizados por la comunidad (gestionados por la administración).</p>
 
             <p><strong>12.4. Importes, cuota de uso y fianza:</strong> El uso exclusivo de la sala conlleva una cuota de reserva de <strong>50,00 €</strong> y una fianza reembolsable de <strong>100,00 €</strong> (importe total de <strong>150,00 €</strong>), sin perjuicio de las cuotas o costes de limpieza que correspondan según lo dispuesto en el régimen interior.</p>
 
@@ -380,7 +371,6 @@
           </div>
         </div>
 
-        <!-- Condiciones y operativa acordadas en la conversación -->
         <div class="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed">
           <h3 class="text-base font-bold text-slate-900">
             Condiciones Operativas y Funcionamiento del Sistema (Escalonia 15)
@@ -395,7 +385,7 @@
 
             <p><strong>Comunicación de solicitud y pago:</strong> Al solicitar una reserva, el sistema prepara el correo de <strong>Solicitud de Pago (48h)</strong> remitido desde el correo de la administración hacia el correo del propietario, editable antes de enviar (asunto, mensaje, fecha, turno, importe de 50 € de alquiler + 100 € de fianza y plazo de 48 horas), y una vez recibido el pago se emite la confirmación definitiva.</p>
 
-            <p><strong>Modo Administrador y Ajustes:</strong> Desde el botón superior <strong>«Ajustes»</strong> (con acceso restringido y alta de administradores) se gestionan el alta masiva por <code>;</code>, la plantilla editable de correo e IBAN, la confirmación de pagos, el estado de devolución de fianzas tras el aviso del conserje y la configuración de conexión con Firebase.</p>
+            <p><strong>Modo Administrador:</strong> Desde el botón superior <strong>«Administrador»</strong> (con clave de acceso) se gestionan el alta masiva por <code>;</code>, la programación de actos comunitarios, la plantilla editable de correo e IBAN, la confirmación de pagos, el estado de devolución de fianzas tras el aviso del conserje y la configuración de conexión con Firebase.</p>
           </div>
         </div>
       </div>
@@ -492,15 +482,15 @@
     </div>
   </div>
 
-  <!-- MODAL 3: AJUSTES / ADMINISTRACIÓN -->
-  <div id="settingsModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
+  <!-- MODAL 3: ADMINISTRADOR -->
+  <div id="adminModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
       <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between sticky top-0 z-10">
         <div>
-          <h3 class="text-sm sm:text-base font-bold">Ajustes y Administración — Escalonia 15</h3>
-          <p class="text-[11px] text-slate-300">Alta masiva por (;), plantilla IBAN/correo, gestión de reservas/fianzas y Firebase</p>
+          <h3 class="text-sm sm:text-base font-bold">Panel de Administrador — Escalonia 15</h3>
+          <p class="text-[11px] text-slate-300">Clave de acceso: <code class="font-bold">1234</code> · Alta masiva (;), actos comunitarios, plantilla IBAN/correo y fianzas</p>
         </div>
-        <button id="closeSettingsModal" type="button" class="text-slate-300 hover:text-white text-lg font-bold leading-none px-1">
+        <button id="closeAdminModal" type="button" class="text-slate-300 hover:text-white text-lg font-bold leading-none px-1">
           &times;
         </button>
       </div>
@@ -510,19 +500,49 @@
         <div id="adminGateBox" class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <p class="font-bold text-slate-900">Acceso Administrador</p>
-            <p class="text-xs text-slate-600">
-              Clave de acceso inicial: <code class="font-bold">ESCALONIA15-ADMIN</code> (puedes cambiarla o dar de alta administradores).
+            <p id="adminLockStatusText" class="text-xs text-slate-600">
+              Introduce la clave de administrador (por defecto <code class="font-bold">1234</code>).
             </p>
           </div>
           <div class="flex items-center gap-2">
-            <input id="adminPinInput" type="password" placeholder="Clave admin" class="rounded-xl border border-slate-300 px-3 py-1.5 text-xs w-40" />
+            <input id="adminPinInput" type="password" placeholder="Clave (1234)" class="rounded-xl border border-slate-300 px-3 py-1.5 text-xs w-36" />
             <button id="unlockAdminBtn" type="button" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold">
               Desbloquear
+            </button>
+            <button id="lockAdminBtn" type="button" class="px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold">
+              Bloquear
             </button>
           </div>
         </div>
 
         <div id="adminPanelContent" class="space-y-6">
+          <!-- Acto comunitario exclusivo de administración -->
+          <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-3">
+            <h4 class="font-bold text-slate-900">0. Reservar Acto Comunitario (exclusivo Administración)</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha</label>
+                <input id="commDateInput" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-1.5 text-xs bg-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Turno</label>
+                <select id="commShiftInput" class="w-full rounded-xl border border-slate-300 px-3 py-1.5 text-xs bg-white">
+                  <option value="manana">Mañana (10:00–16:30)</option>
+                  <option value="tarde">Tarde (17:30–22:00 / 24:00)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Título del acto comunitario</label>
+                <input id="commTitleInput" type="text" placeholder="Junta / Evento comunitario" class="w-full rounded-xl border border-slate-300 px-3 py-1.5 text-xs bg-white" />
+              </div>
+            </div>
+            <div class="flex justify-end">
+              <button id="createCommEventBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
+                Registrar Acto Comunitario
+              </button>
+            </div>
+          </div>
+
           <!-- 1. Alta masiva (;) -->
           <div class="p-4 rounded-xl border border-slate-200 space-y-2.5">
             <h4 class="font-bold text-slate-900">1. Alta masiva de correos de propietarios (separados por ";")</h4>
@@ -598,7 +618,7 @@
 
   <script>
     (function () {
-      const STORAGE_KEY = 'escalonia15_sala_comun_v1';
+      const STORAGE_KEY = 'escalonia15_sala_comun_v2';
       const PORTALS = Array.from({ length: 18 }, (_, i) => `Portal ${i + 1}`);
       const UNITS = [
         'Bajo A', 'Bajo B', 'Bajo C', 'Bajo D',
@@ -627,7 +647,7 @@
       function getShiftScheduleText(isoStr, shift) {
         if (shift === 'manana') return '10:00 a 16:30 h';
         const [y, m, d] = isoStr.split('-').map(Number);
-        const dayOfWeek = new Date(y, m - 1, d).getDay(); // 0=Dom ... 4=Jue, 5=Vie, 6=Sab
+        const dayOfWeek = new Date(y, m - 1, d).getDay();
         if (dayOfWeek === 5 || dayOfWeek === 6) {
           return '17:30 a 24:00 h (Viernes/Sábado/Víspera)';
         }
@@ -646,10 +666,10 @@
             year: today.getFullYear(),
             month: today.getMonth()
           },
-          adminUnlocked: true,
+          adminUnlocked: false,
           adminConfig: {
             adminEmail: 'administracion@escalonia15.es',
-            adminCode: 'ESCALONIA15-ADMIN',
+            adminCode: '1234',
             iban: 'ES76 2100 0813 6101 2345 6789',
             concept: 'Reserva Sala Común Escalonia 15',
             mailTemplate:
@@ -689,7 +709,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
               id: 'res-init-1',
               date: formatDateISO(dPlus3),
               shift: 'tarde',
-              status: 'pendiente', // libre | pendiente | reservado
+              status: 'pendiente',
               ownerEmail: 'portal1.primeroa@escalonia15.es',
               portal: 'Portal 1',
               unit: 'Primero A',
@@ -720,14 +740,21 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           const raw = localStorage.getItem(STORAGE_KEY);
           if (!raw) return buildInitialState();
           const parsed = JSON.parse(raw);
-          return { ...buildInitialState(), ...parsed };
+          return {
+            ...buildInitialState(),
+            ...parsed,
+            adminConfig: {
+              ...buildInitialState().adminConfig,
+              ...(parsed.adminConfig || {})
+            }
+          };
         } catch (e) {
           return buildInitialState();
         }
       }
 
       let state = loadState();
-      let selectedSlot = null; // { date, shift }
+      let selectedSlot = null;
 
       function saveState() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -878,8 +905,8 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const grid = document.getElementById('calendarGrid');
         grid.innerHTML = '';
 
-        const firstDayJS = monthDate.getDay(); // 0=Sun..6=Sat
-        const offset = firstDayJS === 0 ? 6 : firstDayJS - 1; // Mon=0..Sun=6
+        const firstDayJS = monthDate.getDay();
+        const offset = firstDayJS === 0 ? 6 : firstDayJS - 1;
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
         for (let i = 0; i < offset; i++) {
@@ -895,19 +922,16 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           const tile = document.createElement('div');
           tile.className = 'day-tile';
 
-          const isSelectedDay = selectedSlot && selectedSlot.date === iso;
-          if (isSelectedDay) {
+          if (selectedSlot && selectedSlot.date === iso) {
             tile.classList.add('ring-2', 'ring-emerald-700');
           }
 
-          // Top-left: Mañana
           const topLeft = document.createElement('div');
           topLeft.className = `diag-top-left ${getShiftClass(iso, 'manana')}`;
           topLeft.title = `${formatDateSpanish(iso)} — ${getShiftLabel(iso, 'manana')} (${getShiftScheduleText(iso, 'manana')})`;
           topLeft.innerHTML = `<span class="slot-label">${getShiftLabel(iso, 'manana')}</span>`;
           topLeft.addEventListener('click', () => handleSelectSlot(iso, 'manana'));
 
-          // Bottom-right: Tarde
           const bottomRight = document.createElement('div');
           bottomRight.className = `diag-bottom-right ${getShiftClass(iso, 'tarde')}`;
           bottomRight.title = `${formatDateSpanish(iso)} — ${getShiftLabel(iso, 'tarde')} (${getShiftScheduleText(iso, 'tarde')})`;
@@ -1058,7 +1082,20 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         });
       }
 
+      function syncAdminLockUI() {
+        const panel = document.getElementById('adminPanelContent');
+        const statusEl = document.getElementById('adminLockStatusText');
+        if (state.adminUnlocked) {
+          panel.classList.remove('opacity-40', 'pointer-events-none', 'select-none');
+          statusEl.innerHTML = `<span class="text-emerald-700 font-bold">Desbloqueado</span> — Tienes acceso completo a la gestión de administrador.`;
+        } else {
+          panel.classList.add('opacity-40', 'pointer-events-none', 'select-none');
+          statusEl.innerHTML = `<span class="text-amber-700 font-bold">Bloqueado</span> — Introduce la clave (<code class="font-bold">${state.adminConfig.adminCode}</code>) y pulsa Desbloquear.`;
+        }
+      }
+
       function renderAdminPanel() {
+        syncAdminLockUI();
         document.getElementById('authorizedCountLabel').textContent =
           `Propietarios autorizados: ${state.users.length}`;
         document.getElementById('cfgAdminEmail').value = state.adminConfig.adminEmail;
@@ -1066,6 +1103,10 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         document.getElementById('cfgPaymentConcept').value = state.adminConfig.concept;
         document.getElementById('cfgMailTemplate').value = state.adminConfig.mailTemplate;
         document.getElementById('firebaseConfigJsonInput').value = state.firebaseConfig || '';
+
+        if (!document.getElementById('commDateInput').value) {
+          document.getElementById('commDateInput').value = formatDateISO(new Date());
+        }
 
         const listEl = document.getElementById('adminReservationsList');
         const activeList = state.reservations.filter(r => r.status !== 'cancelada');
@@ -1078,7 +1119,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
             <div>
               <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} · ${r.shift === 'manana' ? 'Mañana' : 'Tarde'}</p>
-              <p class="text-slate-600">${r.ownerEmail} (${r.portal} · ${r.unit}) — Estado: <strong>${r.status.toUpperCase()}</strong></p>
+              <p class="text-slate-600">${r.ownerEmail} (${r.portal} · ${r.unit}) · ${r.eventType} — Estado: <strong>${r.status.toUpperCase()}</strong></p>
             </div>
             <div class="flex flex-wrap items-center gap-1.5">
               ${r.status === 'pendiente' ? `
@@ -1308,16 +1349,17 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         showToast(`Cuenta activada para ${existing.email} (${existing.portal} · ${existing.unit}).`);
       });
 
-      // Settings Modal actions
-      const settingsModal = document.getElementById('settingsModal');
-      document.getElementById('btnOpenSettings').addEventListener('click', () => {
+      // Admin Modal actions
+      const adminModal = document.getElementById('adminModal');
+      document.getElementById('btnOpenAdmin').addEventListener('click', () => {
+        document.getElementById('adminPinInput').value = '';
         renderAdminPanel();
-        settingsModal.classList.remove('hidden');
-        settingsModal.classList.add('flex');
+        adminModal.classList.remove('hidden');
+        adminModal.classList.add('flex');
       });
-      document.getElementById('closeSettingsModal').addEventListener('click', () => {
-        settingsModal.classList.add('hidden');
-        settingsModal.classList.remove('flex');
+      document.getElementById('closeAdminModal').addEventListener('click', () => {
+        adminModal.classList.add('hidden');
+        adminModal.classList.remove('flex');
       });
 
       document.getElementById('unlockAdminBtn').addEventListener('click', () => {
@@ -1325,10 +1367,57 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         if (code === state.adminConfig.adminCode) {
           state.adminUnlocked = true;
           saveState();
+          syncAdminLockUI();
           showToast('Modo Administrador desbloqueado.');
         } else {
           showToast('Clave de administrador incorrecta.', true);
         }
+      });
+
+      document.getElementById('lockAdminBtn').addEventListener('click', () => {
+        state.adminUnlocked = false;
+        saveState();
+        syncAdminLockUI();
+        showToast('Modo Administrador bloqueado.');
+      });
+
+      document.getElementById('createCommEventBtn').addEventListener('click', () => {
+        if (!state.adminUnlocked) {
+          showToast('Desbloquea primero el Modo Administrador.', true);
+          return;
+        }
+        const dateVal = document.getElementById('commDateInput').value;
+        const shiftVal = document.getElementById('commShiftInput').value;
+        const titleVal = document.getElementById('commTitleInput').value.trim() || 'Acto comunitario';
+
+        if (!dateVal) {
+          showToast('Selecciona una fecha para el acto comunitario.', true);
+          return;
+        }
+        if (getSlotReservation(dateVal, shiftVal)) {
+          showToast('Ya existe una reserva en ese día y turno.', true);
+          return;
+        }
+
+        state.reservations.push({
+          id: `comm-${Date.now()}`,
+          date: dateVal,
+          shift: shiftVal,
+          status: 'reservado',
+          ownerEmail: state.adminConfig.adminEmail,
+          portal: 'Comunidad',
+          unit: titleVal,
+          eventType: `Acto comunitario: ${titleVal}`,
+          createdAt: new Date().toISOString(),
+          conserjeChecked: false,
+          depositRefunded: false
+        });
+
+        saveState();
+        renderCalendar();
+        renderAdminPanel();
+        document.getElementById('commTitleInput').value = '';
+        showToast(`Acto comunitario registrado en ROJO para el ${formatDateSpanish(dateVal)}.`);
       });
 
       document.getElementById('saveBulkEmailsBtn').addEventListener('click', () => {
@@ -1386,7 +1475,8 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         saveState();
         document.getElementById('newAdminEmailInput').value = '';
         document.getElementById('newAdminCodeInput').value = '';
-        showToast('Administrador y configuración guardados.');
+        syncAdminLockUI();
+        showToast('Administrador y clave guardados.');
       });
 
       document.getElementById('saveFirebaseCfgBtn').addEventListener('click', () => {
