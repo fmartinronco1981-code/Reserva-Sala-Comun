@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reserva Sala Común Escalonia 15 — v1.2</title>
+  <title>Reserva Sala Común Escalonia 15 — v1.3</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -135,7 +135,7 @@
     <div class="max-w-xl w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-7 sm:p-10 text-center shadow-2xl space-y-7">
       <div class="space-y-1">
         <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-emerald-200 px-3 py-1 rounded-full bg-white/10">
-          Versión 1.2 · Producción
+          Versión 1.3 · Tiempo Real
         </span>
         <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight pt-2">
           Bienvenido a reserva sala común Escalonia 15
@@ -172,7 +172,7 @@
           </div>
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-emerald-300">
-              Reserva Sala Común Escalonia 15 · v1.2
+              Reserva Sala Común Escalonia 15 · v1.3
             </p>
             <h2 id="ownerWelcomeTitle" class="text-base sm:text-lg font-extrabold tracking-tight leading-tight">
               Bienvenido · Vivienda
@@ -184,6 +184,13 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
+          <button
+            id="btnOpenSettings"
+            type="button"
+            class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-400/40 text-emerald-100 transition"
+          >
+            Ajustes
+          </button>
           <button
             id="btnOpenAuth"
             type="button"
@@ -533,42 +540,103 @@
     </div>
   </div>
 
-  <!-- MODAL 2B: CAMBIO OBLIGATORIO DE CONTRASEÑA EN PRIMER ACCESO -->
+  <!-- MODAL 2B: CAMBIO OBLIGATORIO DE CONTRASEÑA Y VIVIENDA EN PRIMER ACCESO -->
   <div id="forcePasswordModal" class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-[1px] hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-emerald-900 text-white px-5 py-3.5">
-        <h3 class="text-sm sm:text-base font-bold">Cambio de contraseña obligatorio</h3>
-        <p class="text-[11px] text-emerald-200">Establece tu contraseña personal antes de continuar</p>
+        <h3 class="text-sm sm:text-base font-bold">Cambio de contraseña y datos de vivienda</h3>
+        <p class="text-[11px] text-emerald-200">Selecciona tu vivienda y establece tu contraseña personal</p>
       </div>
 
       <div class="p-5 space-y-3.5 text-xs sm:text-sm">
         <div class="grid grid-cols-3 gap-2">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Portal</label>
-            <input id="firstPortalInput" type="text" placeholder="Ej. 1" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+            <label for="firstPortalSelect" class="block text-xs font-semibold text-slate-700 mb-1">Portal</label>
+            <select id="firstPortalSelect" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs bg-white font-medium"></select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Piso</label>
-            <input id="firstFloorInput" type="text" placeholder="Ej. 2º" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+            <label for="firstFloorSelect" class="block text-xs font-semibold text-slate-700 mb-1">Piso</label>
+            <select id="firstFloorSelect" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs bg-white font-medium">
+              <option value="Bajo">Bajo</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Letra</label>
-            <input id="firstLetterInput" type="text" placeholder="Ej. B" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs uppercase" />
+            <label for="firstLetterSelect" class="block text-xs font-semibold text-slate-700 mb-1">Letra</label>
+            <select id="firstLetterSelect" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs bg-white font-medium">
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+            </select>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Nueva contraseña (mínimo 6 caracteres)</label>
-          <input id="newOwnerPasswordInput" type="password" minlength="6" autocomplete="new-password" placeholder="Elige una contraseña segura" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+          <label for="newOwnerPasswordInput" class="block text-xs font-semibold text-slate-700 mb-1">Nueva contraseña (mínimo 6 caracteres)</label>
+          <input id="newOwnerPasswordInput" type="password" minlength="6" autocomplete="new-password" placeholder="Elige una contraseña distinta a 123456" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Repite la nueva contraseña</label>
+          <label for="confirmOwnerPasswordInput" class="block text-xs font-semibold text-slate-700 mb-1">Repite la nueva contraseña</label>
           <input id="confirmOwnerPasswordInput" type="password" minlength="6" autocomplete="new-password" placeholder="Repite la contraseña" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
         </div>
 
         <button id="saveNewPasswordBtn" type="button" class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm transition">
-          Guardar nueva contraseña y entrar
+          Confirmar datos y cambiar contraseña
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2C: AJUSTES DE PROPIETARIO (CAMBIAR CONTRASEÑA Y VIVIENDA) -->
+  <div id="ownerSettingsModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="bg-brand-dark text-white px-5 py-3.5 flex items-center justify-between">
+        <h3 class="text-sm sm:text-base font-bold">Ajustes de Propietario</h3>
+        <button id="closeSettingsModal" type="button" class="text-emerald-200 hover:text-white text-lg font-bold leading-none px-1">
+          &times;
+        </button>
+      </div>
+
+      <div class="p-5 space-y-3.5 text-xs sm:text-sm">
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label for="settingsPortalSelect" class="block text-xs font-semibold text-slate-700 mb-1">Portal</label>
+            <select id="settingsPortalSelect" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs bg-white font-medium"></select>
+          </div>
+          <div>
+            <label for="settingsFloorSelect" class="block text-xs font-semibold text-slate-700 mb-1">Piso</label>
+            <select id="settingsFloorSelect" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs bg-white font-medium">
+              <option value="Bajo">Bajo</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
+          </div>
+          <div>
+            <label for="settingsLetterSelect" class="block text-xs font-semibold text-slate-700 mb-1">Letra</label>
+            <select id="settingsLetterSelect" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs bg-white font-medium">
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="settingsNewPassInput" class="block text-xs font-semibold text-slate-700 mb-1">Nueva contraseña (opcional si solo cambias vivienda)</label>
+          <input id="settingsNewPassInput" type="password" minlength="6" autocomplete="new-password" placeholder="Mínimo 6 caracteres" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+        </div>
+
+        <div>
+          <label for="settingsConfirmPassInput" class="block text-xs font-semibold text-slate-700 mb-1">Confirmar nueva contraseña</label>
+          <input id="settingsConfirmPassInput" type="password" minlength="6" autocomplete="new-password" placeholder="Repite la nueva contraseña" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+        </div>
+
+        <button id="saveSettingsBtn" type="button" class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm transition">
+          Confirmar cambios
         </button>
       </div>
     </div>
@@ -610,7 +678,7 @@
       <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-            Administrador · v1.2
+            Administrador · v1.3
           </span>
           <h2 id="adminHeaderTitle" class="text-base sm:text-lg font-bold leading-tight">
             Administrador — Sala Común Escalonia 15
@@ -725,7 +793,7 @@
           <div>
             <h3 class="text-base sm:text-lg font-bold text-slate-900">Alta de propietarios</h3>
             <p class="text-xs text-slate-500">
-              Escribe uno o varios correos separados por punto y coma (<code>;</code>). Se asignará la contraseña inicial <strong>123456</strong> y se abrirá tu correo (Outlook) con los datos de acceso.
+              Escribe uno o varios correos separados por punto y coma (<code>;</code>). Se asignará la contraseña inicial <strong>123456</strong> y se abrirá tu correo con los datos de acceso.
             </p>
           </div>
           <span id="authorizedCountLabel" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold"></span>
@@ -876,6 +944,7 @@
       let authUser = null;
       let isCurrentUserAdmin = false;
       let currentUserProfile = null;
+      let userProfileRef = null;
       let pendingScreenAfterLogin = null;
       let lastEnteredPassword = "";
 
@@ -906,6 +975,15 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         users: {},
         reservations: []
       };
+
+      function populatePortalSelects() {
+        const optionsHtml = Array.from({ length: 18 }, (_, i) => {
+          const n = String(i + 1);
+          return `<option value="${n}">${n}</option>`;
+        }).join("");
+        document.getElementById("firstPortalSelect").innerHTML = optionsHtml;
+        document.getElementById("settingsPortalSelect").innerHTML = optionsHtml;
+      }
 
       function normalizeEmailKey(email) {
         return email.trim().toLowerCase().replace(/\./g, "_dot_").replace(/[@#$[\]]/g, "_");
@@ -1059,8 +1137,11 @@ Administración Escalonia 15`
 
       function updateHeaderAndUserInfo() {
         const btnLogout = document.getElementById("btnOwnerLogout");
+        const btnSettings = document.getElementById("btnOpenSettings");
+
         if (!authUser) {
           btnLogout.classList.add("hidden");
+          btnSettings.classList.add("hidden");
           document.getElementById("ownerWelcomeTitle").textContent = "Bienvenido · Sala Común Escalonia 15";
           document.getElementById("activeUserBanner").textContent = "Inicia sesión con tu correo y contraseña (123456 en el primer acceso).";
           document.getElementById("formUserEmail").textContent = "Sin sesión";
@@ -1071,6 +1152,8 @@ Administración Escalonia 15`
         }
 
         btnLogout.classList.remove("hidden");
+        btnSettings.classList.remove("hidden");
+
         const housingLabel = getUserHousingLabel(currentUserProfile);
         document.getElementById("ownerWelcomeTitle").textContent = `Bienvenido · ${housingLabel}`;
         document.getElementById("activeUserBanner").textContent = `${authUser.email} · ${housingLabel}`;
@@ -1332,6 +1415,16 @@ Administración Escalonia 15`
         modal.classList.add("flex");
       }
 
+      function upsertReservationInLocalState(id, patchOrFull) {
+        const idx = state.reservations.findIndex(r => r.id === id);
+        if (idx >= 0) {
+          state.reservations[idx] = { ...state.reservations[idx], ...patchOrFull, id };
+        } else {
+          state.reservations.push({ ...patchOrFull, id });
+        }
+        refreshAllViews();
+      }
+
       function renderMyReservations() {
         const pendingEl = document.getElementById("pendingReservationsList");
         const confirmedEl = document.getElementById("confirmedReservationsList");
@@ -1399,11 +1492,14 @@ Administración Escalonia 15`
             const resDate = new Date(y, m - 1, d);
             const daysBefore = Math.round((resDate - today) / (1000 * 60 * 60 * 24));
 
+            const patch = {
+              status: "cancelada",
+              cancelledByOwner: true
+            };
+            upsertReservationInLocalState(found.id, patch);
+
             try {
-              await db.ref(`escalonia15/reservations/${found.id}`).update({
-                status: "cancelada",
-                cancelledByOwner: true
-              });
+              await db.ref(`escalonia15/reservations/${found.id}`).update(patch);
               showToast(
                 daysBefore < 7
                   ? "Anulada fuera del plazo de 7 días: se devuelve la fianza pero no la parte del alquiler."
@@ -1498,10 +1594,10 @@ Administración Escalonia 15`
 
         listEl.querySelectorAll("[data-admin-cancel]").forEach(btn => {
           btn.addEventListener("click", async () => {
-            await db.ref(`escalonia15/reservations/${btn.dataset.adminCancel}`).update({
-              status: "cancelada",
-              cancelledByOwner: false
-            });
+            const id = btn.dataset.adminCancel;
+            const patch = { status: "cancelada", cancelledByOwner: false };
+            upsertReservationInLocalState(id, patch);
+            await db.ref(`escalonia15/reservations/${id}`).update(patch);
             showToast("Reserva cancelada.");
           });
         });
@@ -1515,19 +1611,20 @@ Administración Escalonia 15`
 
         listEl.querySelectorAll("[data-confirm-pay]").forEach(btn => {
           btn.addEventListener("click", async () => {
-            await db.ref(`escalonia15/reservations/${btn.dataset.confirmPay}`).update({
-              status: "reservado"
-            });
+            const id = btn.dataset.confirmPay;
+            const patch = { status: "reservado" };
+            upsertReservationInLocalState(id, patch);
+            await db.ref(`escalonia15/reservations/${id}`).update(patch);
             showToast("Reserva confirmada.");
           });
         });
 
         listEl.querySelectorAll("[data-no-autorizar]").forEach(btn => {
           btn.addEventListener("click", async () => {
-            await db.ref(`escalonia15/reservations/${btn.dataset.noAutorizar}`).update({
-              status: "no_autorizada",
-              cancelledByOwner: false
-            });
+            const id = btn.dataset.noAutorizar;
+            const patch = { status: "no_autorizada", cancelledByOwner: false };
+            upsertReservationInLocalState(id, patch);
+            await db.ref(`escalonia15/reservations/${id}`).update(patch);
             showToast("Reserva marcada como NO AUTORIZADA.");
           });
         });
@@ -1536,10 +1633,10 @@ Administración Escalonia 15`
           btn.addEventListener("click", async () => {
             const item = state.reservations.find(x => x.id === btn.dataset.refundDep);
             if (!item) return;
-            await db.ref(`escalonia15/reservations/${item.id}`).update({
-              depositReturned: !item.depositReturned
-            });
-            showToast(!item.depositReturned ? "Fianza marcada como devuelta." : "Marca de fianza devuelta quitada.");
+            const nextVal = !item.depositReturned;
+            upsertReservationInLocalState(item.id, { depositReturned: nextVal });
+            await db.ref(`escalonia15/reservations/${item.id}`).update({ depositReturned: nextVal });
+            showToast(nextVal ? "Fianza marcada como devuelta." : "Marca de fianza devuelta quitada.");
           });
         });
       }
@@ -1575,16 +1672,32 @@ Administración Escalonia 15`
 
       function openForcePasswordModal() {
         const modal = document.getElementById("forcePasswordModal");
-        document.getElementById("firstPortalInput").value = (currentUserProfile && currentUserProfile.portal) || "";
-        document.getElementById("firstFloorInput").value = (currentUserProfile && currentUserProfile.floor) || "";
-        document.getElementById("firstLetterInput").value = (currentUserProfile && currentUserProfile.letter) || "";
+        document.getElementById("firstPortalSelect").value = (currentUserProfile && currentUserProfile.portal) || "1";
+        document.getElementById("firstFloorSelect").value = (currentUserProfile && currentUserProfile.floor) || "Bajo";
+        document.getElementById("firstLetterSelect").value = (currentUserProfile && currentUserProfile.letter) || "A";
         document.getElementById("newOwnerPasswordInput").value = "";
         document.getElementById("confirmOwnerPasswordInput").value = "";
         modal.classList.remove("hidden");
         modal.classList.add("flex");
       }
 
+      function openOwnerSettingsModal() {
+        const modal = document.getElementById("ownerSettingsModal");
+        document.getElementById("settingsPortalSelect").value = (currentUserProfile && currentUserProfile.portal) || "1";
+        document.getElementById("settingsFloorSelect").value = (currentUserProfile && currentUserProfile.floor) || "Bajo";
+        document.getElementById("settingsLetterSelect").value = (currentUserProfile && currentUserProfile.letter) || "A";
+        document.getElementById("settingsNewPassInput").value = "";
+        document.getElementById("settingsConfirmPassInput").value = "";
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+
       auth.onAuthStateChanged(async user => {
+        if (userProfileRef) {
+          userProfileRef.off();
+          userProfileRef = null;
+        }
+
         authUser = user;
         if (!user) {
           isCurrentUserAdmin = false;
@@ -1597,37 +1710,38 @@ Administración Escalonia 15`
 
         const extraAdmins = (state.admins || []).map(a => (a.uid || "").trim()).filter(Boolean);
         isCurrentUserAdmin = user.uid === ADMIN_UID || extraAdmins.includes(user.uid);
-        const profSnap = await db.ref(`escalonia15/users/${user.uid}`).once("value");
-        currentUserProfile = profSnap.val();
 
-        if (isCurrentUserAdmin && !currentUserProfile) {
-          currentUserProfile = {
-            email: user.email,
-            role: "admin",
-            portal: "Admin",
-            floor: "-",
-            letter: "-",
-            mustChangePassword: false
-          };
-          await db.ref(`escalonia15/users/${user.uid}`).set(currentUserProfile);
-        }
+        userProfileRef = db.ref(`escalonia15/users/${user.uid}`);
+        userProfileRef.on("value", async profSnap => {
+          currentUserProfile = profSnap.val();
+          if (isCurrentUserAdmin && !currentUserProfile) {
+            currentUserProfile = {
+              email: user.email,
+              role: "admin",
+              portal: "Admin",
+              floor: "-",
+              letter: "-",
+              mustChangePassword: false
+            };
+            await userProfileRef.set(currentUserProfile);
+          }
 
-        if (pendingScreenAfterLogin === "admin" && isCurrentUserAdmin) {
-          activeScreen = "admin";
-        } else if (pendingScreenAfterLogin === "owner") {
-          activeScreen = "owner";
-        }
-        pendingScreenAfterLogin = null;
+          if (pendingScreenAfterLogin === "admin" && isCurrentUserAdmin) {
+            activeScreen = "admin";
+          } else if (pendingScreenAfterLogin === "owner") {
+            activeScreen = "owner";
+          }
+          pendingScreenAfterLogin = null;
 
-        applyScreenVisibility();
-        refreshAllViews();
+          applyScreenVisibility();
+          refreshAllViews();
 
-        if (!isCurrentUserAdmin && (!currentUserProfile || currentUserProfile.mustChangePassword === true || lastEnteredPassword === INITIAL_OWNER_PASS)) {
-          openForcePasswordModal();
-        }
+          if (!isCurrentUserAdmin && (!currentUserProfile || currentUserProfile.mustChangePassword === true || lastEnteredPassword === INITIAL_OWNER_PASS)) {
+            openForcePasswordModal();
+          }
+        });
       });
 
-      // Botones principales de entrada
       document.getElementById("btnEnterOwner").addEventListener("click", () => {
         activeScreen = "owner";
         applyScreenVisibility();
@@ -1646,6 +1760,61 @@ Administración Escalonia 15`
         lastEnteredPassword = "";
         auth.signOut();
         showToast("Sesión cerrada.");
+      });
+
+      document.getElementById("btnOpenSettings").addEventListener("click", openOwnerSettingsModal);
+      document.getElementById("closeSettingsModal").addEventListener("click", () => {
+        const modal = document.getElementById("ownerSettingsModal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      });
+
+      document.getElementById("saveSettingsBtn").addEventListener("click", async () => {
+        if (!authUser) return;
+        const portal = document.getElementById("settingsPortalSelect").value;
+        const floor = document.getElementById("settingsFloorSelect").value;
+        const letter = document.getElementById("settingsLetterSelect").value;
+        const p1 = document.getElementById("settingsNewPassInput").value;
+        const p2 = document.getElementById("settingsConfirmPassInput").value;
+
+        if (p1 || p2) {
+          if (p1.length < 6) {
+            showToast("La nueva contraseña debe tener al menos 6 caracteres.", true);
+            return;
+          }
+          if (p1 !== p2) {
+            showToast("Las contraseñas no coinciden.", true);
+            return;
+          }
+        }
+
+        try {
+          if (p1) {
+            await authUser.updatePassword(p1);
+            lastEnteredPassword = p1;
+          }
+          const updatedProfile = {
+            ...(currentUserProfile || {}),
+            email: authUser.email,
+            portal,
+            floor,
+            letter,
+            role: "owner",
+            active: true,
+            mustChangePassword: false,
+            updatedAt: new Date().toISOString()
+          };
+          await db.ref(`escalonia15/users/${authUser.uid}`).set(updatedProfile);
+          currentUserProfile = updatedProfile;
+          refreshAllViews();
+
+          const modal = document.getElementById("ownerSettingsModal");
+          modal.classList.add("hidden");
+          modal.classList.remove("flex");
+          showToast("Ajustes guardados.");
+        } catch (err) {
+          showToast("Error al guardar ajustes: " + err.message, true);
+        }
       });
 
       document.getElementById("pickShiftMananaBtn").addEventListener("click", () => {
@@ -1708,23 +1877,32 @@ Administración Escalonia 15`
         if (!validateSelection() || !selectedSlot || !authUser) return;
         const eventType = document.getElementById("eventTypeInput").value;
         const housing = getUserHousingLabel(currentUserProfile);
+        const tempId = "tmp_" + Date.now();
+
+        const payload = {
+          date: selectedSlot.date,
+          shift: selectedSlot.shift,
+          status: "pendiente",
+          ownerEmail: authUser.email,
+          ownerUid: authUser.uid,
+          housing,
+          eventType,
+          createdByAdmin: false,
+          createdAt: new Date().toISOString(),
+          depositReturned: false,
+          cancelledByOwner: false
+        };
+
+        upsertReservationInLocalState(tempId, payload);
 
         try {
-          await db.ref("escalonia15/reservations").push({
-            date: selectedSlot.date,
-            shift: selectedSlot.shift,
-            status: "pendiente",
-            ownerEmail: authUser.email,
-            ownerUid: authUser.uid,
-            housing,
-            eventType,
-            createdByAdmin: false,
-            createdAt: new Date().toISOString(),
-            depositReturned: false,
-            cancelledByOwner: false
-          });
+          const ref = await db.ref("escalonia15/reservations").push(payload);
+          state.reservations = state.reservations.filter(r => r.id !== tempId);
+          upsertReservationInLocalState(ref.key, payload);
           showToast("Solicitud de reserva enviada. Queda pendiente de revisión por la administración.");
         } catch (err) {
+          state.reservations = state.reservations.filter(r => r.id !== tempId);
+          refreshAllViews();
           showToast("No se pudo registrar la reserva: " + err.message, true);
         }
       });
@@ -1806,16 +1984,12 @@ Administración Escalonia 15`
 
       document.getElementById("saveNewPasswordBtn").addEventListener("click", async () => {
         if (!authUser) return;
-        const portal = document.getElementById("firstPortalInput").value.trim();
-        const floor = document.getElementById("firstFloorInput").value.trim();
-        const letter = document.getElementById("firstLetterInput").value.trim().toUpperCase();
+        const portal = document.getElementById("firstPortalSelect").value;
+        const floor = document.getElementById("firstFloorSelect").value;
+        const letter = document.getElementById("firstLetterSelect").value;
         const pass1 = document.getElementById("newOwnerPasswordInput").value;
         const pass2 = document.getElementById("confirmOwnerPasswordInput").value;
 
-        if (!portal || !floor || !letter) {
-          showToast("Indica Portal, Piso y Letra de tu vivienda.", true);
-          return;
-        }
         if (pass1.length < 6 || pass1 === INITIAL_OWNER_PASS) {
           showToast("Elige una contraseña distinta a 123456 (mínimo 6 caracteres).", true);
           return;
@@ -1845,7 +2019,7 @@ Administración Escalonia 15`
           modal.classList.add("hidden");
           modal.classList.remove("flex");
           refreshAllViews();
-          showToast("Contraseña actualizada correctamente.");
+          showToast("Datos confirmados y contraseña actualizada.");
         } catch (err) {
           showToast("No se pudo actualizar la contraseña: " + err.message, true);
         }
@@ -1931,20 +2105,23 @@ Administración Escalonia 15`
           return;
         }
 
+        const payload = {
+          date: dateVal,
+          shift: shiftVal,
+          status: "reservado",
+          ownerEmail: state.adminConfig.adminEmail || ADMIN_EMAIL,
+          ownerUid: authUser.uid,
+          housing: titleVal,
+          eventType: titleVal,
+          createdByAdmin: true,
+          createdAt: new Date().toISOString(),
+          depositReturned: false,
+          cancelledByOwner: false
+        };
+
         try {
-          await db.ref("escalonia15/reservations").push({
-            date: dateVal,
-            shift: shiftVal,
-            status: "reservado",
-            ownerEmail: state.adminConfig.adminEmail || ADMIN_EMAIL,
-            ownerUid: authUser.uid,
-            housing: titleVal,
-            eventType: titleVal,
-            createdByAdmin: true,
-            createdAt: new Date().toISOString(),
-            depositReturned: false,
-            cancelledByOwner: false
-          });
+          const ref = await db.ref("escalonia15/reservations").push(payload);
+          upsertReservationInLocalState(ref.key, payload);
           document.getElementById("commTitleInput").value = "";
           showToast("Acto comunitario registrado en estado Reservado.");
         } catch (err) {
@@ -1952,7 +2129,6 @@ Administración Escalonia 15`
         }
       });
 
-      // Alta de propietarios por ";" + creación en Auth con 123456 + abrir Outlook (mailto)
       document.getElementById("saveBulkEmailsBtn").addEventListener("click", async () => {
         if (!authUser) {
           showToast("Debes tener iniciada la sesión de administrador.", true);
@@ -2003,6 +2179,10 @@ Administración Escalonia 15`
           }
 
           await db.ref("escalonia15/authorizedEmails").update(updates);
+          Object.entries(updates).forEach(([k, v]) => {
+            state.authorizedEmails[k] = v;
+          });
+          refreshAllViews();
           document.getElementById("bulkEmailsInput").value = "";
           openOutlookInvite(parts);
           showToast(`${parts.length} propietario(s) autorizado(s) con clave ${INITIAL_OWNER_PASS}. Abriendo correo...`);
@@ -2027,6 +2207,9 @@ Administración Escalonia 15`
           mailTemplate: document.getElementById("cfgMailTemplate").value,
           admins: state.admins
         };
+
+        state.adminConfig = updatedConfig;
+        refreshAllViews();
 
         try {
           await db.ref("escalonia15/adminConfig").set(updatedConfig);
@@ -2054,6 +2237,8 @@ Administración Escalonia 15`
           state.admins.push({ email: newEmail, uid: newUid || "" });
         }
 
+        refreshAllViews();
+
         try {
           await db.ref("escalonia15/adminConfig/admins").set(state.admins);
           document.getElementById("newAdminEmailInput").value = "";
@@ -2064,6 +2249,7 @@ Administración Escalonia 15`
         }
       });
 
+      populatePortalSelects();
       applyScreenVisibility();
       refreshAllViews();
     })();
