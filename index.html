@@ -297,7 +297,7 @@
               type="button"
               class="w-full py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm shadow-sm transition"
             >
-              Solicitar reserva y preparar correo de pago
+              Solicitar reserva
             </button>
           </div>
         </div>
@@ -306,13 +306,10 @@
 
     <!-- TAB 2: MIS RESERVAS -->
     <section id="tab-mis-reservas" class="tab-panel hidden space-y-4">
-      <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4 mb-4">
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4">
           <div>
             <h2 class="text-base sm:text-lg font-bold text-slate-900">Mis Reservas</h2>
-            <p class="text-xs text-slate-500">
-              Historial y gestión de tus reservas en la Sala Común Escalonia 15.
-            </p>
           </div>
 
           <div class="flex flex-wrap items-center gap-2 text-xs">
@@ -325,7 +322,17 @@
           </div>
         </div>
 
-        <div id="myReservationsList" class="space-y-3"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="rounded-xl border border-yellow-300 bg-yellow-50/50 p-4 space-y-2.5">
+            <h3 class="text-sm font-bold text-yellow-950">Reservas pendientes</h3>
+            <div id="pendingReservationsList" class="space-y-2"></div>
+          </div>
+
+          <div class="rounded-xl border border-red-200 bg-red-50/40 p-4 space-y-2.5">
+            <h3 class="text-sm font-bold text-red-950">Reserva confirmada</h3>
+            <div id="confirmedReservationsList" class="space-y-2"></div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -383,16 +390,16 @@
 
             <p><strong>Calendario visual partido en diagonal:</strong> Cada día del calendario se divide en diagonal en dos mitades —<strong>Mañana</strong> y <strong>Tarde</strong>— con código de color por turno: <strong>verde</strong> para <strong>Libre</strong>, <strong>amarillo</strong> para <strong>Pendiente de pago</strong> y <strong>rojo</strong> para <strong>Reservado</strong>.</p>
 
-            <p><strong>Comunicación de solicitud y pago:</strong> Al solicitar una reserva, el sistema prepara el correo de <strong>Solicitud de Pago (48h)</strong> remitido desde el correo de la administración hacia el correo del propietario, editable antes de enviar (asunto, mensaje, fecha, turno, importe de 50 € de alquiler + 100 € de fianza y plazo de 48 horas), y una vez recibido el pago se emite la confirmación definitiva.</p>
+            <p><strong>Comunicación de solicitud y visto bueno:</strong> Al solicitar una reserva, la reserva queda en <strong>Pendiente de pago (48h)</strong> sin mostrar el recuadro de pago al propietario; es el <strong>administrador</strong> quien, al dar el visto bueno, abre/prepara la <strong>Solicitud de Pago (48h)</strong> de la administración hacia el propietario, y al confirmarse el pago pasa a <strong>Reservado</strong>.</p>
 
-            <p><strong>Modo Administrador:</strong> Desde el botón superior <strong>«Administrador»</strong> (con clave de acceso) se accede a una interfaz de administración con reservas por confirmar, programación de actos comunitarios, alta de propietarios por <code>;</code>, plantilla de correo e IBAN y alta de otro administrador.</p>
+            <p><strong>Interfaz de Administrador:</strong> Desde el botón superior <strong>«Administrador»</strong> se accede primero a la clave (<code>1234</code> por defecto) y después a una interfaz completa con pestañas separadas para <strong>Reservas por confirmar y control de fianzas</strong> (con contador de reservas anuales del propietario, visto bueno/correo, confirmación de pago y botón de <strong>Fianza devuelta</strong>), <strong>Programar acto comunitario</strong>, <strong>Alta de propietarios</strong>, <strong>Plantilla de correo e IBAN</strong> y <strong>Dar de alta otro administrador</strong>.</p>
           </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- MODAL 1: SOLICITUD DE PAGO (48H) — EDITABLE ANTES DE ENVIAR (DE ADMINISTRACIÓN A PROPIETARIO) -->
+  <!-- MODAL 1: SOLICITUD DE PAGO (48H) — EDITABLE ANTES DE ENVIAR (ADMINISTRACIÓN -> PROPIETARIO) -->
   <div id="paymentModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
@@ -482,13 +489,13 @@
     </div>
   </div>
 
-  <!-- MODAL 3A: PANTALLA DE ACCESO CON CLAVE DE ADMINISTRADOR -->
-  <div id="adminLoginModal" class="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-[1px] hidden items-center justify-center p-4">
+  <!-- MODAL 3A: PANTALLA DE CONTRASEÑA DE ADMINISTRADOR -->
+  <div id="adminLoginModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-[1px] hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
         <div>
           <h3 class="text-sm sm:text-base font-bold">Acceso Administrador — Escalonia 15</h3>
-          <p class="text-[11px] text-slate-300">Introduce la clave de acceso para abrir el panel de gestión</p>
+          <p class="text-[11px] text-slate-300">Introduce la contraseña para abrir la interfaz de administración</p>
         </div>
         <button id="closeAdminLoginModal" type="button" class="text-slate-300 hover:text-white text-lg font-bold leading-none px-1">
           &times;
@@ -497,169 +504,220 @@
 
       <div class="p-5 space-y-4 text-xs sm:text-sm">
         <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700">
-          Clave inicial de prueba: <code class="font-bold text-slate-900">1234</code>
+          Contraseña inicial: <code class="font-bold text-slate-900">1234</code>
         </div>
 
         <div>
-          <label for="adminPinInput" class="block text-xs font-semibold text-slate-700 mb-1">Clave de administrador</label>
+          <label for="adminPinInput" class="block text-xs font-semibold text-slate-700 mb-1">Contraseña de administrador</label>
           <input id="adminPinInput" type="password" placeholder="1234" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
         </div>
 
         <button id="unlockAdminBtn" type="button" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm transition">
-          Entrar al panel de Administrador
+          Entrar
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 3B: INTERFAZ DEDICADA DE ADMINISTRADOR (TRAS VALIDAR CLAVE) -->
-  <div id="adminDashboardModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-[1px] hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200">
-      <div class="bg-slate-900 text-white px-5 py-4 flex flex-wrap items-center justify-between gap-2 sticky top-0 z-10">
+  <!-- VISTA COMPLETA DEDICADA DE ADMINISTRADOR (TRAS VALIDAR CONTRASEÑA) -->
+  <section id="adminFullInterface" class="fixed inset-0 z-40 bg-slate-100 hidden flex-col overflow-y-auto">
+    <header class="bg-slate-900 text-white sticky top-0 z-20 shadow-md">
+      <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200 mb-1">
-            Panel de Gestión de Administración
+          <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
+            Interfaz de Administración
           </span>
-          <h3 class="text-base sm:text-lg font-bold leading-tight">Administración — Sala Común Escalonia 15</h3>
+          <h2 class="text-base sm:text-lg font-bold leading-tight">
+            Administración — Sala Común Escalonia 15
+          </h2>
         </div>
+
         <div class="flex items-center gap-2">
-          <button id="lockAdminBtn" type="button" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold">
-            Cerrar sesión admin
-          </button>
-          <button id="closeAdminDashboardModal" type="button" class="text-slate-300 hover:text-white text-xl font-bold leading-none px-1.5">
-            &times;
+          <button id="exitAdminFullBtn" type="button" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">
+            &larr; Volver a la comunidad
           </button>
         </div>
       </div>
 
-      <div class="p-5 sm:p-6 space-y-6 text-xs sm:text-sm">
-
-        <!-- SECCIÓN 1: RESERVAS POR CONFIRMAR + FIANZAS + ACTO COMUNITARIO -->
-        <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
-            <div>
-              <h4 class="text-sm sm:text-base font-bold text-slate-900">1. Reservas por Confirmar y Control de Fianzas</h4>
-              <p class="text-xs text-slate-500">Confirma pagos en el plazo de 48 h, marca la revisión del conserje y registra la devolución de fianza (100 €).</p>
-            </div>
-          </div>
-
-          <div id="adminReservationsList" class="space-y-2.5"></div>
-
-          <!-- Acto comunitario exclusivo de administración -->
-          <div class="pt-4 border-t border-slate-200 space-y-3">
-            <h5 class="text-xs sm:text-sm font-bold text-emerald-950">Programar Acto Comunitario (exclusivo Administración)</h5>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha</label>
-                <input id="commDateInput" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-1.5 text-xs bg-white" />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Turno</label>
-                <select id="commShiftInput" class="w-full rounded-xl border border-slate-300 px-3 py-1.5 text-xs bg-white">
-                  <option value="manana">Mañana (10:00–16:30)</option>
-                  <option value="tarde">Tarde (17:30–22:00 / 24:00)</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Título del acto comunitario</label>
-                <input id="commTitleInput" type="text" placeholder="Junta / Evento comunitario" class="w-full rounded-xl border border-slate-300 px-3 py-1.5 text-xs bg-white" />
-              </div>
-            </div>
-            <div class="flex justify-end">
-              <button id="createCommEventBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
-                Registrar Acto Comunitario
-              </button>
-            </div>
-          </div>
+      <!-- PESTAÑAS SEPARADAS DEL ADMINISTRADOR -->
+      <nav class="bg-slate-950 border-t border-white/10">
+        <div class="max-w-6xl mx-auto px-4 flex gap-1 overflow-x-auto">
+          <button
+            type="button"
+            data-admin-tab="reservas-fianzas"
+            class="admin-tab px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-emerald-400 text-white whitespace-nowrap transition"
+          >
+            Reservas por confirmar y control de fianzas
+          </button>
+          <button
+            type="button"
+            data-admin-tab="acto-comunitario"
+            class="admin-tab px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-300 hover:text-white whitespace-nowrap transition"
+          >
+            Programar acto comunitario
+          </button>
+          <button
+            type="button"
+            data-admin-tab="alta-propietarios"
+            class="admin-tab px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-300 hover:text-white whitespace-nowrap transition"
+          >
+            Alta de propietarios
+          </button>
+          <button
+            type="button"
+            data-admin-tab="plantilla-iban"
+            class="admin-tab px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-300 hover:text-white whitespace-nowrap transition"
+          >
+            Plantilla de correo e IBAN
+          </button>
+          <button
+            type="button"
+            data-admin-tab="nuevo-admin"
+            class="admin-tab px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-300 hover:text-white whitespace-nowrap transition"
+          >
+            Dar de alta otro administrador
+          </button>
         </div>
+      </nav>
+    </header>
 
-        <!-- SECCIÓN 2: ALTA DE PROPIETARIOS -->
-        <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 space-y-3">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <h4 class="text-sm sm:text-base font-bold text-slate-900">2. Alta de Propietarios (Alta Masiva con ";")</h4>
-              <p class="text-xs text-slate-500">Pega los correos electrónicos de los propietarios separados por punto y coma (<code>;</code>) para autorizarlos.</p>
-            </div>
-            <span id="authorizedCountLabel" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold"></span>
-          </div>
-
-          <textarea id="bulkEmailsInput" rows="3" placeholder="vecino1@escalonia15.es; vecino2@escalonia15.es; vecino3@escalonia15.es" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs"></textarea>
-
-          <div class="flex justify-end">
-            <button id="saveBulkEmailsBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
-              Autorizar propietarios
-            </button>
-          </div>
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 text-xs sm:text-sm">
+      <!-- PESTAÑA 1: RESERVAS POR CONFIRMAR Y CONTROL DE FIANZAS -->
+      <div id="admin-tab-reservas-fianzas" class="admin-panel bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="border-b border-slate-100 pb-3">
+          <h3 class="text-base sm:text-lg font-bold text-slate-900">Reservas por confirmar y control de fianzas</h3>
+          <p class="text-xs text-slate-500">
+            Revisa el contador anual de reservas de cada propietario, da el visto bueno / prepara el correo de pago (48h), confirma pagos y marca la devolución de fianza.
+          </p>
         </div>
-
-        <!-- SECCIÓN 3: PLANTILLA DE CORREO E IBAN -->
-        <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 space-y-3">
-          <div>
-            <h4 class="text-sm sm:text-base font-bold text-slate-900">3. Plantilla de Correo e IBAN</h4>
-            <p class="text-xs text-slate-500">Configura el correo remitente de administración, el IBAN, el concepto y el texto base enviado al propietario.</p>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Correo de Administración</label>
-              <input id="cfgAdminEmail" type="email" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">IBAN de cobro / fianza</label>
-              <input id="cfgAdminIban" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Concepto por defecto</label>
-            <input id="cfgPaymentConcept" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Texto base del correo de Solicitud de Pago (48h)</label>
-            <textarea id="cfgMailTemplate" rows="6" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs"></textarea>
-          </div>
-
-          <div class="flex justify-end">
-            <button id="saveTemplateBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
-              Guardar plantilla e IBAN
-            </button>
-          </div>
-        </div>
-
-        <!-- SECCIÓN 4: DAR DE ALTA OTRO ADMINISTRADOR -->
-        <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 space-y-3">
-          <div>
-            <h4 class="text-sm sm:text-base font-bold text-slate-900">4. Dar de Alta Otro Administrador</h4>
-            <p class="text-xs text-slate-500">Añade un nuevo administrador y/o actualiza la clave de acceso del panel de administración.</p>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Correo del nuevo administrador</label>
-              <input id="newAdminEmailInput" type="email" placeholder="otro.admin@escalonia15.es" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Clave de acceso de administración</label>
-              <input id="newAdminCodeInput" type="text" placeholder="1234" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
-            </div>
-          </div>
-
-          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-            <div id="adminsListSummary" class="text-xs text-slate-600"></div>
-            <button id="addAdminBtn" type="button" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold">
-              Guardar administrador
-            </button>
-          </div>
-        </div>
-
+        <div id="adminReservationsList" class="space-y-3"></div>
       </div>
-    </div>
-  </div>
+
+      <!-- PESTAÑA 2: PROGRAMAR ACTO COMUNITARIO -->
+      <div id="admin-tab-acto-comunitario" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="border-b border-slate-100 pb-3">
+          <h3 class="text-base sm:text-lg font-bold text-slate-900">Programar acto comunitario</h3>
+          <p class="text-xs text-slate-500">
+            Función exclusiva de la administración para registrar actos comunitarios en el calendario.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha</label>
+            <input id="commDateInput" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Turno</label>
+            <select id="commShiftInput" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white">
+              <option value="manana">Mañana (10:00–16:30)</option>
+              <option value="tarde">Tarde (17:30–22:00 / 24:00)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Título del acto comunitario</label>
+            <input id="commTitleInput" type="text" placeholder="Junta / Evento comunitario" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white" />
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button id="createCommEventBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
+            Registrar acto comunitario
+          </button>
+        </div>
+      </div>
+
+      <!-- PESTAÑA 3: ALTA DE PROPIETARIOS -->
+      <div id="admin-tab-alta-propietarios" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900">Alta de propietarios</h3>
+            <p class="text-xs text-slate-500">
+              Pega los correos electrónicos de las viviendas separados por punto y coma (<code>;</code>) para autorizarlos en bloque.
+            </p>
+          </div>
+          <span id="authorizedCountLabel" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold"></span>
+        </div>
+
+        <textarea id="bulkEmailsInput" rows="4" placeholder="vecino1@escalonia15.es; vecino2@escalonia15.es; vecino3@escalonia15.es" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs"></textarea>
+
+        <div class="flex justify-end">
+          <button id="saveBulkEmailsBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
+            Autorizar propietarios
+          </button>
+        </div>
+      </div>
+
+      <!-- PESTAÑA 4: PLANTILLA DE CORREO E IBAN -->
+      <div id="admin-tab-plantilla-iban" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="border-b border-slate-100 pb-3">
+          <h3 class="text-base sm:text-lg font-bold text-slate-900">Plantilla de correo e IBAN</h3>
+          <p class="text-xs text-slate-500">
+            Configura el correo remitente de administración, el IBAN, el concepto y el texto base enviado al propietario al dar el visto bueno.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Correo de Administración</label>
+            <input id="cfgAdminEmail" type="email" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">IBAN de cobro / fianza</label>
+            <input id="cfgAdminIban" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Concepto por defecto</label>
+          <input id="cfgPaymentConcept" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Texto base del correo de Solicitud de Pago (48h)</label>
+          <textarea id="cfgMailTemplate" rows="6" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs"></textarea>
+        </div>
+
+        <div class="flex justify-end">
+          <button id="saveTemplateBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
+            Guardar plantilla e IBAN
+          </button>
+        </div>
+      </div>
+
+      <!-- PESTAÑA 5: DAR DE ALTA OTRO ADMINISTRADOR -->
+      <div id="admin-tab-nuevo-admin" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="border-b border-slate-100 pb-3">
+          <h3 class="text-base sm:text-lg font-bold text-slate-900">Dar de alta otro administrador</h3>
+          <p class="text-xs text-slate-500">
+            Añade un nuevo correo de administrador y/o actualiza la contraseña de acceso.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Correo del nuevo administrador</label>
+            <input id="newAdminEmailInput" type="email" placeholder="otro.admin@escalonia15.es" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Contraseña de administración</label>
+            <input id="newAdminCodeInput" type="text" placeholder="1234" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
+          <div id="adminsListSummary" class="text-xs text-slate-600"></div>
+          <button id="addAdminBtn" type="button" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold">
+            Guardar administrador
+          </button>
+        </div>
+      </div>
+    </main>
+  </section>
 
   <script>
     (function () {
-      const STORAGE_KEY = 'escalonia15_sala_comun_v3';
+      const STORAGE_KEY = 'escalonia15_sala_comun_v4';
       const PORTALS = Array.from({ length: 18 }, (_, i) => `Portal ${i + 1}`);
       const UNITS = [
         'Bajo A', 'Bajo B', 'Bajo C', 'Bajo D',
@@ -707,7 +765,6 @@
             year: today.getFullYear(),
             month: today.getMonth()
           },
-          adminSessionActive: false,
           adminConfig: {
             adminEmail: 'administracion@escalonia15.es',
             adminCode: '1234',
@@ -716,7 +773,7 @@
             mailTemplate:
 `Estimado/a vecino/a ({{PORTAL}} · {{VIVIENDA}}),
 
-Hemos registrado tu solicitud de reserva en exclusiva de la Sala Común de Escalonia 15:
+La administración ha dado el visto bueno a tu solicitud de reserva en exclusiva de la Sala Común de Escalonia 15:
 
 - Fecha: {{FECHA}}
 - Turno: {{TURNO}} ({{HORARIO}})
@@ -724,7 +781,7 @@ Hemos registrado tu solicitud de reserva en exclusiva de la Sala Común de Escal
 - IBAN: {{IBAN}}
 - Concepto: {{CONCEPTO}}
 
-De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 horas desde la solicitud para realizar el pago. Una vez recibido, te enviaremos la confirmación definitiva.`
+De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 horas para realizar el pago. Una vez recibido, se confirmará definitivamente la reserva.`
           },
           admins: ['administracion@escalonia15.es'],
           users: [
@@ -755,8 +812,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
               unit: 'Primero A',
               eventType: 'Reunión / Celebración familiar',
               createdAt: new Date().toISOString(),
-              conserjeChecked: false,
-              depositRefunded: false
+              depositReturned: false
             },
             {
               id: 'res-init-2',
@@ -768,8 +824,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
               unit: 'Primero A',
               eventType: 'Acto con fecha fija (Bautizo / Comunión / Evento señalado)',
               createdAt: new Date().toISOString(),
-              conserjeChecked: false,
-              depositRefunded: false
+              depositReturned: false
             }
           ]
         };
@@ -1032,71 +1087,48 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
       function renderMyReservations() {
         const user = getCurrentUser();
-        const container = document.getElementById('myReservationsList');
-        const mine = state.reservations.filter(r => r.ownerEmail.toLowerCase() === user.email.toLowerCase());
+        const pendingEl = document.getElementById('pendingReservationsList');
+        const confirmedEl = document.getElementById('confirmedReservationsList');
 
-        if (!mine.length) {
-          container.innerHTML = `
-            <div class="p-6 rounded-xl border border-dashed border-slate-300 text-center text-xs sm:text-sm text-slate-500">
-              Aún no tienes reservas registradas para <strong>${user.portal} · ${user.unit}</strong>.
+        const mine = state.reservations.filter(
+          r => r.ownerEmail.toLowerCase() === user.email.toLowerCase() && r.status !== 'cancelada'
+        );
+        const pending = mine.filter(r => r.status === 'pendiente');
+        const confirmed = mine.filter(r => r.status === 'reservado');
+
+        if (!pending.length) {
+          pendingEl.innerHTML = `<p class="text-xs text-slate-500">Sin reservas pendientes.</p>`;
+        } else {
+          pendingEl.innerHTML = pending.map(r => `
+            <div class="p-3 rounded-xl bg-white border border-yellow-200 flex items-center justify-between gap-2 text-xs">
+              <div>
+                <p class="font-bold text-slate-900">${formatDateSpanish(r.date)}</p>
+                <p class="text-slate-600">${r.shift === 'manana' ? 'Mañana' : 'Tarde'} (${getShiftScheduleText(r.date, r.shift)})</p>
+              </div>
+              <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold">
+                Anular
+              </button>
             </div>
-          `;
-          return;
+          `).join('');
         }
 
-        container.innerHTML = mine.map(r => {
-          const shiftText = r.shift === 'manana' ? 'Mañana' : 'Tarde';
-          const badgeMap = {
-            pendiente: 'bg-yellow-100 text-yellow-900 border-yellow-300',
-            reservado: 'bg-red-100 text-red-900 border-red-300',
-            cancelada: 'bg-slate-100 text-slate-600 border-slate-300'
-          };
-          const statusLabelMap = {
-            pendiente: 'Pendiente de pago (48h)',
-            reservado: 'Reservado / Confirmado',
-            cancelada: 'Anulada'
-          };
-
-          return `
-            <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div class="space-y-1 text-xs sm:text-sm">
-                <div class="flex flex-wrap items-center gap-2">
-                  <span class="font-bold text-slate-900">${formatDateSpanish(r.date)}</span>
-                  <span class="px-2 py-0.5 rounded-full text-[11px] font-bold border ${badgeMap[r.status] || ''}">
-                    ${statusLabelMap[r.status] || r.status}
-                  </span>
-                </div>
-                <p class="text-xs text-slate-600">
-                  Turno: <strong>${shiftText}</strong> (${getShiftScheduleText(r.date, r.shift)}) · Motivo: <strong>${r.eventType}</strong>
-                </p>
-                <p class="text-[11px] text-slate-500">
-                  Adjudicado: <strong>${r.portal} · ${r.unit}</strong> · Revisión conserje: <strong>${r.conserjeChecked ? 'Verificada' : 'Pendiente'}</strong> · Fianza: <strong>${r.depositRefunded ? 'Devuelta' : 'En depósito (100 €)'}</strong>
-                </p>
+        if (!confirmed.length) {
+          confirmedEl.innerHTML = `<p class="text-xs text-slate-500">Sin reservas confirmadas.</p>`;
+        } else {
+          confirmedEl.innerHTML = confirmed.map(r => `
+            <div class="p-3 rounded-xl bg-white border border-red-200 flex items-center justify-between gap-2 text-xs">
+              <div>
+                <p class="font-bold text-slate-900">${formatDateSpanish(r.date)}</p>
+                <p class="text-slate-600">${r.shift === 'manana' ? 'Mañana' : 'Tarde'} (${getShiftScheduleText(r.date, r.shift)})</p>
               </div>
-              <div class="flex items-center gap-2">
-                ${r.status === 'pendiente' ? `
-                  <button data-reopen-mail="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
-                    Ver correo pago
-                  </button>
-                ` : ''}
-                ${r.status !== 'cancelada' ? `
-                  <button data-cancel-res="${r.id}" type="button" class="px-3 py-1.5 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold">
-                    Anular reserva
-                  </button>
-                ` : ''}
-              </div>
+              <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold">
+                Anular
+              </button>
             </div>
-          `;
-        }).join('');
+          `).join('');
+        }
 
-        container.querySelectorAll('[data-reopen-mail]').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const found = state.reservations.find(item => item.id === btn.dataset.reopenMail);
-            if (found) openPaymentModalForReservation(found);
-          });
-        });
-
-        container.querySelectorAll('[data-cancel-res]').forEach(btn => {
+        document.querySelectorAll('[data-cancel-res]').forEach(btn => {
           btn.addEventListener('click', () => {
             const found = state.reservations.find(item => item.id === btn.dataset.cancelRes);
             if (!found) return;
@@ -1130,7 +1162,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         document.getElementById('cfgPaymentConcept').value = state.adminConfig.concept;
         document.getElementById('cfgMailTemplate').value = state.adminConfig.mailTemplate;
         document.getElementById('adminsListSummary').innerHTML =
-          `Administradores registrados: <strong>${state.admins.join(', ')}</strong>`;
+          `Administradores: <strong>${state.admins.join(', ')}</strong>`;
 
         if (!document.getElementById('commDateInput').value) {
           document.getElementById('commDateInput').value = formatDateISO(new Date());
@@ -1139,31 +1171,49 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const listEl = document.getElementById('adminReservationsList');
         const activeList = state.reservations.filter(r => r.status !== 'cancelada');
         if (!activeList.length) {
-          listEl.innerHTML = `<p class="text-xs text-slate-500">No hay reservas por confirmar ni activas.</p>`;
+          listEl.innerHTML = `<p class="text-xs text-slate-500">No hay reservas activas.</p>`;
           return;
         }
 
-        listEl.innerHTML = activeList.map(r => `
-          <div class="p-3 rounded-xl bg-white border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-            <div>
-              <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} · ${r.shift === 'manana' ? 'Mañana' : 'Tarde'}</p>
-              <p class="text-slate-600">${r.ownerEmail} (${r.portal} · ${r.unit}) · ${r.eventType} — Estado: <strong>${r.status.toUpperCase()}</strong></p>
-            </div>
-            <div class="flex flex-wrap items-center gap-1.5">
-              ${r.status === 'pendiente' ? `
-                <button data-confirm-pay="${r.id}" type="button" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold">
-                  Confirmar pago
+        listEl.innerHTML = activeList.map(r => {
+          const year = Number(r.date.split('-')[0]);
+          const yearCount = getUserYearReservationCount(r.ownerEmail, year);
+
+          return `
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
+              <div class="space-y-0.5">
+                <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} · ${r.shift === 'manana' ? 'Mañana' : 'Tarde'}</p>
+                <p class="text-slate-700">${r.ownerEmail} (${r.portal} · ${r.unit}) — Estado: <strong>${r.status.toUpperCase()}</strong></p>
+                <p class="text-emerald-800 font-semibold">Veces reservado este año (${year}): <strong>${yearCount}</strong></p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <button data-visto-bueno="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold">
+                  Visto bueno (Correo pago 48h)
                 </button>
-              ` : ''}
-              <button data-conserje-ok="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 font-bold">
-                ${r.conserjeChecked ? 'Conserje OK ✓' : 'Marcar revisión conserje'}
-              </button>
-              <button data-refund-dep="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-900 hover:bg-emerald-100 font-bold">
-                ${r.depositRefunded ? 'Fianza devuelta ✓' : 'Devolver fianza (100 €)'}
-              </button>
+                ${r.status === 'pendiente' ? `
+                  <button data-confirm-pay="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold">
+                    Confirmar reserva
+                  </button>
+                ` : ''}
+                <button data-refund-dep="${r.id}" type="button" class="px-3 py-1.5 rounded-lg border ${
+                  r.depositReturned
+                    ? 'bg-emerald-100 border-emerald-400 text-emerald-950'
+                    : 'bg-white border-slate-300 hover:bg-slate-100 text-slate-800'
+                } font-bold">
+                  ${r.depositReturned ? 'Fianza devuelta ✓' : 'Fianza devuelta'}
+                </button>
+              </div>
             </div>
-          </div>
-        `).join('');
+          `;
+        }).join('');
+
+        listEl.querySelectorAll('[data-visto-bueno]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const item = state.reservations.find(x => x.id === btn.dataset.vistoBueno);
+            if (!item) return;
+            openPaymentModalForReservation(item);
+          });
+        });
 
         listEl.querySelectorAll('[data-confirm-pay]').forEach(btn => {
           btn.addEventListener('click', () => {
@@ -1174,19 +1224,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             renderCalendar();
             renderMyReservations();
             renderAdminDashboard();
-            showToast(`Pago confirmado para ${item.ownerEmail}. Reserva marcada en ROJO.`);
-          });
-        });
-
-        listEl.querySelectorAll('[data-conserje-ok]').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const item = state.reservations.find(x => x.id === btn.dataset.conserjeOk);
-            if (!item) return;
-            item.conserjeChecked = !item.conserjeChecked;
-            saveState();
-            renderMyReservations();
-            renderAdminDashboard();
-            showToast('Estado de revisión del conserje actualizado.');
+            showToast(`Reserva confirmada para ${item.ownerEmail}.`);
           });
         });
 
@@ -1194,43 +1232,15 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           btn.addEventListener('click', () => {
             const item = state.reservations.find(x => x.id === btn.dataset.refundDep);
             if (!item) return;
-            item.conserjeChecked = true;
-            item.depositRefunded = true;
+            item.depositReturned = !item.depositReturned;
             saveState();
-            renderMyReservations();
             renderAdminDashboard();
-            showToast(`Fianza de 100 € registrada como devuelta para ${item.ownerEmail}.`);
+            showToast(item.depositReturned ? 'Fianza marcada como devuelta.' : 'Marca de fianza devuelta quitada.');
           });
         });
       }
 
-      function openAdminLoginModal() {
-        document.getElementById('adminPinInput').value = '';
-        const modal = document.getElementById('adminLoginModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-      }
-
-      function closeAdminLoginModal() {
-        const modal = document.getElementById('adminLoginModal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }
-
-      function openAdminDashboardModal() {
-        renderAdminDashboard();
-        const modal = document.getElementById('adminDashboardModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-      }
-
-      function closeAdminDashboardModal() {
-        const modal = document.getElementById('adminDashboardModal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }
-
-      // Tab switching
+      // Main navigation tabs
       document.querySelectorAll('.nav-tab').forEach(tabBtn => {
         tabBtn.addEventListener('click', () => {
           const target = tabBtn.dataset.tab;
@@ -1251,6 +1261,24 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         });
       });
 
+      // Admin sub-tabs
+      document.querySelectorAll('.admin-tab').forEach(tabBtn => {
+        tabBtn.addEventListener('click', () => {
+          const target = tabBtn.dataset.adminTab;
+          document.querySelectorAll('.admin-tab').forEach(b => {
+            b.classList.remove('border-emerald-400', 'text-white');
+            b.classList.add('border-transparent', 'text-slate-300');
+          });
+          tabBtn.classList.add('border-emerald-400', 'text-white');
+          tabBtn.classList.remove('border-transparent', 'text-slate-300');
+
+          document.querySelectorAll('.admin-panel').forEach(panel => {
+            panel.classList.add('hidden');
+          });
+          document.getElementById(`admin-tab-${target}`).classList.remove('hidden');
+        });
+      });
+
       // Month controls
       document.getElementById('prevMonthBtn').addEventListener('click', () => {
         const { year, month } = state.currentYearMonth;
@@ -1268,7 +1296,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         renderCalendar();
       });
 
-      // Form listeners
+      // Booking submit (no payment modal for owner)
       ['acceptNormsCheck', 'fixedDateExceptionCheck'].forEach(id => {
         document.getElementById(id).addEventListener('change', validateSelection);
       });
@@ -1288,8 +1316,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           unit: user.unit,
           eventType,
           createdAt: new Date().toISOString(),
-          conserjeChecked: false,
-          depositRefunded: false
+          depositReturned: false
         };
 
         state.reservations.push(newReservation);
@@ -1297,11 +1324,10 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         renderCalendar();
         renderMyReservations();
         renderAdminDashboard();
-        openPaymentModalForReservation(newReservation);
-        showToast('Solicitud registrada en AMARILLO (Pendiente de pago 48h). Revisa y envía el correo.');
+        showToast('Reserva solicitada. Queda pendiente de confirmación.');
       });
 
-      // Payment Modal actions
+      // Payment Modal actions (opened only when admin gives visto bueno)
       document.getElementById('closePaymentModal').addEventListener('click', () => {
         const modal = document.getElementById('paymentModal');
         modal.classList.add('hidden');
@@ -1315,9 +1341,9 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const fullText = `Para: ${to}\nAsunto: ${subj}\n\n${body}`;
         try {
           await navigator.clipboard.writeText(fullText);
-          showToast('Texto del correo copiado al portapapeles.');
+          showToast('Texto copiado.');
         } catch (e) {
-          showToast('No se pudo copiar automáticamente.', true);
+          showToast('No se pudo copiar.', true);
         }
       });
 
@@ -1326,7 +1352,6 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const subject = encodeURIComponent(document.getElementById('mailSubjectInput').value.trim());
         const body = encodeURIComponent(document.getElementById('mailBodyInput').value.trim());
         window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
-        showToast('Abriendo cliente de correo con la solicitud de pago (48h).');
       });
 
       // Auth Modal actions
@@ -1348,7 +1373,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const found = state.users.find(u => u.email.toLowerCase() === email);
 
         if (!found) {
-          showToast('Ese correo no está dado de alta en Escalonia 15.', true);
+          showToast('Ese correo no está dado de alta.', true);
           return;
         }
         if (pass && found.password && pass !== found.password) {
@@ -1363,19 +1388,19 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         renderMyReservations();
         authModal.classList.add('hidden');
         authModal.classList.remove('flex');
-        showToast(`Sesión iniciada como ${found.email} (${found.portal} · ${found.unit}).`);
+        showToast(`Sesión iniciada: ${found.email}`);
       });
 
       document.getElementById('forgotPasswordBtn').addEventListener('click', () => {
         const email = document.getElementById('loginEmailInput').value.trim() || state.currentUserEmail;
-        showToast(`Enlace de restablecimiento enviado a ${email}.`);
+        showToast(`Recuperación enviada a ${email}.`);
       });
 
       document.getElementById('activateAccountBtn').addEventListener('click', () => {
         const email = document.getElementById('loginEmailInput').value.trim().toLowerCase();
         const pass = document.getElementById('loginPasswordInput').value.trim();
         if (!email) {
-          showToast('Introduce tu correo autorizado para activar tu cuenta.', true);
+          showToast('Introduce un correo autorizado.', true);
           return;
         }
         let existing = state.users.find(u => u.email.toLowerCase() === email);
@@ -1400,39 +1425,40 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         renderMyReservations();
         authModal.classList.add('hidden');
         authModal.classList.remove('flex');
-        showToast(`Cuenta activada para ${existing.email} (${existing.portal} · ${existing.unit}).`);
+        showToast(`Cuenta activada: ${existing.email}`);
       });
 
-      // Admin Login & Dedicated Dashboard actions
+      // Admin password modal -> dedicated full admin interface
+      const adminLoginModal = document.getElementById('adminLoginModal');
+      const adminFullInterface = document.getElementById('adminFullInterface');
+
       document.getElementById('btnOpenAdmin').addEventListener('click', () => {
-        if (state.adminSessionActive) {
-          openAdminDashboardModal();
-        } else {
-          openAdminLoginModal();
-        }
+        document.getElementById('adminPinInput').value = '';
+        adminLoginModal.classList.remove('hidden');
+        adminLoginModal.classList.add('flex');
       });
 
-      document.getElementById('closeAdminLoginModal').addEventListener('click', closeAdminLoginModal);
-      document.getElementById('closeAdminDashboardModal').addEventListener('click', closeAdminDashboardModal);
+      document.getElementById('closeAdminLoginModal').addEventListener('click', () => {
+        adminLoginModal.classList.add('hidden');
+        adminLoginModal.classList.remove('flex');
+      });
 
       document.getElementById('unlockAdminBtn').addEventListener('click', () => {
         const code = document.getElementById('adminPinInput').value.trim();
         if (code === state.adminConfig.adminCode) {
-          state.adminSessionActive = true;
-          saveState();
-          closeAdminLoginModal();
-          openAdminDashboardModal();
-          showToast('Bienvenido al panel de Administrador.');
+          adminLoginModal.classList.add('hidden');
+          adminLoginModal.classList.remove('flex');
+          renderAdminDashboard();
+          adminFullInterface.classList.remove('hidden');
+          adminFullInterface.classList.add('flex');
         } else {
-          showToast('Clave de administrador incorrecta.', true);
+          showToast('Contraseña de administrador incorrecta.', true);
         }
       });
 
-      document.getElementById('lockAdminBtn').addEventListener('click', () => {
-        state.adminSessionActive = false;
-        saveState();
-        closeAdminDashboardModal();
-        showToast('Sesión de administrador cerrada.');
+      document.getElementById('exitAdminFullBtn').addEventListener('click', () => {
+        adminFullInterface.classList.add('hidden');
+        adminFullInterface.classList.remove('flex');
       });
 
       document.getElementById('createCommEventBtn').addEventListener('click', () => {
@@ -1441,7 +1467,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const titleVal = document.getElementById('commTitleInput').value.trim() || 'Acto comunitario';
 
         if (!dateVal) {
-          showToast('Selecciona una fecha para el acto comunitario.', true);
+          showToast('Selecciona una fecha.', true);
           return;
         }
         if (getSlotReservation(dateVal, shiftVal)) {
@@ -1459,15 +1485,14 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           unit: titleVal,
           eventType: `Acto comunitario: ${titleVal}`,
           createdAt: new Date().toISOString(),
-          conserjeChecked: false,
-          depositRefunded: false
+          depositReturned: false
         });
 
         saveState();
         renderCalendar();
         renderAdminDashboard();
         document.getElementById('commTitleInput').value = '';
-        showToast(`Acto comunitario registrado en ROJO para el ${formatDateSpanish(dateVal)}.`);
+        showToast('Acto comunitario registrado.');
       });
 
       document.getElementById('saveBulkEmailsBtn').addEventListener('click', () => {
@@ -1478,7 +1503,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           .filter(Boolean);
 
         if (!parts.length) {
-          showToast('Escribe al menos un correo separado por ";".', true);
+          showToast('Escribe correos separados por ";".', true);
           return;
         }
 
@@ -1501,7 +1526,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         saveState();
         renderAdminDashboard();
         document.getElementById('bulkEmailsInput').value = '';
-        showToast(`Alta masiva completada: ${added} propietario(s) nuevo(s) autorizado(s).`);
+        showToast(`${added} propietario(s) autorizado(s).`);
       });
 
       document.getElementById('saveTemplateBtn').addEventListener('click', () => {
@@ -1510,7 +1535,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         state.adminConfig.concept = document.getElementById('cfgPaymentConcept').value.trim();
         state.adminConfig.mailTemplate = document.getElementById('cfgMailTemplate').value;
         saveState();
-        showToast('Plantilla de correo e IBAN guardada.');
+        showToast('Plantilla e IBAN guardados.');
       });
 
       document.getElementById('addAdminBtn').addEventListener('click', () => {
@@ -1526,7 +1551,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         document.getElementById('newAdminEmailInput').value = '';
         document.getElementById('newAdminCodeInput').value = '';
         renderAdminDashboard();
-        showToast('Administrador y clave guardados.');
+        showToast('Administrador guardado.');
       });
 
       // Initial render
