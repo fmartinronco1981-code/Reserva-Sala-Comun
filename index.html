@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reserva Sala Común Escalonia 15</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -336,7 +337,7 @@
               <label class="flex items-start gap-2 pt-1 cursor-pointer select-none">
                 <input id="fixedDateExceptionCheck" type="checkbox" class="mt-0.5 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600" />
                 <span class="text-[11px] text-slate-600 leading-snug">
-                  Aplicar excepción de <strong>acto con fecha fija</strong> (punto 12.1) si la fecha supera los 30 días de antelación.
+                  Aplicar excepción de <strong>acto con fecha fija</strong> (punto 12.1) si la fecha supera el plazo general de un mes.
                 </span>
               </label>
 
@@ -649,13 +650,18 @@
         <div id="adminReservationsList" class="space-y-3"></div>
       </div>
 
-      <!-- PESTAÑA 2: PROGRAMAR ACTO COMUNITARIO -->
+      <!-- PESTAÑA 2: PROGRAMAR ACTO COMUNITARIO (RESERVA DIRECTA DE ADMINISTRADOR SIN PAGO NI FIANZA) -->
       <div id="admin-tab-acto-comunitario" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
-        <div class="border-b border-slate-100 pb-3">
-          <h3 class="text-base sm:text-lg font-bold text-slate-900">Programar acto comunitario</h3>
-          <p class="text-xs text-slate-500">
-            Función exclusiva de la administración para registrar actos comunitarios en el calendario.
-          </p>
+        <div class="border-b border-slate-100 pb-3 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900">Programar acto comunitario</h3>
+            <p class="text-xs text-slate-500">
+              Reserva directa de administración: queda en estado Reservado sin pago ni fianza, con contador sin límite.
+            </p>
+          </div>
+          <span id="adminCommCounterBadge" class="px-3 py-1 rounded-full bg-slate-100 text-slate-900 text-xs font-bold">
+            Actos comunitarios registrados: 0 (sin límite)
+          </span>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -803,14 +809,33 @@
 
   <script>
     (function () {
-      const STORAGE_KEY = 'escalonia15_sala_comun_v10';
-      const CHANNEL_NAME = 'escalonia15_realtime_sync_v10';
+      // CONFIGURACIÓN SUPABASE REALTIME (rellena URL y ANON_KEY para sincronización en la nube entre dispositivos)
+      const SUPABASE_URL = '';
+      const SUPABASE_ANON_KEY = '';
+      const SUPABASE_TABLE = 'escalonia15_state';
+      const SUPABASE_ROW_ID = 'escalonia15_main';
+
+      const STORAGE_KEY = 'escalonia15_sala_comun_v11';
+      const CHANNEL_NAME = 'escalonia15_realtime_sync_v11';
       const PORTALS = Array.from({ length: 18 }, (_, i) => `Portal ${i + 1}`);
       const UNITS = [
         'Bajo A', 'Bajo B', 'Bajo C', 'Bajo D',
         'Primero A', 'Primero B', 'Primero C', 'Primero D',
         'Segundo A', 'Segundo B', 'Segundo C', 'Segundo D'
       ];
+
+      const hasSupabaseConfig = Boolean(
+        SUPABASE_URL &&
+        SUPABASE_ANON_KEY &&
+        !SUPABASE_URL.includes('TU_PROYECTO') &&
+        !SUPABASE_ANON_KEY.includes('TU_ANON_KEY') &&
+        window.supabase &&
+        typeof window.supabase.createClient === 'function'
+      );
+
+      const supabaseClient = hasSupabaseConfig
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
 
       const syncChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(CHANNEL_NAME) : null;
       let lastKnownRawState = '';
@@ -906,6 +931,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
               portal: 'Portal 1',
               unit: 'Primero A',
               eventType: 'Reunión / Celebración familiar',
+              createdByAdmin: false,
               createdAt: new Date().toISOString(),
               depositReturned: false,
               cancelledByOwner: false
@@ -919,11 +945,24 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
               portal: 'Portal 1',
               unit: 'Primero A',
               eventType: 'Acto con fecha fija (Bautizo / Comunión / Evento señalado)',
+              createdByAdmin: false,
               createdAt: new Date().toISOString(),
               depositReturned: false,
               cancelledByOwner: false
             }
           ]
+        };
+      }
+
+      function normalizeState(parsed) {
+        const base = buildInitialState();
+        return {
+          ...base,
+          ...(parsed || {}),
+          adminConfig: {
+            ...base.adminConfig,
+            ...((parsed && parsed.adminConfig) || {})
+          }
         };
       }
 
@@ -938,15 +977,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             return initial;
           }
           lastKnownRawState = raw;
-          const parsed = JSON.parse(raw);
-          return {
-            ...buildInitialState(),
-            ...parsed,
-            adminConfig: {
-              ...buildInitialState().adminConfig,
-              ...(parsed.adminConfig || {})
-            }
-          };
+          return normalizeState(JSON.parse(raw));
         } catch (e) {
           return buildInitialState();
         }
@@ -985,32 +1016,45 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         renderAdminDashboard();
       }
 
-      function saveState(broadcast = true) {
+      async function pushStateToCloud(serializedState, eventType = 'UPDATE') {
+        if (!supabaseClient) return;
+        try {
+          await supabaseClient
+            .from(SUPABASE_TABLE)
+            .upsert(
+              {
+                id: SUPABASE_ROW_ID,
+                payload: JSON.parse(serializedState),
+                last_event: eventType,
+                updated_at: new Date().toISOString()
+              },
+              { onConflict: 'id' }
+            );
+        } catch (err) {
+          // Fallback local continúa operando sin interrupciones
+        }
+      }
+
+      function saveState(broadcast = true, eventType = 'UPDATE') {
         const serialized = JSON.stringify(state);
         lastKnownRawState = serialized;
         localStorage.setItem(STORAGE_KEY, serialized);
         refreshAllViews();
         if (broadcast) {
           if (syncChannel) {
-            syncChannel.postMessage({ type: 'STATE_UPDATED', payload: serialized, ts: Date.now() });
+            syncChannel.postMessage({ type: 'STATE_UPDATED', eventType, payload: serialized, ts: Date.now() });
           }
           window.dispatchEvent(new CustomEvent('escalonia15:live-update', { detail: serialized }));
+          pushStateToCloud(serialized, eventType);
         }
       }
 
       function syncFromExternalRaw(rawValue) {
         if (!rawValue || rawValue === lastKnownRawState) return;
         lastKnownRawState = rawValue;
+        localStorage.setItem(STORAGE_KEY, rawValue);
         try {
-          const parsed = JSON.parse(rawValue);
-          state = {
-            ...buildInitialState(),
-            ...parsed,
-            adminConfig: {
-              ...buildInitialState().adminConfig,
-              ...(parsed.adminConfig || {})
-            }
-          };
+          state = normalizeState(JSON.parse(rawValue));
           refreshAllViews();
         } catch (e) {
           // ignore malformed sync payload
@@ -1042,13 +1086,51 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         };
       }
 
-      // Polling ligero en tiempo real para garantizar actualización inmediata en cualquier contexto
+      async function pullInitialCloudStateAndSubscribe() {
+        if (!supabaseClient) return;
+        try {
+          const { data } = await supabaseClient
+            .from(SUPABASE_TABLE)
+            .select('payload')
+            .eq('id', SUPABASE_ROW_ID)
+            .maybeSingle();
+
+          if (data && data.payload) {
+            syncFromExternalRaw(JSON.stringify(data.payload));
+          } else {
+            await pushStateToCloud(JSON.stringify(state), 'INSERT');
+          }
+
+          supabaseClient
+            .channel('escalonia15-realtime-channel')
+            .on(
+              'postgres_changes',
+              {
+                event: '*',
+                schema: 'public',
+                table: SUPABASE_TABLE,
+                filter: `id=eq.${SUPABASE_ROW_ID}`
+              },
+              (payload) => {
+                const nextPayload = payload.new && payload.new.payload;
+                if (nextPayload) {
+                  syncFromExternalRaw(JSON.stringify(nextPayload));
+                }
+              }
+            )
+            .subscribe();
+        } catch (e) {
+          // Si no existe la tabla aún, el respaldo local mantiene el funcionamiento
+        }
+      }
+
+      // Respaldo continuo entre pestañas / contextos del navegador
       setInterval(() => {
         const currentRaw = localStorage.getItem(STORAGE_KEY);
         if (currentRaw && currentRaw !== lastKnownRawState) {
           syncFromExternalRaw(currentRaw);
         }
-      }, 250);
+      }, 200);
 
       function showToast(message, isError = false) {
         const box = document.getElementById('toastBox');
@@ -1084,11 +1166,16 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
       function getUserYearReservationCount(email, year) {
         return state.reservations.filter(r => {
+          if (r.createdByAdmin) return false;
           if (r.ownerEmail.toLowerCase() !== email.toLowerCase()) return false;
           if (r.status === 'cancelada' || r.status === 'no_autorizada') return false;
           const resYear = Number(r.date.split('-')[0]);
           return resYear === year;
         }).length;
+      }
+
+      function getAdminEventsCount() {
+        return state.reservations.filter(r => r.createdByAdmin === true && r.status === 'reservado').length;
       }
 
       function updateHeaderAndUserInfo() {
@@ -1360,7 +1447,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const ownerCancelledEl = document.getElementById('ownerCancelledReservationsList');
 
         const mine = state.reservations.filter(
-          r => r.ownerEmail.toLowerCase() === user.email.toLowerCase()
+          r => !r.createdByAdmin && r.ownerEmail.toLowerCase() === user.email.toLowerCase()
         );
         const pending = mine.filter(r => r.status === 'pendiente');
         const confirmed = mine.filter(r => r.status === 'reservado');
@@ -1419,7 +1506,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
             found.status = 'cancelada';
             found.cancelledByOwner = true;
-            saveState();
+            saveState(true, 'UPDATE');
 
             if (daysBefore < 7) {
               showToast('Anulada por propietario fuera del plazo de 7 días: se devuelve la fianza pero no la parte del alquiler.');
@@ -1433,6 +1520,8 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       function renderAdminDashboard() {
         document.getElementById('authorizedCountLabel').textContent =
           `Propietarios autorizados: ${state.users.length}`;
+        document.getElementById('adminCommCounterBadge').textContent =
+          `Actos comunitarios registrados: ${getAdminEventsCount()} (sin límite)`;
         document.getElementById('cfgAdminEmail').value = state.adminConfig.adminEmail;
         document.getElementById('cfgAdminIban').value = state.adminConfig.iban;
         document.getElementById('cfgPaymentConcept').value = state.adminConfig.concept;
@@ -1452,6 +1541,23 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         }
 
         listEl.innerHTML = activeList.map(r => {
+          if (r.createdByAdmin) {
+            return `
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
+                <div class="space-y-0.5">
+                  <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
+                  <p class="text-slate-700">${r.eventType || r.unit} — Estado: <strong>RESERVADO</strong></p>
+                  <p class="text-emerald-800 font-semibold">Contador de actos comunitarios: <strong>${getAdminEventsCount()}</strong> (sin límite)</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <button data-admin-cancel="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold">
+                    Cancelar reserva
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+
           const year = Number(r.date.split('-')[0]);
           const yearCount = getUserYearReservationCount(r.ownerEmail, year);
 
@@ -1486,6 +1592,17 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           `;
         }).join('');
 
+        listEl.querySelectorAll('[data-admin-cancel]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const item = state.reservations.find(x => x.id === btn.dataset.adminCancel);
+            if (!item) return;
+            item.status = 'cancelada';
+            item.cancelledByOwner = false;
+            saveState(true, 'UPDATE');
+            showToast('Reserva cancelada.');
+          });
+        });
+
         listEl.querySelectorAll('[data-visto-bueno]').forEach(btn => {
           btn.addEventListener('click', () => {
             const item = state.reservations.find(x => x.id === btn.dataset.vistoBueno);
@@ -1499,7 +1616,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             const item = state.reservations.find(x => x.id === btn.dataset.confirmPay);
             if (!item) return;
             item.status = 'reservado';
-            saveState();
+            saveState(true, 'UPDATE');
             showToast(`Reserva confirmada para ${item.ownerEmail}.`);
           });
         });
@@ -1510,7 +1627,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             if (!item) return;
             item.status = 'no_autorizada';
             item.cancelledByOwner = false;
-            saveState();
+            saveState(true, 'UPDATE');
             showToast(`Reserva de ${item.ownerEmail} marcada como NO AUTORIZADA.`);
           });
         });
@@ -1520,7 +1637,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             const item = state.reservations.find(x => x.id === btn.dataset.refundDep);
             if (!item) return;
             item.depositReturned = !item.depositReturned;
-            saveState();
+            saveState(true, 'UPDATE');
             showToast(item.depositReturned ? 'Fianza marcada como devuelta.' : 'Marca de fianza devuelta quitada.');
           });
         });
@@ -1596,7 +1713,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         const { year, month } = state.currentYearMonth;
         const targetDate = new Date(year, month + delta, 1);
         state.currentYearMonth = { year: targetDate.getFullYear(), month: targetDate.getMonth() };
-        saveState(false);
+        saveState(true, 'UPDATE');
       }
 
       document.getElementById('prevMonthBtn').addEventListener('click', () => shiftMonthBy(-1));
@@ -1623,13 +1740,14 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           portal: user.portal,
           unit: user.unit,
           eventType,
+          createdByAdmin: false,
           createdAt: new Date().toISOString(),
           depositReturned: false,
           cancelledByOwner: false
         };
 
         state.reservations.push(newReservation);
-        saveState();
+        saveState(true, 'INSERT');
         showToast('Solicitud de reserva enviada. Queda pendiente de revisión por la administración.');
       });
 
@@ -1688,7 +1806,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         }
 
         state.currentUserEmail = found.email;
-        saveState(false);
+        saveState(true, 'UPDATE');
         authModal.classList.add('hidden');
         authModal.classList.remove('flex');
         showToast(`Bienvenido · ${found.portal} · ${found.unit}`);
@@ -1722,7 +1840,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           existing.active = true;
         }
         state.currentUserEmail = existing.email;
-        saveState();
+        saveState(true, 'INSERT');
         authModal.classList.add('hidden');
         authModal.classList.remove('flex');
         showToast(`Cuenta activada: ${existing.portal} · ${existing.unit}`);
@@ -1785,17 +1903,18 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           shift: shiftVal,
           status: 'reservado',
           ownerEmail: state.adminConfig.adminEmail,
-          portal: 'Comunidad',
+          portal: 'Administración',
           unit: titleVal,
-          eventType: `Acto comunitario: ${titleVal}`,
+          eventType: titleVal,
+          createdByAdmin: true,
           createdAt: new Date().toISOString(),
           depositReturned: false,
           cancelledByOwner: false
         });
 
-        saveState();
+        saveState(true, 'INSERT');
         document.getElementById('commTitleInput').value = '';
-        showToast('Acto comunitario registrado.');
+        showToast('Reserva registrada por administración en estado Reservado.');
       });
 
       document.getElementById('saveBulkEmailsBtn').addEventListener('click', () => {
@@ -1826,7 +1945,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           }
         });
 
-        saveState();
+        saveState(true, 'INSERT');
         document.getElementById('bulkEmailsInput').value = '';
         showToast(`${added} propietario(s) autorizado(s).`);
       });
@@ -1836,7 +1955,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         state.adminConfig.iban = document.getElementById('cfgAdminIban').value.trim();
         state.adminConfig.concept = document.getElementById('cfgPaymentConcept').value.trim();
         state.adminConfig.mailTemplate = document.getElementById('cfgMailTemplate').value;
-        saveState();
+        saveState(true, 'UPDATE');
         showToast('Plantilla e IBAN guardados.');
       });
 
@@ -1849,15 +1968,16 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         if (newCode) {
           state.adminConfig.adminCode = newCode;
         }
-        saveState();
+        saveState(true, 'UPDATE');
         document.getElementById('newAdminEmailInput').value = '';
         document.getElementById('newAdminCodeInput').value = '';
         showToast('Administrador guardado.');
       });
 
-      // Render inicial
+      // Render inicial y suscripción en tiempo real
       applyScreenVisibility();
       refreshAllViews();
+      pullInitialCloudStateAndSubscribe();
     })();
   </script>
 </body>
