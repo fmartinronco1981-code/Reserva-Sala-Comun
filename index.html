@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reserva Sala Común Escalonia 15 — v1.0</title>
+  <title>Reserva Sala Común Escalonia 15 — v1.1</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -135,7 +135,7 @@
     <div class="max-w-xl w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-7 sm:p-10 text-center shadow-2xl space-y-7">
       <div class="space-y-1">
         <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-emerald-200 px-3 py-1 rounded-full bg-white/10">
-          Versión 1.0 · Producción
+          Versión 1.1 · Producción
         </span>
         <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight pt-2">
           Bienvenido a reserva sala común Escalonia 15
@@ -172,7 +172,7 @@
           </div>
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-emerald-300">
-              Reserva Sala Común Escalonia 15 · v1.0
+              Reserva Sala Común Escalonia 15 · v1.1
             </p>
             <h2 id="ownerWelcomeTitle" class="text-base sm:text-lg font-extrabold tracking-tight leading-tight">
               Bienvenido · Vivienda
@@ -189,7 +189,7 @@
             type="button"
             class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 border border-white/15 transition"
           >
-            Cuenta / Activar / Cambiar
+            Iniciar sesión / Cambiar
           </button>
           <button
             id="btnOwnerLogout"
@@ -494,7 +494,7 @@
     </div>
   </div>
 
-  <!-- MODAL 2: INICIAR SESIÓN O ACTIVAR CUENTA DE PROPIETARIO -->
+  <!-- MODAL 2: INICIAR SESIÓN DE PROPIETARIO -->
   <div id="authModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-brand-dark text-white px-5 py-3.5 flex items-center justify-between">
@@ -505,24 +505,18 @@
       </div>
 
       <div class="p-5 space-y-4 text-xs sm:text-sm">
-        <div class="flex gap-2 border-b border-slate-200 pb-2">
-          <button id="modeLoginTab" type="button" class="flex-1 py-1.5 rounded-lg bg-emerald-700 text-white text-xs font-bold">
-            Iniciar sesión
-          </button>
-          <button id="modeActivateTab" type="button" class="flex-1 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold">
-            Activar cuenta
-          </button>
-        </div>
+        <p class="text-xs text-slate-600">
+          Entra con tu correo autorizado y la contraseña inicial <strong>123456</strong> (o la que hayas configurado). Si entras por primera vez, se te pedirá cambiarla al momento.
+        </p>
 
-        <!-- MODO LOGIN -->
-        <div id="authLoginFields" class="space-y-3">
+        <div class="space-y-3">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Correo electrónico</label>
             <input id="loginEmailInput" type="email" autocomplete="email" placeholder="vecino@correo.com" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Contraseña</label>
-            <input id="loginPasswordInput" type="password" autocomplete="current-password" placeholder="Tu contraseña" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+            <input id="loginPasswordInput" type="password" autocomplete="current-password" placeholder="123456 o tu contraseña" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
           </div>
 
           <div class="flex items-center justify-between text-xs">
@@ -535,38 +529,47 @@
             Entrar
           </button>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- MODO ACTIVACIÓN DE PROPIETARIO -->
-        <div id="authActivateFields" class="hidden space-y-3">
-          <p class="text-xs text-slate-600">
-            Solo para correos previamente autorizados por administración. Crea tu contraseña e indica tu vivienda.
-          </p>
+  <!-- MODAL 2B: CAMBIO OBLIGATORIO DE CONTRASEÑA EN PRIMER ACCESO -->
+  <div id="forcePasswordModal" class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-[1px] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="bg-emerald-900 text-white px-5 py-3.5">
+        <h3 class="text-sm sm:text-base font-bold">Cambio de contraseña obligatorio</h3>
+        <p class="text-[11px] text-emerald-200">Establece tu contraseña personal antes de continuar</p>
+      </div>
+
+      <div class="p-5 space-y-3.5 text-xs sm:text-sm">
+        <div class="grid grid-cols-3 gap-2">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Correo autorizado</label>
-            <input id="actEmailInput" type="email" autocomplete="email" placeholder="vecino@correo.com" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
-          </div>
-          <div class="grid grid-cols-3 gap-2">
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Portal</label>
-              <input id="actPortalInput" type="text" placeholder="Ej. 1" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Piso</label>
-              <input id="actFloorInput" type="text" placeholder="Ej. 2º" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Letra</label>
-              <input id="actLetterInput" type="text" placeholder="Ej. B" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm uppercase" />
-            </div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Portal</label>
+            <input id="firstPortalInput" type="text" placeholder="Ej. 1" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Crea tu contraseña (mínimo 6 caracteres)</label>
-            <input id="actPasswordInput" type="password" minlength="6" autocomplete="new-password" placeholder="Mínimo 6 caracteres" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Piso</label>
+            <input id="firstFloorInput" type="text" placeholder="Ej. 2º" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
           </div>
-          <button id="activateAccountBtn" type="button" class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm transition">
-            Activar cuenta de propietario
-          </button>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Letra</label>
+            <input id="firstLetterInput" type="text" placeholder="Ej. B" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs uppercase" />
+          </div>
         </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Nueva contraseña (mínimo 6 caracteres)</label>
+          <input id="newOwnerPasswordInput" type="password" minlength="6" autocomplete="new-password" placeholder="Elige una contraseña segura" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Repite la nueva contraseña</label>
+          <input id="confirmOwnerPasswordInput" type="password" minlength="6" autocomplete="new-password" placeholder="Repite la contraseña" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
+        </div>
+
+        <button id="saveNewPasswordBtn" type="button" class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm transition">
+          Guardar nueva contraseña y entrar
+        </button>
       </div>
     </div>
   </div>
@@ -607,7 +610,7 @@
       <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-            Administrador · v1.0
+            Administrador · v1.1
           </span>
           <h2 id="adminHeaderTitle" class="text-base sm:text-lg font-bold leading-tight">
             Administrador — Sala Común Escalonia 15
@@ -722,18 +725,18 @@
           <div>
             <h3 class="text-base sm:text-lg font-bold text-slate-900">Alta de propietarios</h3>
             <p class="text-xs text-slate-500">
-              Pega los correos electrónicos de las viviendas separados por punto y coma (<code>;</code>) para autorizarlos en bloque.
+              Escribe uno o varios correos separados por punto y coma (<code>;</code>). Se asignará la contraseña inicial <strong>123456</strong> y se abrirá tu correo (Outlook) con los datos de acceso.
             </p>
           </div>
           <span id="authorizedCountLabel" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold"></span>
         </div>
 
-        <textarea id="bulkEmailsInput" rows="4" placeholder="vecino1@correo.com; vecino2@correo.com; vecino3@correo.com" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs"></textarea>
+        <textarea id="bulkEmailsInput" rows="4" placeholder="vecino1@correo.com; vecino2@correo.com" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs"></textarea>
 
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div id="authorizedEmailsPreview" class="flex flex-wrap gap-1.5 text-xs"></div>
           <button id="saveBulkEmailsBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
-            Autorizar propietarios
+            Autorizar y abrir correo (123456)
           </button>
         </div>
       </div>
@@ -780,7 +783,7 @@
         <div class="border-b border-slate-100 pb-3">
           <h3 class="text-base sm:text-lg font-bold text-slate-900">Dar de alta otro administrador</h3>
           <p class="text-xs text-slate-500">
-            Registra el correo de otro administrador en la comunidad (recuerda crear su usuario en Firebase Authentication).
+            Registra el correo de otro administrador en la comunidad.
           </p>
         </div>
 
@@ -839,6 +842,7 @@
     (function () {
       const ADMIN_UID = "frJdxFWkPgOs7neTSQZEoOpN2Ot2";
       const ADMIN_EMAIL = "fmartinronco1981@gmail.com";
+      const INITIAL_OWNER_PASS = "123456";
 
       const firebaseConfig = {
         apiKey: "AIzaSyCB15Exkb3uDkYrSzapnXNGbpHJsb32EHs",
@@ -857,12 +861,18 @@
       const auth = app.auth();
       const db = app.database();
 
+      // App secundaria para crear cuentas de vecinos sin cerrar la sesión del administrador
+      const secondaryApp = window.firebase.apps.find(a => a.name === "SecondaryAuthApp")
+        || window.firebase.initializeApp(firebaseConfig, "SecondaryAuthApp");
+      const secondaryAuth = secondaryApp.auth();
+
       let activeScreen = "landing";
       let selectedSlot = null;
       let authUser = null;
       let isCurrentUserAdmin = false;
       let currentUserProfile = null;
       let pendingScreenAfterLogin = null;
+      let lastEnteredPassword = "";
 
       let state = {
         currentYearMonth: {
@@ -941,7 +951,30 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         clearTimeout(window.__toastTimer);
         window.__toastTimer = setTimeout(() => {
           box.classList.add("hidden");
-        }, 3800);
+        }, 4000);
+      }
+
+      function openOutlookInvite(emails) {
+        const to = encodeURIComponent(emails.join(";"));
+        const cc = encodeURIComponent(state.adminConfig.adminEmail || ADMIN_EMAIL);
+        const subject = encodeURIComponent("Acceso Reserva Sala Común Escalonia 15");
+        const appUrl = window.location.href.split("#")[0];
+        const body = encodeURIComponent(
+`Hola,
+
+Se ha dado de alta tu acceso a la aplicación de Reserva de la Sala Común de Escalonia 15:
+${appUrl}
+
+Tus datos iniciales de acceso son:
+- Usuario (correo): ${emails.join(", ")}
+- Contraseña inicial: ${INITIAL_OWNER_PASS}
+
+Al entrar por primera vez se te pedirá cambiar la contraseña por una personal.
+
+Un saludo,
+Administración Escalonia 15`
+        );
+        window.location.href = `mailto:${to}?cc=${cc}&subject=${subject}&body=${body}`;
       }
 
       function applyScreenVisibility() {
@@ -968,7 +1001,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       }
 
       function getUserHousingLabel(profile) {
-        if (!profile) return "Vivienda sin completar";
+        if (!profile) return "Vivienda por completar";
         if (profile.role === "admin") return "Administración";
         const parts = [];
         if (profile.portal) parts.push(`Portal ${profile.portal}`);
@@ -1010,7 +1043,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         if (!authUser) {
           btnLogout.classList.add("hidden");
           document.getElementById("ownerWelcomeTitle").textContent = "Bienvenido · Sala Común Escalonia 15";
-          document.getElementById("activeUserBanner").textContent = "Inicia sesión o activa tu cuenta de propietario para reservar.";
+          document.getElementById("activeUserBanner").textContent = "Inicia sesión con tu correo y contraseña (123456 en el primer acceso).";
           document.getElementById("formUserEmail").textContent = "Sin sesión";
           document.getElementById("formUserUnit").textContent = "-";
           document.getElementById("formUserCount").textContent = "0 / 2";
@@ -1067,7 +1100,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
         if (!authUser) {
           if (selectedSlot) {
-            msgBox.textContent = "Inicia sesión o activa tu cuenta de propietario para enviar la solicitud.";
+            msgBox.textContent = "Inicia sesión como propietario para enviar la solicitud.";
             msgBox.className = "p-2.5 rounded-xl text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-200";
           } else {
             msgBox.classList.add("hidden");
@@ -1500,7 +1533,6 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         renderAdminDashboard();
       }
 
-      // Escucha en tiempo real de Realtime Database
       db.ref("escalonia15/adminConfig").on("value", snap => {
         if (snap.exists()) {
           state.adminConfig = { ...state.adminConfig, ...snap.val() };
@@ -1522,7 +1554,17 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         refreshAllViews();
       });
 
-      // Observador de autenticación real de Firebase
+      function openForcePasswordModal() {
+        const modal = document.getElementById("forcePasswordModal");
+        document.getElementById("firstPortalInput").value = (currentUserProfile && currentUserProfile.portal) || "";
+        document.getElementById("firstFloorInput").value = (currentUserProfile && currentUserProfile.floor) || "";
+        document.getElementById("firstLetterInput").value = (currentUserProfile && currentUserProfile.letter) || "";
+        document.getElementById("newOwnerPasswordInput").value = "";
+        document.getElementById("confirmOwnerPasswordInput").value = "";
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+
       auth.onAuthStateChanged(async user => {
         authUser = user;
         if (!user) {
@@ -1544,7 +1586,8 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             role: "admin",
             portal: "Admin",
             floor: "-",
-            letter: "-"
+            letter: "-",
+            mustChangePassword: false
           };
           await db.ref(`escalonia15/users/${user.uid}`).set(currentUserProfile);
         }
@@ -1558,6 +1601,10 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
         applyScreenVisibility();
         refreshAllViews();
+
+        if (!isCurrentUserAdmin && (!currentUserProfile || currentUserProfile.mustChangePassword === true || lastEnteredPassword === INITIAL_OWNER_PASS)) {
+          openForcePasswordModal();
+        }
       });
 
       // Botones principales de entrada
@@ -1566,7 +1613,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         applyScreenVisibility();
         refreshAllViews();
         if (!authUser) {
-          openAuthModal("login");
+          openAuthModal();
         }
       });
 
@@ -1576,11 +1623,11 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       });
 
       document.getElementById("btnOwnerLogout").addEventListener("click", () => {
+        lastEnteredPassword = "";
         auth.signOut();
         showToast("Sesión cerrada.");
       });
 
-      // Selector de turno en panel derecho
       document.getElementById("pickShiftMananaBtn").addEventListener("click", () => {
         if (selectedSlot) handleSelectSlot(selectedSlot.date, "manana");
       });
@@ -1589,7 +1636,6 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         if (selectedSlot) handleSelectSlot(selectedSlot.date, "tarde");
       });
 
-      // Navegación pestañas propietario
       document.querySelectorAll(".nav-tab").forEach(tabBtn => {
         tabBtn.addEventListener("click", () => {
           const target = tabBtn.dataset.tab;
@@ -1606,7 +1652,6 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         });
       });
 
-      // Navegación pestañas administrador
       document.querySelectorAll(".admin-tab").forEach(tabBtn => {
         tabBtn.addEventListener("click", () => {
           const target = tabBtn.dataset.adminTab;
@@ -1623,7 +1668,6 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         });
       });
 
-      // Cambio de mes
       function shiftMonthBy(delta) {
         const { year, month } = state.currentYearMonth;
         const targetDate = new Date(year, month + delta, 1);
@@ -1636,7 +1680,6 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       document.getElementById("adminPrevMonthBtn").addEventListener("click", () => shiftMonthBy(-1));
       document.getElementById("adminNextMonthBtn").addEventListener("click", () => shiftMonthBy(1));
 
-      // Solicitar reserva de propietario
       ["acceptNormsCheck", "fixedDateExceptionCheck"].forEach(id => {
         document.getElementById(id).addEventListener("change", validateSelection);
       });
@@ -1693,46 +1736,28 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         window.location.href = `mailto:${to}?cc=${cc}&subject=${subject}&body=${body}`;
       });
 
-      // Modal propietario (Login / Activación)
+      // Modal propietario (Login)
       const authModal = document.getElementById("authModal");
-      function openAuthModal(mode = "login") {
-        const loginTab = document.getElementById("modeLoginTab");
-        const actTab = document.getElementById("modeActivateTab");
-        const loginFields = document.getElementById("authLoginFields");
-        const actFields = document.getElementById("authActivateFields");
-
-        if (mode === "activate") {
-          actTab.className = "flex-1 py-1.5 rounded-lg bg-emerald-700 text-white text-xs font-bold";
-          loginTab.className = "flex-1 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold";
-          actFields.classList.remove("hidden");
-          loginFields.classList.add("hidden");
-        } else {
-          loginTab.className = "flex-1 py-1.5 rounded-lg bg-emerald-700 text-white text-xs font-bold";
-          actTab.className = "flex-1 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold";
-          loginFields.classList.remove("hidden");
-          actFields.classList.add("hidden");
-        }
-
+      function openAuthModal() {
         authModal.classList.remove("hidden");
         authModal.classList.add("flex");
       }
 
-      document.getElementById("btnOpenAuth").addEventListener("click", () => openAuthModal("login"));
-      document.getElementById("modeLoginTab").addEventListener("click", () => openAuthModal("login"));
-      document.getElementById("modeActivateTab").addEventListener("click", () => openAuthModal("activate"));
+      document.getElementById("btnOpenAuth").addEventListener("click", openAuthModal);
       document.getElementById("closeAuthModal").addEventListener("click", () => {
         authModal.classList.add("hidden");
         authModal.classList.remove("flex");
       });
 
       document.getElementById("doLoginBtn").addEventListener("click", async () => {
-        const email = document.getElementById("loginEmailInput").value.trim();
+        const email = document.getElementById("loginEmailInput").value.trim().toLowerCase();
         const pass = document.getElementById("loginPasswordInput").value;
         if (!email || !pass) {
           showToast("Introduce correo y contraseña.", true);
           return;
         }
         try {
+          lastEnteredPassword = pass;
           await auth.signInWithEmailAndPassword(email, pass);
           authModal.classList.add("hidden");
           authModal.classList.remove("flex");
@@ -1756,45 +1781,51 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         }
       });
 
-      document.getElementById("activateAccountBtn").addEventListener("click", async () => {
-        const email = document.getElementById("actEmailInput").value.trim().toLowerCase();
-        const portal = document.getElementById("actPortalInput").value.trim();
-        const floor = document.getElementById("actFloorInput").value.trim();
-        const letter = document.getElementById("actLetterInput").value.trim().toUpperCase();
-        const pass = document.getElementById("actPasswordInput").value;
+      // Guardar nueva contraseña en primer acceso
+      document.getElementById("saveNewPasswordBtn").addEventListener("click", async () => {
+        if (!authUser) return;
+        const portal = document.getElementById("firstPortalInput").value.trim();
+        const floor = document.getElementById("firstFloorInput").value.trim();
+        const letter = document.getElementById("firstLetterInput").value.trim().toUpperCase();
+        const pass1 = document.getElementById("newOwnerPasswordInput").value;
+        const pass2 = document.getElementById("confirmOwnerPasswordInput").value;
 
-        if (!email || !portal || !floor || !letter || pass.length < 6) {
-          showToast("Completa correo, portal, piso, letra y contraseña (mínimo 6 caracteres).", true);
+        if (!portal || !floor || !letter) {
+          showToast("Indica Portal, Piso y Letra de tu vivienda.", true);
           return;
         }
-        if (email === ADMIN_EMAIL.toLowerCase()) {
-          showToast("Ese correo corresponde a administración.", true);
+        if (pass1.length < 6 || pass1 === INITIAL_OWNER_PASS) {
+          showToast("Elige una contraseña distinta a 123456 (mínimo 6 caracteres).", true);
+          return;
+        }
+        if (pass1 !== pass2) {
+          showToast("Las contraseñas no coinciden.", true);
           return;
         }
 
         try {
-          const snapAuth = await db.ref(`escalonia15/authorizedEmails/${normalizeEmailKey(email)}`).once("value");
-          if (!snapAuth.exists() || !snapAuth.val().authorized) {
-            showToast("Tu correo aún no ha sido autorizado por administración.", true);
-            return;
-          }
-
-          const cred = await auth.createUserWithEmailAndPassword(email, pass);
-          await db.ref(`escalonia15/users/${cred.user.uid}`).set({
-            email,
+          await authUser.updatePassword(pass1);
+          lastEnteredPassword = pass1;
+          const updatedProfile = {
+            email: authUser.email,
             portal,
             floor,
             letter,
             role: "owner",
             active: true,
-            createdAt: new Date().toISOString()
-          });
+            mustChangePassword: false,
+            updatedAt: new Date().toISOString()
+          };
+          await db.ref(`escalonia15/users/${authUser.uid}`).set(updatedProfile);
+          currentUserProfile = updatedProfile;
 
-          authModal.classList.add("hidden");
-          authModal.classList.remove("flex");
-          showToast("Cuenta activada correctamente.");
+          const modal = document.getElementById("forcePasswordModal");
+          modal.classList.add("hidden");
+          modal.classList.remove("flex");
+          refreshAllViews();
+          showToast("Contraseña actualizada correctamente.");
         } catch (err) {
-          showToast("No se pudo activar la cuenta: " + err.message, true);
+          showToast("No se pudo actualizar la contraseña: " + err.message, true);
         }
       });
 
@@ -1829,6 +1860,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
         try {
           pendingScreenAfterLogin = "admin";
+          lastEnteredPassword = pass;
           const cred = await auth.signInWithEmailAndPassword(email, pass);
           if (cred.user.uid !== ADMIN_UID) {
             pendingScreenAfterLogin = null;
@@ -1848,6 +1880,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
       document.getElementById("adminLogoutBtn").addEventListener("click", () => {
         activeScreen = "landing";
+        lastEnteredPassword = "";
         auth.signOut();
         showToast("Sesión de administrador cerrada.");
       });
@@ -1894,7 +1927,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         }
       });
 
-      // Alta masiva de correos por punto y coma (;)
+      // Alta de propietarios por ";" + creación en Auth con 123456 + abrir Outlook (mailto)
       document.getElementById("saveBulkEmailsBtn").addEventListener("click", async () => {
         if (!isCurrentUserAdmin) return;
         const raw = document.getElementById("bulkEmailsInput").value;
@@ -1904,24 +1937,44 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           .filter(e => e.includes("@"));
 
         if (!parts.length) {
-          showToast('Escribe correos válidos separados por ";".', true);
+          showToast('Escribe uno o varios correos válidos separados por ";".', true);
           return;
         }
 
         try {
           const updates = {};
-          parts.forEach(email => {
+          for (const email of parts) {
             updates[normalizeEmailKey(email)] = {
               email,
               authorized: true,
+              initialPassword: INITIAL_OWNER_PASS,
+              mustChangePassword: true,
               authorizedAt: new Date().toISOString()
             };
-          });
+
+            try {
+              const secCred = await secondaryAuth.createUserWithEmailAndPassword(email, INITIAL_OWNER_PASS);
+              await db.ref(`escalonia15/users/${secCred.user.uid}`).set({
+                email,
+                role: "owner",
+                active: true,
+                mustChangePassword: true,
+                createdAt: new Date().toISOString()
+              });
+              await secondaryAuth.signOut();
+            } catch (authErr) {
+              if (authErr.code !== "auth/email-already-in-use") {
+                throw authErr;
+              }
+            }
+          }
+
           await db.ref("escalonia15/authorizedEmails").update(updates);
           document.getElementById("bulkEmailsInput").value = "";
-          showToast(`${parts.length} correo(s) autorizado(s).`);
+          showToast(`${parts.length} propietario(s) autorizado(s). Abriendo correo...`);
+          openOutlookInvite(parts);
         } catch (err) {
-          showToast("Error al autorizar correos: " + err.message, true);
+          showToast("Error al autorizar propietario: " + err.message, true);
         }
       });
 
