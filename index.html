@@ -122,301 +122,338 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- TOP HEADER -->
-  <header class="bg-brand-dark text-white sticky top-0 z-30 shadow-md">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-lg bg-emerald-600/30 border border-emerald-400/40 flex items-center justify-center font-bold text-emerald-200">
-          E15
-        </div>
-        <div>
-          <h1 class="text-base sm:text-lg font-bold tracking-tight leading-tight">
-            Reserva Sala Común Escalonia 15
-          </h1>
-          <p id="activeUserBanner" class="text-xs text-emerald-200/85">
-            Cargando sesión...
-          </p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <button
-          id="btnOpenAuth"
-          type="button"
-          class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 border border-white/15 transition"
-        >
-          Cuenta / Cambiar usuario
-        </button>
-        <button
-          id="btnOpenAdmin"
-          type="button"
-          class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition flex items-center gap-1.5"
-        >
-          <span>Administrador</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- MAIN NAVIGATION TABS -->
-    <nav class="bg-emerald-950/90 border-t border-white/10">
-      <div class="max-w-6xl mx-auto px-4 py-2 flex flex-wrap gap-2">
-        <button
-          type="button"
-          data-tab="calendario"
-          class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-emerald-700 text-white transition"
-        >
-          Calendario y Reservas
-        </button>
-        <button
-          type="button"
-          data-tab="mis-reservas"
-          class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-white/10 text-emerald-100 hover:bg-white/20 transition"
-        >
-          Mis Reservas
-        </button>
-        <button
-          type="button"
-          data-tab="normas"
-          class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-white/10 text-emerald-100 hover:bg-white/20 transition"
-        >
-          Normas de la sala
-        </button>
-      </div>
-    </nav>
-  </header>
-
   <!-- TOAST NOTIFICATION -->
   <div id="toastBox" class="fixed bottom-4 right-4 z-50 max-w-sm pointer-events-none hidden">
     <div id="toastInner" class="pointer-events-auto rounded-xl px-4 py-3 text-xs sm:text-sm font-medium shadow-xl border bg-slate-900 text-white border-slate-700"></div>
   </div>
 
-  <!-- MAIN CONTENT -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-5 space-y-5">
+  <!-- PANTALLA 0: ENTRADA PRINCIPAL (SOLO ESTO AL ABRIR) -->
+  <section id="landingScreen" class="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-brand-dark via-brand-primary to-emerald-900 text-white">
+    <div class="max-w-xl w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-7 sm:p-10 text-center shadow-2xl space-y-7">
+      <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+        Bienvenido a reserva sala común Escalonia 15
+      </h1>
 
-    <!-- TAB 1: CALENDARIO Y RESERVAS -->
-    <section id="tab-calendario" class="tab-panel space-y-5">
-      <!-- BANNER DE BIENVENIDA EN GRANDE -->
-      <div class="bg-gradient-to-r from-brand-dark via-brand-primary to-emerald-800 text-white rounded-2xl p-5 sm:p-7 shadow-md border border-emerald-900/40">
-        <span class="inline-block px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-white/15 text-emerald-100 mb-2">
-          Comunidad de Vecinos
-        </span>
-        <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
-          Bienvenido a reserva sala común Escalonia 15
-        </h2>
-        <p class="text-xs sm:text-sm text-emerald-100/90 mt-2 max-w-2xl">
-          Consulta la disponibilidad en diagonal por turno de mañana o tarde y solicita tu reserva en exclusiva.
-        </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+        <button
+          id="btnEnterOwner"
+          type="button"
+          class="py-4 px-5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm sm:text-base shadow-lg transition cursor-pointer"
+        >
+          Entrar como propietario
+        </button>
+
+        <button
+          id="btnEnterAdmin"
+          type="button"
+          class="py-4 px-5 rounded-2xl bg-slate-950/80 hover:bg-slate-950 text-white border border-white/25 font-extrabold text-sm sm:text-base shadow-lg transition cursor-pointer"
+        >
+          Entrar como administrador
+        </button>
       </div>
+    </div>
+  </section>
 
-      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
-          <span class="font-bold text-slate-700">Turno partido en diagonal (Mañana / Tarde):</span>
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-900 border border-green-300">
-            <span class="w-2.5 h-2.5 rounded-full bg-green-600"></span> Libre
-          </span>
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-900 border border-yellow-300">
-            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span> Pendiente
-          </span>
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-900 border border-red-300">
-            <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Reservado / No autorizado
-          </span>
-        </div>
-
-        <div class="flex items-center justify-between md:justify-end gap-2">
-          <button id="prevMonthBtn" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
-            &larr; Anterior
-          </button>
-          <div id="currentMonthLabel" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-900 text-xs sm:text-sm font-bold min-w-[155px] text-center"></div>
-          <button id="nextMonthBtn" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
-            Siguiente &rarr;
-          </button>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <!-- Calendar Grid -->
-        <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-          <div class="grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold text-slate-500 uppercase mb-2">
-            <div>Lun</div>
-            <div>Mar</div>
-            <div>Mié</div>
-            <div>Jue</div>
-            <div>Vie</div>
-            <div>Sáb</div>
-            <div>Dom</div>
+  <!-- VISTA COMPLETA DE PROPIETARIO -->
+  <div id="ownerApp" class="hidden min-h-screen flex-col">
+    <header class="bg-brand-dark text-white sticky top-0 z-30 shadow-md">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-emerald-600/30 border border-emerald-400/40 flex items-center justify-center font-bold text-emerald-200">
+            E15
           </div>
-          <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 sm:gap-2"></div>
-
-          <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
-            <span>Mitad superior izquierda: <strong>Mañana (10:00–16:30)</strong></span>
-            <span>Mitad inferior derecha: <strong>Tarde (17:30–22:00 / V-S-Víspera 24:00)</strong></span>
-          </div>
-        </div>
-
-        <!-- Booking Panel -->
-        <div class="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4 h-fit">
-          <div class="border-b border-slate-100 pb-3">
-            <h3 class="text-base font-bold text-slate-900">Solicitar Reserva en Exclusiva</h3>
-            <p class="text-xs text-slate-500 mt-0.5">
-              Cuota: <strong>50,00 €</strong> + Fianza: <strong>100,00 €</strong> (Total: <strong>150,00 €</strong>). Pago en 48 h.
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-emerald-300">
+              Reserva Sala Común Escalonia 15
+            </p>
+            <h2 id="ownerWelcomeTitle" class="text-base sm:text-lg font-extrabold tracking-tight leading-tight">
+              Bienvenido · Vivienda
+            </h2>
+            <p id="activeUserBanner" class="text-xs text-emerald-200/85">
+              Cargando sesión...
             </p>
           </div>
+        </div>
 
-          <div class="space-y-3 text-xs">
-            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-              <div class="flex justify-between">
-                <span class="text-slate-500">Propietario / Correo:</span>
-                <span id="formUserEmail" class="font-bold text-slate-800 truncate max-w-[190px]">-</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-500">Portal y Vivienda:</span>
-                <span id="formUserUnit" class="font-bold text-slate-800">-</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-500">Reservas en el año:</span>
-                <span id="formUserCount" class="font-bold text-emerald-700">0 / 2</span>
-              </div>
-            </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            id="btnOpenAuth"
+            type="button"
+            class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 border border-white/15 transition"
+          >
+            Cuenta / Cambiar usuario
+          </button>
+          <button
+            id="btnBackToLandingFromOwner"
+            type="button"
+            class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 border border-white/15 transition"
+          >
+            Inicio
+          </button>
+        </div>
+      </div>
 
-            <div class="space-y-2">
-              <label class="block font-semibold text-slate-700">Fecha y turno seleccionado</label>
-              <div id="selectedSlotSummary" class="p-2.5 rounded-xl border border-dashed border-slate-300 bg-slate-50/70 text-slate-600 font-medium">
-                Pulsa un día en el calendario para elegir entre Turno mañana y Turno tarde.
-              </div>
+      <!-- MAIN NAVIGATION TABS -->
+      <nav class="bg-emerald-950/90 border-t border-white/10">
+        <div class="max-w-6xl mx-auto px-4 py-2 flex flex-wrap gap-2">
+          <button
+            type="button"
+            data-tab="calendario"
+            class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-emerald-700 text-white transition"
+          >
+            Calendario y Reservas
+          </button>
+          <button
+            type="button"
+            data-tab="mis-reservas"
+            class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-white/10 text-emerald-100 hover:bg-white/20 transition"
+          >
+            Mis Reservas
+          </button>
+          <button
+            type="button"
+            data-tab="normas"
+            class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-white/10 text-emerald-100 hover:bg-white/20 transition"
+          >
+            Normas de la sala
+          </button>
+        </div>
+      </nav>
+    </header>
 
-              <!-- Ventanita / pestañita interactiva de turno para elegir o confirmar -->
-              <div id="shiftQuickSelector" class="hidden rounded-xl bg-emerald-50/70 border border-emerald-200 p-2 space-y-1.5">
-                <div class="flex items-center justify-between text-[11px] font-semibold text-emerald-950 px-0.5">
-                  <span>Elegir turno de la fecha:</span>
-                  <span id="selectedShiftBadge" class="px-2 py-0.5 rounded-md bg-white border border-emerald-200 text-emerald-800 font-bold"></span>
-                </div>
-                <div class="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-white border border-emerald-200/80">
-                  <button
-                    id="pickShiftMananaBtn"
-                    type="button"
-                    class="py-1.5 px-2 rounded-lg text-xs font-bold transition text-center"
-                  >
-                    Turno mañana
-                  </button>
-                  <button
-                    id="pickShiftTardeBtn"
-                    type="button"
-                    class="py-1.5 px-2 rounded-lg text-xs font-bold transition text-center"
-                  >
-                    Turno tarde
-                  </button>
-                </div>
-              </div>
-            </div>
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-5 space-y-5">
+      <!-- TAB 1: CALENDARIO Y RESERVAS -->
+      <section id="tab-calendario" class="tab-panel space-y-5">
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
+            <span class="font-bold text-slate-700">Turno partido en diagonal (Mañana / Tarde):</span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-900 border border-green-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-green-600"></span> Libre
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-900 border border-yellow-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span> Pendiente
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-900 border border-red-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Reservado / No autorizado
+            </span>
+          </div>
 
-            <div>
-              <label for="eventTypeInput" class="block font-semibold text-slate-700 mb-1">Motivo / Tipo de acto</label>
-              <select id="eventTypeInput" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-white text-slate-800 font-medium">
-                <option value="Reunión / Celebración familiar">Reunión / Celebración familiar</option>
-                <option value="Acto con fecha fija (Bautizo / Comunión / Evento señalado)">Acto con fecha fija (Bautizo / Comunión / Evento señalado)</option>
-              </select>
-            </div>
-
-            <label class="flex items-start gap-2 pt-1 cursor-pointer select-none">
-              <input id="fixedDateExceptionCheck" type="checkbox" class="mt-0.5 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600" />
-              <span class="text-[11px] text-slate-600 leading-snug">
-                Aplicar excepción de <strong>acto con fecha fija</strong> (punto 12.1) si la fecha supera los 30 días de antelación.
-              </span>
-            </label>
-
-            <label class="flex items-start gap-2 cursor-pointer select-none">
-              <input id="acceptNormsCheck" type="checkbox" class="mt-0.5 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600" />
-              <span class="text-[11px] text-slate-700 leading-snug">
-                Acepto las <strong>Normas de la sala</strong> (50 € alquiler, 100 € fianza, pago en 48 h, anulación con 7 días y revisión del conserje).
-              </span>
-            </label>
-
-            <div id="annualLimitNotice" class="hidden p-2.5 rounded-xl text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-300"></div>
-
-            <div id="ruleValidationMsg" class="hidden p-2.5 rounded-xl text-[11px] font-semibold"></div>
-
-            <button
-              id="btnSubmitBooking"
-              type="button"
-              class="w-full py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm shadow-sm transition"
-            >
-              Solicitar reserva
+          <div class="flex items-center justify-between md:justify-end gap-2">
+            <button id="prevMonthBtn" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
+              &larr; Anterior
+            </button>
+            <div id="currentMonthLabel" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-900 text-xs sm:text-sm font-bold min-w-[155px] text-center"></div>
+            <button id="nextMonthBtn" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
+              Siguiente &rarr;
             </button>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- TAB 2: MIS RESERVAS -->
-    <section id="tab-mis-reservas" class="tab-panel hidden space-y-4">
-      <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-5">
-        <div class="border-b border-slate-100 pb-3">
-          <h2 class="text-base sm:text-lg font-bold text-slate-900">Mis Reservas</h2>
-        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <!-- Calendar Grid -->
+          <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+            <div class="grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold text-slate-500 uppercase mb-2">
+              <div>Lun</div>
+              <div>Mar</div>
+              <div>Mié</div>
+              <div>Jue</div>
+              <div>Vie</div>
+              <div>Sáb</div>
+              <div>Dom</div>
+            </div>
+            <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 sm:gap-2"></div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="rounded-xl border border-yellow-300 bg-yellow-50/50 p-4 space-y-2.5">
-            <h3 class="text-sm font-bold text-yellow-950">Reservas pendientes</h3>
-            <div id="pendingReservationsList" class="space-y-2"></div>
+            <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
+              <span>Mitad superior izquierda: <strong>Mañana (10:00–16:30)</strong></span>
+              <span>Mitad inferior derecha: <strong>Tarde (17:30–22:00 / V-S-Víspera 24:00)</strong></span>
+            </div>
           </div>
 
-          <div class="rounded-xl border border-red-200 bg-red-50/40 p-4 space-y-2.5">
-            <h3 class="text-sm font-bold text-red-950">Reserva confirmada</h3>
-            <div id="confirmedReservationsList" class="space-y-2"></div>
+          <!-- Booking Panel -->
+          <div class="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4 h-fit">
+            <div class="border-b border-slate-100 pb-3">
+              <h3 class="text-base font-bold text-slate-900">Solicitar Reserva en Exclusiva</h3>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Cuota: <strong>50,00 €</strong> + Fianza: <strong>100,00 €</strong> (Total: <strong>150,00 €</strong>). Pago en 48 h.
+              </p>
+            </div>
+
+            <div class="space-y-3 text-xs">
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Propietario / Correo:</span>
+                  <span id="formUserEmail" class="font-bold text-slate-800 truncate max-w-[190px]">-</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Vivienda:</span>
+                  <span id="formUserUnit" class="font-bold text-slate-800">-</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Reservas en el año:</span>
+                  <span id="formUserCount" class="font-bold text-emerald-700">0 / 2</span>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <label class="block font-semibold text-slate-700">Fecha y turno seleccionado</label>
+                <div id="selectedSlotSummary" class="p-2.5 rounded-xl border border-dashed border-slate-300 bg-slate-50/70 text-slate-600 font-medium">
+                  Pulsa un día en el calendario para elegir entre Turno mañana y Turno tarde.
+                </div>
+
+                <!-- Ventanita / pestañita interactiva de turno para elegir o confirmar -->
+                <div id="shiftQuickSelector" class="hidden rounded-xl bg-emerald-50/70 border border-emerald-200 p-2 space-y-1.5">
+                  <div class="flex items-center justify-between text-[11px] font-semibold text-emerald-950 px-0.5">
+                    <span>Elegir turno de la fecha:</span>
+                    <span id="selectedShiftBadge" class="px-2 py-0.5 rounded-md bg-white border border-emerald-200 text-emerald-800 font-bold"></span>
+                  </div>
+                  <div class="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-white border border-emerald-200/80">
+                    <button
+                      id="pickShiftMananaBtn"
+                      type="button"
+                      class="py-1.5 px-2 rounded-lg text-xs font-bold transition text-center"
+                    >
+                      Turno mañana
+                    </button>
+                    <button
+                      id="pickShiftTardeBtn"
+                      type="button"
+                      class="py-1.5 px-2 rounded-lg text-xs font-bold transition text-center"
+                    >
+                      Turno tarde
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label for="eventTypeInput" class="block font-semibold text-slate-700 mb-1">Motivo / Tipo de acto</label>
+                <select id="eventTypeInput" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-white text-slate-800 font-medium">
+                  <option value="Reunión / Celebración familiar">Reunión / Celebración familiar</option>
+                  <option value="Acto con fecha fija (Bautizo / Comunión / Evento señalado)">Acto con fecha fija (Bautizo / Comunión / Evento señalado)</option>
+                </select>
+              </div>
+
+              <label class="flex items-start gap-2 pt-1 cursor-pointer select-none">
+                <input id="fixedDateExceptionCheck" type="checkbox" class="mt-0.5 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600" />
+                <span class="text-[11px] text-slate-600 leading-snug">
+                  Aplicar excepción de <strong>acto con fecha fija</strong> (punto 12.1) si la fecha supera los 30 días de antelación.
+                </span>
+              </label>
+
+              <label class="flex items-start gap-2 cursor-pointer select-none">
+                <input id="acceptNormsCheck" type="checkbox" class="mt-0.5 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600" />
+                <span class="text-[11px] text-slate-700 leading-snug">
+                  Acepto las <strong>Normas de la sala</strong>.
+                </span>
+              </label>
+
+              <div id="annualLimitNotice" class="hidden p-2.5 rounded-xl text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-300"></div>
+
+              <div id="ruleValidationMsg" class="hidden p-2.5 rounded-xl text-[11px] font-semibold"></div>
+
+              <button
+                id="btnSubmitBooking"
+                type="button"
+                class="w-full py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm shadow-sm transition"
+              >
+                Solicitar reserva
+              </button>
+            </div>
           </div>
         </div>
+      </section>
 
-        <div id="ownerCancelledReservationsBox" class="hidden rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
-          <h3 class="text-sm font-bold text-slate-800">Anuladas por propietario</h3>
-          <div id="ownerCancelledReservationsList" class="space-y-2"></div>
+      <!-- TAB 2: MIS RESERVAS -->
+      <section id="tab-mis-reservas" class="tab-panel hidden space-y-4">
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-5">
+          <div class="border-b border-slate-100 pb-3">
+            <h2 class="text-base sm:text-lg font-bold text-slate-900">Mis Reservas</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="rounded-xl border border-yellow-300 bg-yellow-50/50 p-4 space-y-2.5">
+              <h3 class="text-sm font-bold text-yellow-950">Reservas pendientes</h3>
+              <div id="pendingReservationsList" class="space-y-2"></div>
+            </div>
+
+            <div class="rounded-xl border border-red-200 bg-red-50/40 p-4 space-y-2.5">
+              <h3 class="text-sm font-bold text-red-950">Reserva confirmada</h3>
+              <div id="confirmedReservationsList" class="space-y-2"></div>
+            </div>
+          </div>
+
+          <div id="ownerCancelledReservationsBox" class="hidden rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
+            <h3 class="text-sm font-bold text-slate-800">Anuladas por propietario</h3>
+            <div id="ownerCancelledReservationsList" class="space-y-2"></div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- TAB 3: NORMAS DE LA SALA -->
-    <section id="tab-normas" class="tab-panel hidden space-y-5">
-      <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-6">
-        <div class="border-b border-slate-200 pb-4">
-          <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-900 mb-2">
-            Reglamento de Régimen Interior — Punto 12
-          </span>
+      <!-- TAB 3: NORMAS DE LA SALA (TEXTO LITERAL DEL PUNTO 12) -->
+      <section id="tab-normas" class="tab-panel hidden space-y-5">
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-4 text-xs sm:text-sm text-slate-800 leading-relaxed">
           <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">
-            Normas de la Sala — Reserva Sala Común Escalonia 15
+            12. Sobre el uso de la sala comunitaria o gastrobar
           </h2>
-          <p class="text-xs sm:text-sm text-slate-600 mt-1">
-            Texto normativo íntegro y condiciones de uso, reserva, pago, anulación, revisión por conserjería y devolución de fianza aplicables a la comunidad Escalonia 15.
-          </p>
-        </div>
 
-        <div class="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed">
-          <h3 class="text-base font-bold text-slate-900">
-            Reglamento de Régimen Interior — Punto 12: Uso y Reserva de la Sala Comunitaria / Gastrobar
-          </h3>
+          <div class="space-y-2.5">
+            <p>12.1. La reserva se hará con los mismos plazos (un mes) por correo electrónico a la administración, con una excepción, cuando se trate de una reserva para celebrar un acto con fecha fija (bautizo, comunión, etc.) en que podrá reservarse sin sujetarse al plazo general de un mes.</p>
 
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
-            <p><strong>12.1. Antelación máxima de reserva:</strong> Las solicitudes de reserva en exclusiva de la sala común podrán realizarse con una antelación máxima de <strong>30 días (un mes)</strong> respecto a la fecha solicitada, quedando excluidos de este límite temporal los <strong>actos con fecha fija</strong> debidamente acreditados (tales como bautizos, comuniones u otras celebraciones señaladas análogas).</p>
+            <p>12.2. El solicitante deberá ser titular o inquilino de la vivienda. Cada solicitante solo podrá reservar la sala dos veces al año.</p>
 
-            <p><strong>12.2. Turnos diarios y horarios:</strong> Solo podrá reservarse <strong>un único turno por día</strong> (bien el turno de mañana o bien el turno de tarde). Los horarios establecidos son:</p>
-            <ul class="list-disc pl-6 space-y-1">
-              <li><strong>Turno de mañana:</strong> de <strong>10:00 a 16:30 horas</strong>.</li>
-              <li><strong>Turno de tarde (de domingo a jueves):</strong> de <strong>17:30 a 22:00 horas</strong>.</li>
-              <li><strong>Turno de tarde (viernes, sábados y vísperas de festivos):</strong> de <strong>17:30 a 24:00 horas</strong>.</li>
-            </ul>
+            <p>12.3. El propietario o inquilino que acceda a la sala, se registrará previamente en conserjería. (sustituido por el 12.1)</p>
 
-            <p><strong>12.3. Límite anual y prioridad de uso:</strong> Cada vivienda o solicitante podrá disfrutar de un máximo de <strong>2 reservas al año</strong> (computándose por año natural con reseteo anual). En caso de concurrencia o criterios de asignación, tendrán prioridad los vecinos o viviendas con menor número de usos previos o nuevos usuarios, así como preferencia los <strong>actos comunitarios</strong> organizados por la comunidad.</p>
+            <p>12.4. Hasta las 17:00 horas, solo se podrán realizar actividades que no generen ruido, compatibles con actividades laborales.</p>
 
-            <p><strong>12.4. Importes, cuota de uso y fianza:</strong> El uso exclusivo de la sala conlleva una cuota de reserva de <strong>50,00 €</strong> y una fianza reembolsable de <strong>100,00 €</strong> (importe total de <strong>150,00 €</strong>), sin perjuicio de las cuotas o costes de limpieza que correspondan según lo dispuesto en el régimen interior.</p>
+            <p>12.5. El solicitante deberá pagar:</p>
+            <div class="pl-5 space-y-1.5">
+              <p>12.5.1. Una cuota de 100 € de fianza, que se devolverá, tras verificar que el salón se deja en perfecto estado.</p>
+              <p>12.5.2. Una cuota de 50 € por el uso en exclusiva del local por parte del propietario que lo reserva, más la cuota de limpieza del local.</p>
+              <p>12.5.3. El pago de la fianza y de la cuota de exclusividad, se realizará mediante transferencia a la cuenta bancaria de la comunidad; la devolución de la parte reembolsable, se realizará igualmente mediante transferencia a la cuenta bancaria del propietario.</p>
+            </div>
 
-            <p><strong>12.5. Plazo de pago (48 horas):</strong> Una vez registrada la solicitud de reserva, el vecino dispone de un plazo máximo de <strong>48 horas</strong> para efectuar el pago correspondiente a la cuenta indicada. Si transcurridas las 48 horas no consta el abono, la solicitud quedará <strong>anulada automáticamente</strong> y el turno volverá a quedar disponible.</p>
+            <p>12.6. El solicitante de la sala debe garantizar que esta quede recogida y limpia tras su uso, que debe finalizar antes de la hora límite.</p>
 
-            <p><strong>12.6. Anulación de reservas y plazo de 7 días:</strong> Toda anulación deberá comunicarse con una antelación mínima de <strong>7 días</strong> respecto a la fecha reservada. Si la anulación se realiza dentro de plazo (al menos 7 días antes), se reintegrarán los importes abonados; si se anula fuera de plazo (con menos de 7 días de antelación), se devolverá la <strong>fianza (100,00 €)</strong> pero se perderá la <strong>cuota de alquiler (50,00 €)</strong>.</p>
+            <p>12.7. Queda prohibido sacar el mobiliario del local.</p>
 
-            <p><strong>12.7. Entrega de llaves, revisión por el conserje y devolución de fianza:</strong> La operativa no contempla entrega de llaves tradicional mediante inventario previo de enseres. Tras la finalización del turno, el <strong>conserje</strong> revisará el estado de la sala y comunicará el resultado de la inspección para que, si todo se encuentra en correcto estado y sin desperfectos ni incidencias, se proceda a la <strong>devolución de la fianza</strong>.</p>
+            <p>12.8. La puerta del salón deberá permanecer cerrada durante su utilización.</p>
+
+            <p>12.9. La sala solo podrá ser reservada en un turno al día (o de mañana o de tarde):</p>
+            <div class="pl-5 space-y-1.5">
+              <p>12.9.1. Horario de mañana: de 10:00 a 16:30 horas.</p>
+              <p>12.9.2. Horario de tarde: De domingo a jueves: De 17:30 a 22:00 horas, los viernes, sábados y vísperas de festivos: De 17:30 a 24:00 horas.</p>
+            </div>
+
+            <p>12.10. En caso de dejar la sala sucia, se contratará un servicio externo de limpieza. El coste correrá a cargo del usuario, descontándose de la fianza. En caso de que los costes excedan el monto de la fianza, se cobrará el faltante al vecino.</p>
+
+            <p>12.11. No se podrá acceder a la sala en traje de baño o estando mojado.</p>
+
+            <p>12.12. Está prohibido pegar o anclar cualquier material en las paredes.</p>
+
+            <p>12.13. El solicitante se hará responsable de todas las acciones que pudieran realizar sus invitados.</p>
+
+            <p>12.14. En caso de producirse algún desperfecto, será sufragado por el solicitante.</p>
+
+            <p>12.15. Los niños deberán estar acompañados por adultos.</p>
+
+            <p>12.16. En todo momento, los invitados harán caso de las instrucciones que pudieran recibir de la Junta de Gobierno.</p>
+
+            <p>12.17. Los actos comunitarios tendrán preferencia, a la hora de la reserva sobre actos particulares.</p>
+
+            <p>12.18. La celebración de los actos estarán limitados al recinto del local.</p>
+
+            <p>12.19. Las reservas solicitadas deberán abonarse como máximo en las 48 h. siguientes a su solicitud. Pasado ese plazo, si no se ha procedido a su abono, se anulará la misma.</p>
+
+            <p>12.20. En caso de querer anular la reserva, deberán informarlo con una antelación mínima de 7 días a la fecha solicitada. Pasado ese plazo, en caso de anulación, se procederá a la devolución de la fianza pero no de la parte que corresponde al alquiler.</p>
+
+            <p>12.21. Se preparará un sistema que permita equilibrar el número de usos por los diferentes solicitantes, dando prioridad a los nuevos usuarios sobre los que ya hayan utilizado la sala con anterioridad.</p>
+
+            <p>12.22. La sala polivalente (cine, tv, etc.) se podrá reservar, sin coste, durante periodos de 1 hora, especificando si es para una actividad privada o está abierta a toda la comunidad. La reserva para una actividad comunitaria tendrá siempre prioridad. La sala debe quedar en perfecto estado tras su uso. Se seguirán por analogía las mismas normas que para la sala comunitaria. La reserva siempre deberá hacerse por el vecino.</p>
           </div>
         </div>
-      </div>
-    </section>
-  </main>
+      </section>
+    </main>
+  </div>
 
   <!-- MODAL 1: SOLICITUD DE PAGO (48H) — SOLO DESDE ADMINISTRADOR AL DAR EL VISTO BUENO -->
   <div id="paymentModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
@@ -538,22 +575,22 @@
     </div>
   </div>
 
-  <!-- VISTA COMPLETA DEDICADA DE ADMINISTRADOR (SIN VENTANA FLOTANTE NI SCROLL LATERAL) -->
+  <!-- VISTA COMPLETA DEDICADA DE ADMINISTRADOR + CALENDARIO (SIN SCROLL LATERAL) -->
   <section id="adminFullInterface" class="fixed inset-0 z-40 bg-slate-100 hidden flex-col overflow-y-auto">
     <header class="bg-slate-900 text-white sticky top-0 z-20 shadow-md">
       <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-            Interfaz de Administración
+            Administrador
           </span>
           <h2 class="text-base sm:text-lg font-bold leading-tight">
-            Administración — Sala Común Escalonia 15
+            Administrador — Sala Común Escalonia 15
           </h2>
         </div>
 
         <div class="flex items-center gap-2">
           <button id="exitAdminFullBtn" type="button" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">
-            &larr; Volver a la comunidad
+            &larr; Volver al inicio
           </button>
         </div>
       </div>
@@ -600,7 +637,7 @@
       </nav>
     </header>
 
-    <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 text-xs sm:text-sm">
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 space-y-6 text-xs sm:text-sm">
       <!-- PESTAÑA 1: RESERVAS POR CONFIRMAR Y CONTROL DE FIANZAS -->
       <div id="admin-tab-reservas-fianzas" class="admin-panel bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div class="border-b border-slate-100 pb-3">
@@ -731,13 +768,43 @@
           </button>
         </div>
       </div>
+
+      <!-- CALENDARIO VISIBLE EN LA VISTA DE ADMINISTRADOR -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900">Calendario de reservas</h3>
+            <p class="text-xs text-slate-500">Vista en tiempo real del estado de cada turno de mañana y tarde.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="adminPrevMonthBtn" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
+              &larr; Anterior
+            </button>
+            <div id="adminCurrentMonthLabel" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-900 text-xs sm:text-sm font-bold min-w-[155px] text-center"></div>
+            <button id="adminNextMonthBtn" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
+              Siguiente &rarr;
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold text-slate-500 uppercase">
+          <div>Lun</div>
+          <div>Mar</div>
+          <div>Mié</div>
+          <div>Jue</div>
+          <div>Vie</div>
+          <div>Sáb</div>
+          <div>Dom</div>
+        </div>
+        <div id="adminCalendarGrid" class="grid grid-cols-7 gap-1.5 sm:gap-2"></div>
+      </div>
     </main>
   </section>
 
   <script>
     (function () {
-      const STORAGE_KEY = 'escalonia15_sala_comun_v9';
-      const CHANNEL_NAME = 'escalonia15_realtime_sync';
+      const STORAGE_KEY = 'escalonia15_sala_comun_v10';
+      const CHANNEL_NAME = 'escalonia15_realtime_sync_v10';
       const PORTALS = Array.from({ length: 18 }, (_, i) => `Portal ${i + 1}`);
       const UNITS = [
         'Bajo A', 'Bajo B', 'Bajo C', 'Bajo D',
@@ -746,6 +813,8 @@
       ];
 
       const syncChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(CHANNEL_NAME) : null;
+      let lastKnownRawState = '';
+      let activeScreen = 'landing'; // 'landing' | 'owner' | 'admin'
 
       function formatDateISO(d) {
         const y = d.getFullYear();
@@ -763,6 +832,10 @@
           month: 'long',
           year: 'numeric'
         });
+      }
+
+      function getShiftLabel(shift) {
+        return shift === 'manana' ? 'Mañana' : 'Tarde';
       }
 
       function getShiftScheduleText(isoStr, shift) {
@@ -857,7 +930,14 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       function loadState() {
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) return buildInitialState();
+          if (!raw) {
+            const initial = buildInitialState();
+            const serialized = JSON.stringify(initial);
+            localStorage.setItem(STORAGE_KEY, serialized);
+            lastKnownRawState = serialized;
+            return initial;
+          }
+          lastKnownRawState = raw;
           const parsed = JSON.parse(raw);
           return {
             ...buildInitialState(),
@@ -875,36 +955,100 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       let state = loadState();
       let selectedSlot = null;
 
+      function applyScreenVisibility() {
+        const landing = document.getElementById('landingScreen');
+        const ownerApp = document.getElementById('ownerApp');
+        const adminFull = document.getElementById('adminFullInterface');
+
+        landing.classList.add('hidden');
+        ownerApp.classList.add('hidden');
+        ownerApp.classList.remove('flex');
+        adminFull.classList.add('hidden');
+        adminFull.classList.remove('flex');
+
+        if (activeScreen === 'owner') {
+          ownerApp.classList.remove('hidden');
+          ownerApp.classList.add('flex');
+        } else if (activeScreen === 'admin') {
+          adminFull.classList.remove('hidden');
+          adminFull.classList.add('flex');
+        } else {
+          landing.classList.remove('hidden');
+        }
+      }
+
       function refreshAllViews() {
         updateHeaderAndUserInfo();
         renderCalendar();
+        renderAdminCalendar();
         renderMyReservations();
         renderAdminDashboard();
       }
 
       function saveState(broadcast = true) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        const serialized = JSON.stringify(state);
+        lastKnownRawState = serialized;
+        localStorage.setItem(STORAGE_KEY, serialized);
         refreshAllViews();
-        if (broadcast && syncChannel) {
-          syncChannel.postMessage({ type: 'STATE_UPDATED', ts: Date.now() });
+        if (broadcast) {
+          if (syncChannel) {
+            syncChannel.postMessage({ type: 'STATE_UPDATED', payload: serialized, ts: Date.now() });
+          }
+          window.dispatchEvent(new CustomEvent('escalonia15:live-update', { detail: serialized }));
+        }
+      }
+
+      function syncFromExternalRaw(rawValue) {
+        if (!rawValue || rawValue === lastKnownRawState) return;
+        lastKnownRawState = rawValue;
+        try {
+          const parsed = JSON.parse(rawValue);
+          state = {
+            ...buildInitialState(),
+            ...parsed,
+            adminConfig: {
+              ...buildInitialState().adminConfig,
+              ...(parsed.adminConfig || {})
+            }
+          };
+          refreshAllViews();
+        } catch (e) {
+          // ignore malformed sync payload
         }
       }
 
       window.addEventListener('storage', (e) => {
-        if (e.key === STORAGE_KEY) {
-          state = loadState();
-          refreshAllViews();
+        if (e.key === STORAGE_KEY && e.newValue) {
+          syncFromExternalRaw(e.newValue);
+        }
+      });
+
+      window.addEventListener('escalonia15:live-update', (e) => {
+        if (e.detail) {
+          syncFromExternalRaw(e.detail);
         }
       });
 
       if (syncChannel) {
         syncChannel.onmessage = (ev) => {
           if (ev.data && ev.data.type === 'STATE_UPDATED') {
-            state = loadState();
-            refreshAllViews();
+            if (ev.data.payload) {
+              syncFromExternalRaw(ev.data.payload);
+            } else {
+              const latest = localStorage.getItem(STORAGE_KEY);
+              if (latest) syncFromExternalRaw(latest);
+            }
           }
         };
       }
+
+      // Polling ligero en tiempo real para garantizar actualización inmediata en cualquier contexto
+      setInterval(() => {
+        const currentRaw = localStorage.getItem(STORAGE_KEY);
+        if (currentRaw && currentRaw !== lastKnownRawState) {
+          syncFromExternalRaw(currentRaw);
+        }
+      }, 250);
 
       function showToast(message, isError = false) {
         const box = document.getElementById('toastBox');
@@ -950,10 +1094,13 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       function updateHeaderAndUserInfo() {
         const user = getCurrentUser();
         state.currentUserEmail = user.email;
+        const housingLabel = `${user.portal} · ${user.unit}`;
+        document.getElementById('ownerWelcomeTitle').textContent =
+          `Bienvenido · ${housingLabel}`;
         document.getElementById('activeUserBanner').textContent =
-          `Sesión activa: ${user.email} · ${user.portal} · ${user.unit}`;
+          `Propietario: ${user.email} · ${housingLabel}`;
         document.getElementById('formUserEmail').textContent = user.email;
-        document.getElementById('formUserUnit').textContent = `${user.portal} · ${user.unit}`;
+        document.getElementById('formUserUnit').textContent = housingLabel;
 
         const targetYear = selectedSlot ? Number(selectedSlot.date.split('-')[0]) : new Date().getFullYear();
         const usedCount = getUserYearReservationCount(user.email, targetYear);
@@ -1035,7 +1182,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         }
 
         if (diffDays > 30 && !fixedException) {
-          msgBox.textContent = 'Supera los 30 días de antelación máxima. Marca "acto con fecha fija" (punto 12.1) si aplica.';
+          msgBox.textContent = 'Supera el plazo general de un mes. Marca la excepción de acto con fecha fija (12.1) si aplica.';
           msgBox.className = 'p-2.5 rounded-xl text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-200';
           btn.disabled = true;
           return false;
@@ -1053,23 +1200,24 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         return true;
       }
 
-      function getShiftClass(dateISO, shift) {
-        const user = getCurrentUser();
+      function getShiftClass(dateISO, shift, isAdminView = false) {
         const activeRes = getActiveSlotReservation(dateISO, shift);
         if (activeRes) {
           return activeRes.status === 'pendiente' ? 'st-pendiente' : 'st-reservado';
         }
-        const rejectedMine = getUserRejectedSlotReservation(dateISO, shift, user.email);
-        if (rejectedMine) {
-          return 'st-no-autorizado';
+        if (!isAdminView) {
+          const user = getCurrentUser();
+          const rejectedMine = getUserRejectedSlotReservation(dateISO, shift, user.email);
+          if (rejectedMine) {
+            return 'st-no-autorizado';
+          }
         }
         return 'st-libre';
       }
 
-      function getShiftHTML(dateISO, shift) {
-        const user = getCurrentUser();
+      function getShiftHTML(dateISO, shift, isAdminView = false) {
         const activeRes = getActiveSlotReservation(dateISO, shift);
-        const prefix = shift === 'manana' ? 'Mañana' : 'Tarde';
+        const prefix = getShiftLabel(shift);
 
         if (activeRes) {
           if (activeRes.status === 'pendiente') {
@@ -1078,23 +1226,20 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           return `<span class="slot-label">${prefix}: Reservado</span>`;
         }
 
-        const rejectedMine = getUserRejectedSlotReservation(dateISO, shift, user.email);
-        if (rejectedMine) {
-          return `<span class="slot-label inline-block px-1.5 py-0.5 rounded bg-red-600 text-white text-[9px] font-extrabold leading-none">No autorizado</span>`;
+        if (!isAdminView) {
+          const user = getCurrentUser();
+          const rejectedMine = getUserRejectedSlotReservation(dateISO, shift, user.email);
+          if (rejectedMine) {
+            return `<span class="slot-label inline-block px-1.5 py-0.5 rounded bg-red-600 text-white text-[9px] font-extrabold leading-none">No autorizado</span>`;
+          }
         }
 
         return `<span class="slot-label">${prefix}: Libre</span>`;
       }
 
-      function renderCalendar() {
+      function buildMonthGridInto(grid, isAdminView) {
         const { year, month } = state.currentYearMonth;
         const monthDate = new Date(year, month, 1);
-        document.getElementById('currentMonthLabel').textContent = monthDate.toLocaleDateString('es-ES', {
-          month: 'long',
-          year: 'numeric'
-        }).replace(/^./, c => c.toUpperCase());
-
-        const grid = document.getElementById('calendarGrid');
         grid.innerHTML = '';
 
         const firstDayJS = monthDate.getDay();
@@ -1114,19 +1259,23 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           const tile = document.createElement('div');
           tile.className = 'day-tile';
 
-          if (selectedSlot && selectedSlot.date === iso) {
+          if (!isAdminView && selectedSlot && selectedSlot.date === iso) {
             tile.classList.add('ring-2', 'ring-emerald-700');
           }
 
           const topLeft = document.createElement('div');
-          topLeft.className = `diag-top-left ${getShiftClass(iso, 'manana')}`;
-          topLeft.innerHTML = getShiftHTML(iso, 'manana');
-          topLeft.addEventListener('click', () => handleSelectSlot(iso, 'manana'));
+          topLeft.className = `diag-top-left ${getShiftClass(iso, 'manana', isAdminView)}`;
+          topLeft.innerHTML = getShiftHTML(iso, 'manana', isAdminView);
+          if (!isAdminView) {
+            topLeft.addEventListener('click', () => handleSelectSlot(iso, 'manana'));
+          }
 
           const bottomRight = document.createElement('div');
-          bottomRight.className = `diag-bottom-right ${getShiftClass(iso, 'tarde')}`;
-          bottomRight.innerHTML = getShiftHTML(iso, 'tarde');
-          bottomRight.addEventListener('click', () => handleSelectSlot(iso, 'tarde'));
+          bottomRight.className = `diag-bottom-right ${getShiftClass(iso, 'tarde', isAdminView)}`;
+          bottomRight.innerHTML = getShiftHTML(iso, 'tarde', isAdminView);
+          if (!isAdminView) {
+            bottomRight.addEventListener('click', () => handleSelectSlot(iso, 'tarde'));
+          }
 
           const divider = document.createElement('div');
           divider.className = 'diag-divider';
@@ -1141,15 +1290,37 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           tile.appendChild(badge);
           grid.appendChild(tile);
         }
+      }
+
+      function renderCalendar() {
+        const { year, month } = state.currentYearMonth;
+        const monthText = new Date(year, month, 1).toLocaleDateString('es-ES', {
+          month: 'long',
+          year: 'numeric'
+        }).replace(/^./, c => c.toUpperCase());
+
+        document.getElementById('currentMonthLabel').textContent = monthText;
+        buildMonthGridInto(document.getElementById('calendarGrid'), false);
 
         updateHeaderAndUserInfo();
         updateShiftQuickSelectorUI();
         validateSelection();
       }
 
+      function renderAdminCalendar() {
+        const { year, month } = state.currentYearMonth;
+        const monthText = new Date(year, month, 1).toLocaleDateString('es-ES', {
+          month: 'long',
+          year: 'numeric'
+        }).replace(/^./, c => c.toUpperCase());
+
+        document.getElementById('adminCurrentMonthLabel').textContent = monthText;
+        buildMonthGridInto(document.getElementById('adminCalendarGrid'), true);
+      }
+
       function handleSelectSlot(dateISO, shift) {
         selectedSlot = { date: dateISO, shift };
-        const shiftName = shift === 'manana' ? 'Mañana' : 'Tarde';
+        const shiftName = getShiftLabel(shift);
         const schedule = getShiftScheduleText(dateISO, shift);
         document.getElementById('selectedSlotSummary').innerHTML =
           `<strong class="text-slate-900">${formatDateSpanish(dateISO)}</strong><br/>Turno seleccionado: <strong>${shiftName}</strong> (${schedule})`;
@@ -1158,7 +1329,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
       function openPaymentModalForReservation(reservation) {
         const tpl = state.adminConfig.mailTemplate;
-        const shiftLabel = reservation.shift === 'manana' ? 'Mañana' : 'Tarde';
+        const shiftLabel = getShiftLabel(reservation.shift);
         const schedule = getShiftScheduleText(reservation.date, reservation.shift);
 
         const body = tpl
@@ -1200,7 +1371,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         } else {
           pendingEl.innerHTML = pending.map(r => `
             <div class="p-3 rounded-xl bg-white border border-yellow-200 flex items-center justify-between gap-2 text-xs">
-              <p class="font-bold text-slate-900">${formatDateSpanish(r.date)}</p>
+              <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
               <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold">
                 Anular
               </button>
@@ -1213,7 +1384,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         } else {
           confirmedEl.innerHTML = confirmed.map(r => `
             <div class="p-3 rounded-xl bg-white border border-red-200 flex items-center justify-between gap-2 text-xs">
-              <p class="font-bold text-slate-900">${formatDateSpanish(r.date)}</p>
+              <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
               <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold">
                 Anular
               </button>
@@ -1227,7 +1398,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           ownerCancelledBox.classList.remove('hidden');
           ownerCancelledEl.innerHTML = cancelledByOwner.map(r => `
             <div class="p-3 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-2 text-xs">
-              <p class="font-bold text-slate-900">${formatDateSpanish(r.date)}</p>
+              <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
               <span class="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-800 text-xs font-bold">
                 Anulada por propietario
               </span>
@@ -1251,7 +1422,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             saveState();
 
             if (daysBefore < 7) {
-              showToast('Anulada por propietario fuera del plazo de 7 días: se devuelve la fianza (100 €) y se retiene la cuota de 50 €.');
+              showToast('Anulada por propietario fuera del plazo de 7 días: se devuelve la fianza pero no la parte del alquiler.');
             } else {
               showToast('Anulada por propietario dentro del plazo de 7 días.');
             }
@@ -1287,7 +1458,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           return `
             <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
               <div class="space-y-0.5">
-                <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} · ${r.shift === 'manana' ? 'Mañana' : 'Tarde'}</p>
+                <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
                 <p class="text-slate-700">${r.ownerEmail} (${r.portal} · ${r.unit}) — Estado: <strong>${r.status.toUpperCase()}</strong></p>
                 <p class="text-emerald-800 font-semibold">Veces reservado este año (${year}): <strong>${yearCount}</strong></p>
               </div>
@@ -1355,6 +1526,19 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         });
       }
 
+      // Entrada desde pantalla inicial
+      document.getElementById('btnEnterOwner').addEventListener('click', () => {
+        state = loadState();
+        activeScreen = 'owner';
+        applyScreenVisibility();
+        refreshAllViews();
+      });
+
+      document.getElementById('btnBackToLandingFromOwner').addEventListener('click', () => {
+        activeScreen = 'landing';
+        applyScreenVisibility();
+      });
+
       // Selector de turno en panel derecho
       document.getElementById('pickShiftMananaBtn').addEventListener('click', () => {
         if (!selectedSlot) return;
@@ -1382,6 +1566,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           });
           document.getElementById(`tab-${target}`).classList.remove('hidden');
 
+          state = loadState();
           refreshAllViews();
         });
       });
@@ -1401,24 +1586,23 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
             panel.classList.add('hidden');
           });
           document.getElementById(`admin-tab-${target}`).classList.remove('hidden');
-          renderAdminDashboard();
+          state = loadState();
+          refreshAllViews();
         });
       });
 
-      // Month controls
-      document.getElementById('prevMonthBtn').addEventListener('click', () => {
+      // Month controls (Propietario y Administrador)
+      function shiftMonthBy(delta) {
         const { year, month } = state.currentYearMonth;
-        const prev = new Date(year, month - 1, 1);
-        state.currentYearMonth = { year: prev.getFullYear(), month: prev.getMonth() };
+        const targetDate = new Date(year, month + delta, 1);
+        state.currentYearMonth = { year: targetDate.getFullYear(), month: targetDate.getMonth() };
         saveState(false);
-      });
+      }
 
-      document.getElementById('nextMonthBtn').addEventListener('click', () => {
-        const { year, month } = state.currentYearMonth;
-        const next = new Date(year, month + 1, 1);
-        state.currentYearMonth = { year: next.getFullYear(), month: next.getMonth() };
-        saveState(false);
-      });
+      document.getElementById('prevMonthBtn').addEventListener('click', () => shiftMonthBy(-1));
+      document.getElementById('nextMonthBtn').addEventListener('click', () => shiftMonthBy(1));
+      document.getElementById('adminPrevMonthBtn').addEventListener('click', () => shiftMonthBy(-1));
+      document.getElementById('adminNextMonthBtn').addEventListener('click', () => shiftMonthBy(1));
 
       // Booking submit (Propietario: nunca abre el modal de pago)
       ['acceptNormsCheck', 'fixedDateExceptionCheck'].forEach(id => {
@@ -1507,7 +1691,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         saveState(false);
         authModal.classList.add('hidden');
         authModal.classList.remove('flex');
-        showToast(`Sesión iniciada: ${found.email}`);
+        showToast(`Bienvenido · ${found.portal} · ${found.unit}`);
       });
 
       document.getElementById('forgotPasswordBtn').addEventListener('click', () => {
@@ -1541,14 +1725,13 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         saveState();
         authModal.classList.add('hidden');
         authModal.classList.remove('flex');
-        showToast(`Cuenta activada: ${existing.email}`);
+        showToast(`Cuenta activada: ${existing.portal} · ${existing.unit}`);
       });
 
-      // Admin password modal -> dedicated full admin interface
+      // Admin password modal -> dedicated full admin interface + calendar
       const adminLoginModal = document.getElementById('adminLoginModal');
-      const adminFullInterface = document.getElementById('adminFullInterface');
 
-      document.getElementById('btnOpenAdmin').addEventListener('click', () => {
+      document.getElementById('btnEnterAdmin').addEventListener('click', () => {
         state = loadState();
         refreshAllViews();
         document.getElementById('adminPinInput').value = '';
@@ -1567,9 +1750,9 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
           state = loadState();
           adminLoginModal.classList.add('hidden');
           adminLoginModal.classList.remove('flex');
+          activeScreen = 'admin';
+          applyScreenVisibility();
           refreshAllViews();
-          adminFullInterface.classList.remove('hidden');
-          adminFullInterface.classList.add('flex');
         } else {
           showToast('Contraseña de administrador incorrecta.', true);
         }
@@ -1577,9 +1760,9 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
 
       document.getElementById('exitAdminFullBtn').addEventListener('click', () => {
         state = loadState();
+        activeScreen = 'landing';
+        applyScreenVisibility();
         refreshAllViews();
-        adminFullInterface.classList.add('hidden');
-        adminFullInterface.classList.remove('flex');
       });
 
       document.getElementById('createCommEventBtn').addEventListener('click', () => {
@@ -1673,6 +1856,7 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       });
 
       // Render inicial
+      applyScreenVisibility();
       refreshAllViews();
     })();
   </script>
