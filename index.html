@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reserva Sala Común Escalonia 15 — v1.9.1</title>
+  <title>Reserva Sala Común Escalonia 15 — v1.9.2</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -159,7 +159,7 @@
     <div class="max-w-xl w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-7 sm:p-10 text-center shadow-2xl space-y-7">
       <div class="space-y-1">
         <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-emerald-200 px-3 py-1 rounded-full bg-white/10">
-          Versión 1.9.1 · Tiempo Real
+          Versión 1.9.2 · Tiempo Real
         </span>
         <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight pt-2">
           Bienvenido a reserva sala común Escalonia 15
@@ -659,7 +659,7 @@
       <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-            Administrador · v1.9.1
+            Administrador · v1.9.2
           </span>
           <h2 id="adminHeaderTitle" class="text-base sm:text-lg font-bold leading-tight">
             Administrador — Sala Común Escalonia 15
@@ -933,7 +933,6 @@
       let pendingScreenAfterLogin = null;
       let lastEnteredPassword = "";
       let isSigningOut = false;
-      let renderRafId = null;
 
       let state = {
         currentYearMonth: {
@@ -955,7 +954,7 @@ La administración ha dado el visto bueno a tu solicitud de reserva en exclusiva
 - IBAN: {{IBAN}}
 - Concepto: {{CONCEPTO}}
 
-De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 horas para realizar el pago. Una vez recibido, se confirmará definitivamente la reserva.`
+Tienes 48 horas para hacer el pago. Una vez que lo hagas se te confirmará la reserva.`
         },
         admins: [{ email: ADMIN_EMAIL, uid: ADMIN_UID }],
         authorizedEmails: {},
@@ -975,6 +974,29 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
         return email.trim().toLowerCase().replace(/\./g, "_dot_").replace(/[@#$[\]]/g, "_");
       }
 
+      function normalizeDateISO(rawDate) {
+        if (!rawDate) return "";
+        const str = String(rawDate).trim();
+        const m = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+        if (!m) return "";
+        const year = Number(m[1]);
+        const month = Number(m[2]);
+        const day = Number(m[3]);
+        if (month < 1 || month > 12 || day < 1 || day > 31) return "";
+        const check = new Date(year, month - 1, day);
+        if (check.getFullYear() !== year || check.getMonth() !== month - 1 || check.getDate() !== day) {
+          return "";
+        }
+        return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      }
+
+      function normalizeShift(rawShift) {
+        const s = String(rawShift || "").trim().toLowerCase();
+        if (s === "manana" || s === "mañana" || s === "m") return "manana";
+        if (s === "tarde" || s === "t") return "tarde";
+        return "";
+      }
+
       function formatDateISO(d) {
         const y = d.getFullYear();
         const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -983,7 +1005,8 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       }
 
       function formatDateSpanish(isoStr) {
-        const [y, m, d] = isoStr.split("-").map(Number);
+        const clean = normalizeDateISO(isoStr) || isoStr;
+        const [y, m, d] = clean.split("-").map(Number);
         const dt = new Date(y, m - 1, d);
         return dt.toLocaleDateString("es-ES", {
           weekday: "long",
@@ -994,11 +1017,11 @@ De acuerdo con el punto 12 de la Normativa de Régimen Interior, dispones de 48 
       }
 
       function getShiftLabel(shift) {
-        return shift === "manana" ? "Mañana" : "Tarde";
+        return normalizeShift(shift) === "manana" ? "Mañana" : "Tarde";
       }
 
       function getShiftScheduleText(isoStr, shift) {
-        if (shift === "manana") return "10:00 a 16:30 h";
+        if (normalizeShift(shift) === "manana") return "10:00 a 16:30 h";
         const [y, m, d] = isoStr.split("-").map(Number);
         const dayOfWeek = new Date(y, m - 1, d).getDay();
         if (dayOfWeek === 5 || dayOfWeek === 6) {
@@ -1119,32 +1142,53 @@ Administración Escalonia 15`
         return Boolean(eventType && eventType.toLowerCase().includes("fecha fija"));
       }
 
+      function isValidActiveReservation(r) {
+        if (!r || typeof r !== "object") return false;
+        const cleanDate = normalizeDateISO(r.date);
+        const cleanShift = normalizeShift(r.shift);
+        if (!cleanDate || !cleanShift) return false;
+        return r.status === "pendiente" || r.status === "reservado";
+      }
+
       function getActiveSlotReservation(dateISO, shift) {
+        const targetDate = normalizeDateISO(dateISO);
+        const targetShift = normalizeShift(shift);
+        if (!targetDate || !targetShift) return null;
         return state.reservations.find(
-          r => r.date === dateISO && r.shift === shift && (r.status === "pendiente" || r.status === "reservado")
+          r => isValidActiveReservation(r) &&
+            normalizeDateISO(r.date) === targetDate &&
+            normalizeShift(r.shift) === targetShift
         ) || null;
       }
 
       function getUserRejectedSlotReservation(dateISO, shift, email) {
         if (!email) return null;
+        const targetDate = normalizeDateISO(dateISO);
+        const targetShift = normalizeShift(shift);
         return state.reservations.find(
-          r => r.date === dateISO && r.shift === shift && r.status === "no_autorizada" && (r.ownerEmail || "").toLowerCase() === email.toLowerCase()
+          r => r &&
+            normalizeDateISO(r.date) === targetDate &&
+            normalizeShift(r.shift) === targetShift &&
+            r.status === "no_autorizada" &&
+            (r.ownerEmail || "").toLowerCase() === email.toLowerCase()
         ) || null;
       }
 
       function getUserYearReservationCount(email, year) {
         if (!email) return 0;
         return state.reservations.filter(r => {
-          if (r.createdByAdmin) return false;
+          if (!r || r.createdByAdmin) return false;
           if ((r.ownerEmail || "").toLowerCase() !== email.toLowerCase()) return false;
           if (r.status === "cancelada" || r.status === "no_autorizada") return false;
-          const resYear = Number(r.date.split("-")[0]);
+          const cleanDate = normalizeDateISO(r.date);
+          if (!cleanDate) return false;
+          const resYear = Number(cleanDate.split("-")[0]);
           return resYear === year;
         }).length;
       }
 
       function getAdminEventsCount() {
-        return state.reservations.filter(r => r.createdByAdmin === true && r.status === "reservado").length;
+        return state.reservations.filter(r => r && r.createdByAdmin === true && r.status === "reservado").length;
       }
 
       function getPaymentCountdownInfo(reservation) {
@@ -1161,7 +1205,7 @@ Administración Escalonia 15`
         const hoursLeft = Math.ceil(remainingMs / (1000 * 60 * 60));
         return {
           expired: false,
-          text: `Correo 48h enviado · Quedan ${hoursLeft}h para pagar y confirmar`
+          text: `Quedan ${hoursLeft}h de 48h para pagar y confirmar`
         };
       }
 
@@ -1343,8 +1387,8 @@ Administración Escalonia 15`
       function updateCommSelectionPreview() {
         const preview = document.getElementById("commSelectedSlotPreview");
         if (!preview) return;
-        const dateVal = document.getElementById("commDateInput").value;
-        const shiftVal = document.getElementById("commShiftInput").value;
+        const dateVal = normalizeDateISO(document.getElementById("commDateInput").value);
+        const shiftVal = normalizeShift(document.getElementById("commShiftInput").value) || "manana";
         if (!dateVal) {
           preview.textContent = "Selecciona una fecha y turno arriba o pulsa sobre el calendario.";
           return;
@@ -1366,8 +1410,8 @@ Administración Escalonia 15`
         const offset = firstDayJS === 0 ? 6 : firstDayJS - 1;
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        const commDateVal = document.getElementById("commDateInput").value;
-        const commShiftVal = document.getElementById("commShiftInput").value;
+        const commDateVal = normalizeDateISO(document.getElementById("commDateInput").value);
+        const commShiftVal = normalizeShift(document.getElementById("commShiftInput").value);
 
         for (let i = 0; i < offset; i++) {
           const empty = document.createElement("div");
@@ -1402,7 +1446,7 @@ Administración Escalonia 15`
               if (activeAdminTab !== "acto-comunitario") {
                 switchAdminTab("acto-comunitario");
               } else {
-                renderAdminCalendar();
+                refreshAllViewsNow();
               }
             });
           }
@@ -1421,7 +1465,7 @@ Administración Escalonia 15`
               if (activeAdminTab !== "acto-comunitario") {
                 switchAdminTab("acto-comunitario");
               } else {
-                renderAdminCalendar();
+                refreshAllViewsNow();
               }
             });
           }
@@ -1490,8 +1534,38 @@ Administración Escalonia 15`
         renderCalendar();
       }
 
+      function upsertReservationInLocalState(id, patchOrFull) {
+        const idx = state.reservations.findIndex(r => r.id === id);
+        if (idx >= 0) {
+          state.reservations[idx] = { ...state.reservations[idx], ...patchOrFull, id };
+        } else {
+          state.reservations.push({ ...patchOrFull, id });
+        }
+        refreshAllViewsNow();
+      }
+
+      function removeReservationFromLocalState(id) {
+        state.reservations = state.reservations.filter(r => r.id !== id);
+        refreshAllViewsNow();
+      }
+
+      async function activate48hCountdownForReservation(reservation) {
+        if (!reservation) return;
+        const startedAt = reservation.paymentWindowStartedAt || new Date().toISOString();
+        upsertReservationInLocalState(reservation.id, { paymentWindowStartedAt: startedAt });
+        try {
+          await db.ref(`escalonia15/reservations/${reservation.id}`).update({
+            paymentWindowStartedAt: startedAt
+          });
+        } catch (err) {
+          showToast("No se pudo guardar el contador de 48h: " + err.message, true);
+        }
+      }
+
       function openPaymentModalForReservation(reservation) {
         activePaymentModalReservationId = reservation.id;
+        activate48hCountdownForReservation(reservation);
+
         const tpl = state.adminConfig.mailTemplate || "";
         const shiftLabel = getShiftLabel(reservation.shift);
         const schedule = getShiftScheduleText(reservation.date, reservation.shift);
@@ -1515,34 +1589,6 @@ Administración Escalonia 15`
         const modal = document.getElementById("paymentModal");
         modal.classList.remove("hidden");
         modal.classList.add("flex");
-      }
-
-      async function start48hPaymentCountdownForActiveModal() {
-        if (!activePaymentModalReservationId) return;
-        const resId = activePaymentModalReservationId;
-        const found = state.reservations.find(r => r.id === resId);
-        if (!found) return;
-
-        const startedAt = found.paymentWindowStartedAt || new Date().toISOString();
-        upsertReservationInLocalState(resId, { paymentWindowStartedAt: startedAt });
-
-        try {
-          await db.ref(`escalonia15/reservations/${resId}`).update({
-            paymentWindowStartedAt: startedAt
-          });
-        } catch (err) {
-          showToast("No se pudo guardar el inicio del contador de 48h: " + err.message, true);
-        }
-      }
-
-      function upsertReservationInLocalState(id, patchOrFull) {
-        const idx = state.reservations.findIndex(r => r.id === id);
-        if (idx >= 0) {
-          state.reservations[idx] = { ...state.reservations[idx], ...patchOrFull, id };
-        } else {
-          state.reservations.push({ ...patchOrFull, id });
-        }
-        scheduleRefreshAllViews();
       }
 
       function openCancelConfirmModal(reservation) {
@@ -1593,7 +1639,7 @@ Administración Escalonia 15`
         }
 
         const mine = state.reservations.filter(
-          r => !r.createdByAdmin && (r.ownerEmail || "").toLowerCase() === authUser.email.toLowerCase()
+          r => r && !r.createdByAdmin && (r.ownerEmail || "").toLowerCase() === authUser.email.toLowerCase()
         );
         const pending = mine.filter(r => r.status === "pendiente");
         const confirmed = mine.filter(r => r.status === "reservado");
@@ -1666,18 +1712,22 @@ Administración Escalonia 15`
         updateCommSelectionPreview();
 
         const listEl = document.getElementById("adminReservationsList");
-        const activeList = state.reservations.filter(r => r.status !== "cancelada" && r.status !== "no_autorizada");
+        const activeList = state.reservations.filter(r => r && r.status !== "cancelada" && r.status !== "no_autorizada");
         if (!activeList.length) {
           listEl.innerHTML = `<p class="text-xs text-slate-500">No hay reservas pendientes ni confirmadas.</p>`;
           return;
         }
 
         listEl.innerHTML = activeList.map(r => {
+          const cleanDate = normalizeDateISO(r.date);
+          const cleanShift = normalizeShift(r.shift);
+          const isMalformedOrGhost = !cleanDate || !cleanShift || (!r.ownerEmail && !r.createdByAdmin);
+
           if (r.createdByAdmin) {
             return `
               <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
                 <div class="space-y-1">
-                  <p class="font-bold text-slate-800">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
+                  <p class="font-bold text-slate-800">${cleanDate ? formatDateSpanish(cleanDate) : (r.date || "Fecha sin formato")} — ${cleanShift ? getShiftLabel(cleanShift) : (r.shift || "Sin turno")}</p>
                   <p class="text-base sm:text-lg font-extrabold text-slate-950">${r.eventType || r.housing || "Acto comunitario"}</p>
                   <p class="text-slate-700 font-semibold">Estado: <strong>RESERVADO</strong></p>
                   <p class="text-emerald-800 font-semibold">Contador de actos comunitarios: <strong>${getAdminEventsCount()}</strong> (sin límite)</p>
@@ -1686,12 +1736,15 @@ Administración Escalonia 15`
                   <button data-admin-cancel="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold">
                     Cancelar reserva
                   </button>
+                  <button data-delete-ghost="${r.id}" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold">
+                    Eliminar registro
+                  </button>
                 </div>
               </div>
             `;
           }
 
-          const year = Number(r.date.split("-")[0]);
+          const year = cleanDate ? Number(cleanDate.split("-")[0]) : new Date().getFullYear();
           const yearCount = getUserYearReservationCount(r.ownerEmail, year);
           const isSpecialFixedDate = Boolean(
             r.isFixedDateException ||
@@ -1703,18 +1756,18 @@ Administración Escalonia 15`
           return `
             <div class="p-4 rounded-xl border flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs ${
               is48hActive
-                ? "bg-amber-50/90 border-2 border-amber-500 shadow-md"
+                ? "bg-orange-50 border-2 border-orange-500 shadow-md"
                 : isSpecialFixedDate
                   ? "bg-amber-50/40 border-amber-400"
                   : "bg-slate-50 border-slate-200"
             }">
               <div class="space-y-1.5">
-                <p class="font-bold text-slate-700">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
+                <p class="font-bold text-slate-700">${cleanDate ? formatDateSpanish(cleanDate) : (r.date || "Fecha sin formato")} — ${cleanShift ? getShiftLabel(cleanShift) : (r.shift || "Sin turno")}</p>
                 <p class="text-base sm:text-lg font-extrabold text-slate-950 tracking-tight">
                   ${r.housing || "Vivienda por completar"}
                 </p>
                 <p class="text-xs sm:text-sm font-bold text-emerald-950 bg-white border border-slate-200 rounded-lg px-2.5 py-1 inline-block">
-                  ${r.ownerEmail || "Sin correo"}
+                  ${r.ownerEmail || "Sin correo (registro huérfano)"}
                 </p>
                 ${isSpecialFixedDate ? `
                   <div>
@@ -1742,7 +1795,7 @@ Administración Escalonia 15`
               <div class="flex flex-wrap items-center gap-2">
                 <button data-visto-bueno="${r.id}" type="button" class="px-3 py-1.5 rounded-lg font-bold ${
                   countdown
-                    ? "bg-orange-600 hover:bg-orange-700 text-white ring-2 ring-orange-300"
+                    ? "bg-orange-600 hover:bg-orange-700 text-white ring-2 ring-orange-300 animate-pulse"
                     : "bg-amber-500 hover:bg-amber-600 text-slate-950"
                 }">
                   ${countdown ? "48h activadas · Ver / reenviar correo" : "Visto bueno (Correo pago 48h)"}
@@ -1762,6 +1815,11 @@ Administración Escalonia 15`
                 } font-bold">
                   ${r.depositReturned ? "Fianza devuelta ✓" : "Fianza devuelta"}
                 </button>
+                ${isMalformedOrGhost ? `
+                  <button data-delete-ghost="${r.id}" type="button" class="px-3 py-1.5 rounded-lg border border-red-400 bg-red-50 hover:bg-red-100 text-red-900 font-bold">
+                    Liberar hueco pillado
+                  </button>
+                ` : ""}
               </div>
             </div>
           `;
@@ -1772,8 +1830,25 @@ Administración Escalonia 15`
             const id = btn.dataset.adminCancel;
             const patch = { status: "cancelada", cancelledByOwner: false };
             upsertReservationInLocalState(id, patch);
-            await db.ref(`escalonia15/reservations/${id}`).update(patch);
-            showToast("Reserva cancelada.");
+            try {
+              await db.ref(`escalonia15/reservations/${id}`).update(patch);
+              showToast("Reserva cancelada.");
+            } catch (err) {
+              showToast("Error al cancelar: " + err.message, true);
+            }
+          });
+        });
+
+        listEl.querySelectorAll("[data-delete-ghost]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const id = btn.dataset.deleteGhost;
+            removeReservationFromLocalState(id);
+            try {
+              await db.ref(`escalonia15/reservations/${id}`).remove();
+              showToast("Registro eliminado y hueco liberado.");
+            } catch (err) {
+              showToast("Error al eliminar registro: " + err.message, true);
+            }
           });
         });
 
@@ -1789,8 +1864,12 @@ Administración Escalonia 15`
             const id = btn.dataset.confirmPay;
             const patch = { status: "reservado" };
             upsertReservationInLocalState(id, patch);
-            await db.ref(`escalonia15/reservations/${id}`).update(patch);
-            showToast("Reserva confirmada.");
+            try {
+              await db.ref(`escalonia15/reservations/${id}`).update(patch);
+              showToast("Reserva confirmada y actualizada en tiempo real.");
+            } catch (err) {
+              showToast("Error al confirmar reserva: " + err.message, true);
+            }
           });
         });
 
@@ -1799,8 +1878,12 @@ Administración Escalonia 15`
             const id = btn.dataset.noAutorizar;
             const patch = { status: "no_autorizada", cancelledByOwner: false };
             upsertReservationInLocalState(id, patch);
-            await db.ref(`escalonia15/reservations/${id}`).update(patch);
-            showToast("Reserva marcada como NO AUTORIZADA.");
+            try {
+              await db.ref(`escalonia15/reservations/${id}`).update(patch);
+              showToast("Reserva marcada como NO AUTORIZADA.");
+            } catch (err) {
+              showToast("Error al marcar no autorizada: " + err.message, true);
+            }
           });
         });
 
@@ -1810,8 +1893,12 @@ Administración Escalonia 15`
             if (!item) return;
             const nextVal = !item.depositReturned;
             upsertReservationInLocalState(item.id, { depositReturned: nextVal });
-            await db.ref(`escalonia15/reservations/${item.id}`).update({ depositReturned: nextVal });
-            showToast(nextVal ? "Fianza marcada como devuelta." : "Marca de fianza devuelta quitada.");
+            try {
+              await db.ref(`escalonia15/reservations/${item.id}`).update({ depositReturned: nextVal });
+              showToast(nextVal ? "Fianza marcada como devuelta." : "Marca de fianza devuelta quitada.");
+            } catch (err) {
+              showToast("Error al actualizar fianza: " + err.message, true);
+            }
           });
         });
       }
@@ -1822,14 +1909,6 @@ Administración Escalonia 15`
         renderAdminCalendar();
         renderMyReservations();
         renderAdminDashboard();
-      }
-
-      function scheduleRefreshAllViews() {
-        if (renderRafId !== null) return;
-        renderRafId = window.requestAnimationFrame(() => {
-          renderRafId = null;
-          refreshAllViewsNow();
-        });
       }
 
       function detachUserProfileListener() {
@@ -1896,13 +1975,13 @@ Administración Escalonia 15`
           if (Array.isArray(snap.val().admins) && snap.val().admins.length) {
             state.admins = snap.val().admins;
           }
-          scheduleRefreshAllViews();
+          refreshAllViewsNow();
         }
       });
 
       db.ref("escalonia15/authorizedEmails").on("value", snap => {
         state.authorizedEmails = snap.val() || {};
-        scheduleRefreshAllViews();
+        refreshAllViewsNow();
       });
 
       db.ref("escalonia15/reservations").on("value", snap => {
@@ -1910,10 +1989,14 @@ Administración Escalonia 15`
         const serverItems = Object.entries(rawObj).map(([id, val]) => ({ id, ...val }));
         const optimisticTempItems = state.reservations.filter(
           localItem => String(localItem.id || "").startsWith("tmp_") &&
-            !serverItems.some(srv => srv.date === localItem.date && srv.shift === localItem.shift && srv.createdAt === localItem.createdAt)
+            !serverItems.some(srv =>
+              normalizeDateISO(srv.date) === normalizeDateISO(localItem.date) &&
+              normalizeShift(srv.shift) === normalizeShift(localItem.shift) &&
+              srv.createdAt === localItem.createdAt
+            )
         );
         state.reservations = [...serverItems, ...optimisticTempItems];
-        scheduleRefreshAllViews();
+        refreshAllViewsNow();
       });
 
       window.setInterval(() => {
@@ -1931,7 +2014,8 @@ Administración Escalonia 15`
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const [y, m, d] = found.date.split("-").map(Number);
+        const cleanDate = normalizeDateISO(found.date) || found.date;
+        const [y, m, d] = cleanDate.split("-").map(Number);
         const resDate = new Date(y, m - 1, d);
         const daysBefore = Math.round((resDate - today) / (1000 * 60 * 60 * 24));
 
@@ -1945,7 +2029,7 @@ Administración Escalonia 15`
           await db.ref(`escalonia15/reservations/${found.id}`).update(patch);
           showToast(
             found.status === "reservado"
-              ? "Reserva confirmada anulada. Se pierde la reserva de 50 €."
+              ? "Reserva confirmada anulada. Se pierde la reserva de 50 euros."
               : (daysBefore < 7
                 ? "Anulada fuera del plazo de 7 días: se devuelve la fianza pero no la parte del alquiler."
                 : "Anulada dentro del plazo de 7 días.")
@@ -2137,16 +2221,16 @@ Administración Escalonia 15`
       document.getElementById("acceptNormsCheck").addEventListener("change", validateSelection);
 
       document.getElementById("commDateInput").addEventListener("change", () => {
-        const val = document.getElementById("commDateInput").value;
+        const val = normalizeDateISO(document.getElementById("commDateInput").value);
         if (val) {
           const [y, m] = val.split("-").map(Number);
           state.currentYearMonth = { year: y, month: m - 1 };
         }
-        renderAdminCalendar();
+        refreshAllViewsNow();
       });
 
       document.getElementById("commShiftInput").addEventListener("change", () => {
-        renderAdminCalendar();
+        refreshAllViewsNow();
       });
 
       document.getElementById("btnSubmitBooking").addEventListener("click", async () => {
@@ -2157,8 +2241,8 @@ Administración Escalonia 15`
         const tempId = "tmp_" + Date.now();
 
         const payload = {
-          date: selectedSlot.date,
-          shift: selectedSlot.shift,
+          date: normalizeDateISO(selectedSlot.date),
+          shift: normalizeShift(selectedSlot.shift),
           status: "pendiente",
           ownerEmail: authUser.email,
           ownerUid: authUser.uid,
@@ -2212,7 +2296,8 @@ Administración Escalonia 15`
       });
 
       document.getElementById("sendMailBtn").addEventListener("click", async () => {
-        await start48hPaymentCountdownForActiveModal();
+        const item = state.reservations.find(x => x.id === activePaymentModalReservationId);
+        if (item) await activate48hCountdownForReservation(item);
         const to = encodeURIComponent(document.getElementById("mailToInput").value.trim());
         const cc = encodeURIComponent(document.getElementById("mailFromInput").value.trim() || ADMIN_EMAIL);
         const subject = encodeURIComponent(document.getElementById("mailSubjectInput").value.trim());
@@ -2223,7 +2308,7 @@ Administración Escalonia 15`
         document.body.appendChild(a);
         a.click();
         a.remove();
-        showToast("Correo preparado y contador de 48h activado.");
+        showToast("Correo abierto con aviso de 48h y temporizador activo.");
       });
 
       const authModal = document.getElementById("authModal");
@@ -2380,12 +2465,12 @@ Administración Escalonia 15`
           showToast("Sesión de administrador no iniciada.", true);
           return;
         }
-        const dateVal = document.getElementById("commDateInput").value;
-        const shiftVal = document.getElementById("commShiftInput").value;
+        const dateVal = normalizeDateISO(document.getElementById("commDateInput").value);
+        const shiftVal = normalizeShift(document.getElementById("commShiftInput").value);
         const titleVal = document.getElementById("commTitleInput").value.trim() || "Acto comunitario";
 
-        if (!dateVal) {
-          showToast("Selecciona una fecha.", true);
+        if (!dateVal || !shiftVal) {
+          showToast("Selecciona una fecha y un turno válidos.", true);
           return;
         }
 
