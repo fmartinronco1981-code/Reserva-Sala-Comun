@@ -912,7 +912,7 @@
               <div>
                 <h3 class="text-sm sm:text-lg font-bold text-slate-900">Reservas por confirmar y control de fianzas</h3>
                 <p class="text-[11px] sm:text-xs text-slate-500">
-                  Visto bueno (48h), confirmar, no autorizar, modificar vecino o confirmar devolución de fianza.
+                  VISTO_BUENO_48H, confirmar, no autorizar, modificar vecino o confirmar devolución de fianza.
                 </p>
               </div>
               <div class="flex flex-wrap items-center gap-1.5">
@@ -2211,7 +2211,7 @@ Administración Escalonia 15`
                       ? "text-red-800 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5"
                       : "text-amber-950 bg-amber-100/80 border border-amber-300 rounded-lg px-2.5 py-1.5"
                   }">
-                    Visto bueno dado · Pendiente de pago (48 h): tienes hasta el <strong>${deadlineInfo.text}</strong> para realizar el pago de la reserva (50,00 €) y la fianza (100,00 €), total <strong>150,00 €</strong>.
+                    VISTO_BUENO_48H dado · Pendiente de pago (48 h): tienes hasta el <strong>${deadlineInfo.text}</strong> para realizar el pago de la reserva (50,00 €) y la fianza (100,00 €), total <strong>150,00 €</strong>.
                   </p>
                 ` : ""}
               </div>
@@ -2594,7 +2594,7 @@ Administración Escalonia 15`
                       ? "bg-orange-500 hover:bg-orange-600 text-white border border-orange-700"
                       : "bg-amber-500 hover:bg-amber-600 text-slate-950"
                   }">
-                    Visto bueno
+                    VISTO_BUENO_48H
                   </button>
                   ${canConfirmPayment ? `
                     <button data-confirm-pay="${r.id}" type="button" class="px-2.5 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold cursor-pointer">
@@ -2922,8 +2922,8 @@ Administración Escalonia 15`
           const dl = formatDeadlineSpanish(nextItem.paymentWindowStartedAt);
           showToast(
             dl
-              ? `Visto bueno dado: tienes hasta el ${dl.text} para realizar el pago (${label}).`
-              : `Visto bueno dado: tienes 48 horas para realizar el pago (${label}).`
+              ? `VISTO_BUENO_48H dado: tienes hasta el ${dl.text} para realizar el pago (${label}).`
+              : `VISTO_BUENO_48H dado: tienes 48 horas para realizar el pago (${label}).`
           );
         }
       }
