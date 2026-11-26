@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reserva Sala Común Escalonia 15 — v1.9.6</title>
+  <title>Reserva Sala Común Escalonia 15 — v1.9.7</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -39,13 +39,19 @@
     }
     .day-tile {
       position: relative;
-      height: 86px;
-      border-radius: 12px;
+      height: 76px;
+      border-radius: 10px;
       overflow: hidden;
       border: 1px solid #cbd5e1;
       background: #ffffff;
       user-select: none;
       transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    @media (min-width: 640px) {
+      .day-tile {
+        height: 84px;
+        border-radius: 12px;
+      }
     }
     .day-tile:hover {
       transform: translateY(-1px);
@@ -53,7 +59,7 @@
     }
     .comm-compact-grid .day-tile,
     .comm-compact-grid > div {
-      height: 66px;
+      height: 62px;
     }
     @media (min-width: 1024px) {
       .comm-compact-grid .day-tile,
@@ -68,7 +74,7 @@
       display: flex;
       align-items: flex-start;
       justify-content: flex-start;
-      padding: 5px 6px;
+      padding: 4px 5px;
       cursor: pointer;
     }
     .diag-bottom-right {
@@ -78,7 +84,7 @@
       display: flex;
       align-items: flex-end;
       justify-content: flex-end;
-      padding: 5px 6px;
+      padding: 4px 5px;
       cursor: pointer;
     }
     .diag-divider {
@@ -117,7 +123,7 @@
       z-index: 4;
       pointer-events: none;
       font-weight: 800;
-      font-size: 0.76rem;
+      font-size: 0.74rem;
       line-height: 1;
       padding: 2px 5px;
       border-radius: 6px;
@@ -126,7 +132,7 @@
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
     }
     .slot-label {
-      font-size: 0.6rem;
+      font-size: 0.58rem;
       font-weight: 700;
       line-height: 1.05;
       letter-spacing: -0.01em;
@@ -148,14 +154,14 @@
 
   <!-- TOAST NOTIFICATION (SIEMPRE POR ENCIMA DE CUALQUIER MODAL) -->
   <div id="toastBox" class="fixed bottom-4 right-4 z-[70] max-w-sm pointer-events-none hidden">
-    <div id="toastInner" class="pointer-events-auto rounded-xl px-4 py-3 text-xs sm:text-sm font-medium shadow-2xl border bg-slate-900 text-white border-slate-700"></div>
+    <div id="toastInner" class="pointer-events-auto rounded-xl px-4 py-3 text-xs sm:text-sm font-bold shadow-2xl border bg-slate-900 text-white border-slate-700"></div>
   </div>
 
-  <!-- MODAL DE CONFIRMACIÓN DE ANULACIÓN / ELIMINACIÓN -->
+  <!-- MODAL DE CONFIRMACIÓN DE ANULACIÓN / FIANZA / ELIMINACIÓN -->
   <div id="cancelConfirmModal" class="fixed inset-0 z-[60] bg-slate-950/75 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div id="cancelConfirmHeader" class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
-        <h3 id="cancelConfirmTitle" class="text-sm sm:text-base font-bold">Confirmar anulación de reserva</h3>
+        <h3 id="cancelConfirmTitle" class="text-sm sm:text-base font-bold">Confirmar acción</h3>
         <button id="closeCancelConfirmModal" type="button" class="text-slate-300 hover:text-white text-lg font-bold leading-none px-1 cursor-pointer">
           &times;
         </button>
@@ -165,10 +171,10 @@
         <div id="cancelConfirmWarning" class="p-3.5 rounded-xl font-bold leading-relaxed"></div>
         <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
           <button id="cancelConfirmNoBtn" type="button" class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold cursor-pointer">
-            No, mantener
+            No, cancelar
           </button>
-          <button id="cancelConfirmYesBtn" type="button" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm cursor-pointer">
-            Sí, confirmar
+          <button id="cancelConfirmYesBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm cursor-pointer">
+            Confirmar
           </button>
         </div>
       </div>
@@ -216,7 +222,7 @@
 
         <div class="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-2">
           <label for="editNeighborTotalCountInput" class="block text-xs font-bold text-emerald-950">
-            Número de reservas en el año (ajustable a mitad de año)
+            Número de reservas en el año
           </label>
           <div class="flex items-center gap-2">
             <button id="editNeighborDecBtn" type="button" class="w-9 h-9 rounded-lg border border-emerald-300 bg-white hover:bg-emerald-100 text-emerald-950 font-extrabold text-base cursor-pointer">
@@ -249,7 +255,7 @@
     <div class="max-w-xl w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-7 sm:p-10 text-center shadow-2xl space-y-7">
       <div class="space-y-1">
         <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-emerald-200 px-3 py-1 rounded-full bg-white/10">
-          Versión 1.9.6 · Tiempo Real
+          Versión 1.9.7 · Tiempo Real
         </span>
         <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight pt-2">
           Bienvenido a reserva sala común Escalonia 15
@@ -279,100 +285,102 @@
   <!-- VISTA COMPLETA DE PROPIETARIO -->
   <div id="ownerApp" class="hidden min-h-screen flex-col">
     <header class="bg-brand-dark text-white sticky top-0 z-30 shadow-md">
-      <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg bg-emerald-600/30 border border-emerald-400/40 flex items-center justify-center font-bold text-emerald-200">
+      <div class="max-w-6xl mx-auto px-3 sm:px-4 py-2 flex items-start justify-between gap-2">
+        <div class="flex items-start gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-emerald-600/30 border border-emerald-400/40 flex items-center justify-center font-bold text-xs text-emerald-200 shrink-0 mt-0.5">
             E15
           </div>
-          <div>
-            <p class="text-xs font-bold uppercase tracking-wider text-emerald-300">
-              Reserva Sala Común Escalonia 15
-            </p>
-            <h2 id="ownerWelcomeTitle" class="text-base sm:text-lg font-extrabold tracking-tight leading-tight">
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-emerald-300">
+                Escalonia 15
+              </p>
+              <button
+                id="btnTopNormasLink"
+                type="button"
+                class="text-[11px] font-bold text-emerald-100 hover:text-white underline underline-offset-2 cursor-pointer"
+              >
+                Normas de la sala
+              </button>
+            </div>
+            <h2 id="ownerWelcomeTitle" class="text-sm sm:text-lg font-extrabold tracking-tight leading-snug truncate">
               Bienvenido
             </h2>
             <p id="activeUserBanner" class="hidden"></p>
           </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
-          <button
-            id="btnOpenSettings"
-            type="button"
-            class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-400/40 text-emerald-100 transition cursor-pointer"
-          >
-            Ajustes
-          </button>
+        <div class="flex flex-col items-end gap-1 shrink-0">
           <button
             id="btnOwnerLogout"
             type="button"
-            class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white transition cursor-pointer"
+            class="hidden px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-600 hover:bg-rose-700 text-white transition cursor-pointer"
           >
             Cerrar sesión
+          </button>
+          <button
+            id="btnOpenSettings"
+            type="button"
+            class="hidden px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-400/40 text-emerald-100 transition cursor-pointer"
+          >
+            Ajustes
           </button>
         </div>
       </div>
 
-      <!-- MAIN NAVIGATION TABS -->
+      <!-- PESTAÑAS PRINCIPALES: RESERVAR SALA Y MIS RESERVAS -->
       <nav class="bg-emerald-950/90 border-t border-white/10">
-        <div class="max-w-6xl mx-auto px-4 py-2 flex flex-wrap gap-2">
+        <div class="max-w-6xl mx-auto px-3 sm:px-4 py-1.5 flex items-center gap-2">
           <button
             type="button"
             data-tab="calendario"
-            class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-emerald-700 text-white transition"
+            class="nav-tab px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-emerald-700 text-white transition cursor-pointer"
           >
-            Calendario y Reservas
+            Reservar sala
           </button>
           <button
             type="button"
             data-tab="mis-reservas"
-            class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-white/10 text-emerald-100 hover:bg-white/20 transition"
+            class="nav-tab px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-emerald-100 hover:bg-white/20 transition cursor-pointer"
           >
-            Mis Reservas
-          </button>
-          <button
-            type="button"
-            data-tab="normas"
-            class="nav-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-white/10 text-emerald-100 hover:bg-white/20 transition"
-          >
-            Normas de la sala
+            Mis reservas
           </button>
         </div>
       </nav>
     </header>
 
-    <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-5 space-y-5">
-      <!-- TAB 1: CALENDARIO Y RESERVAS -->
-      <section id="tab-calendario" class="tab-panel space-y-5">
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
-            <span class="font-bold text-slate-700">Turno partido en diagonal (Mañana / Tarde):</span>
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-900 border border-green-300">
-              <span class="w-2.5 h-2.5 rounded-full bg-green-600"></span> Libre
+    <main class="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-4 py-3.5 sm:py-5 space-y-4">
+      <!-- TAB 1: RESERVAR SALA -->
+      <section id="tab-calendario" class="tab-panel space-y-4">
+        <div class="bg-white rounded-2xl border border-slate-200 p-3 sm:p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-2.5">
+          <div class="flex flex-wrap items-center gap-2 text-[11px] sm:text-xs font-semibold">
+            <span class="font-bold text-slate-700">Mañana / Tarde:</span>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-900 border border-green-300">
+              <span class="w-2 h-2 rounded-full bg-green-600"></span> Libre
             </span>
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-900 border border-yellow-300">
-              <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span> Pendiente
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-900 border border-yellow-300">
+              <span class="w-2 h-2 rounded-full bg-yellow-500"></span> Pendiente
             </span>
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-900 border border-red-300">
-              <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Reservado / No autorizado
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-900 border border-red-300">
+              <span class="w-2 h-2 rounded-full bg-red-600"></span> Reservado / No autorizado
             </span>
           </div>
 
           <div class="flex items-center justify-between md:justify-end gap-2">
-            <button id="prevMonthBtn" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
+            <button id="prevMonthBtn" type="button" class="px-2.5 py-1 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold cursor-pointer">
               &larr; Anterior
             </button>
-            <div id="currentMonthLabel" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-900 text-xs sm:text-sm font-bold min-w-[155px] text-center"></div>
-            <button id="nextMonthBtn" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
+            <div id="currentMonthLabel" class="px-3 py-1 rounded-lg bg-slate-100 text-slate-900 text-xs sm:text-sm font-bold min-w-[140px] text-center"></div>
+            <button id="nextMonthBtn" type="button" class="px-2.5 py-1 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold cursor-pointer">
               Siguiente &rarr;
             </button>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
           <!-- Calendar Grid -->
-          <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-            <div class="grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold text-slate-500 uppercase mb-2">
+          <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 p-3 sm:p-4 shadow-sm">
+            <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-slate-500 uppercase mb-1.5">
               <div>Lun</div>
               <div>Mar</div>
               <div>Mié</div>
@@ -381,28 +389,28 @@
               <div>Sáb</div>
               <div>Dom</div>
             </div>
-            <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 sm:gap-2"></div>
+            <div id="calendarGrid" class="grid grid-cols-7 gap-1 sm:gap-2"></div>
 
-            <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
-              <span>Mitad superior izquierda: <strong>Mañana (10:00–16:30)</strong></span>
-              <span>Mitad inferior derecha: <strong>Tarde (17:30–22:00 / V-S-Víspera 24:00)</strong></span>
+            <div class="mt-2.5 pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
+              <span>Arriba izquierda: <strong>Mañana (10:00–16:30)</strong></span>
+              <span>Abajo derecha: <strong>Tarde (17:30–22:00 / V-S-Víspera 24:00)</strong></span>
             </div>
           </div>
 
           <!-- Booking Panel -->
-          <div class="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4 h-fit">
-            <div class="border-b border-slate-100 pb-3">
-              <h3 class="text-base font-bold text-slate-900">Solicitar Reserva en Exclusiva</h3>
+          <div class="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-3.5 sm:p-5 shadow-sm space-y-3 h-fit">
+            <div class="border-b border-slate-100 pb-2.5">
+              <h3 class="text-sm sm:text-base font-bold text-slate-900">Solicitar Reserva en Exclusiva</h3>
               <p class="text-xs text-slate-500 mt-0.5">
                 Cuota: <strong>50,00 €</strong> + Fianza: <strong>100,00 €</strong> (Total: <strong>150,00 €</strong>). Pago en 48 h.
               </p>
             </div>
 
-            <div class="space-y-3 text-xs">
-              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+            <div class="space-y-2.5 text-xs">
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
                 <div class="flex justify-between">
                   <span class="text-slate-500">Propietario / Correo:</span>
-                  <span id="formUserEmail" class="font-bold text-slate-800 truncate max-w-[190px]">Sin sesión</span>
+                  <span id="formUserEmail" class="font-bold text-slate-800 truncate max-w-[185px]">Sin sesión</span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-slate-500">Vivienda:</span>
@@ -414,7 +422,7 @@
                 </div>
               </div>
 
-              <div class="space-y-2">
+              <div class="space-y-1.5">
                 <label class="block font-semibold text-slate-700">Fecha y turno seleccionado</label>
                 <div id="selectedSlotSummary" class="p-2.5 rounded-xl border border-dashed border-slate-300 bg-slate-50/70 text-slate-600 font-medium">
                   Pulsa un día en el calendario para elegir entre Turno mañana y Turno tarde.
@@ -452,10 +460,10 @@
                 </select>
               </div>
 
-              <label class="flex items-start gap-2 pt-1 cursor-pointer select-none">
+              <label class="flex items-start gap-2 pt-0.5 cursor-pointer select-none">
                 <input id="acceptNormsCheck" type="checkbox" class="mt-0.5 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600" />
                 <span class="text-[11px] text-slate-700 leading-snug">
-                  Acepto las <strong>Normas de la sala</strong>.
+                  Acepto las <button id="inlineNormsTrigger" type="button" class="underline font-bold text-emerald-900 cursor-pointer">Normas de la sala</button>.
                 </span>
               </label>
 
@@ -477,36 +485,41 @@
 
       <!-- TAB 2: MIS RESERVAS -->
       <section id="tab-mis-reservas" class="tab-panel hidden space-y-4">
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-5">
-          <div class="border-b border-slate-100 pb-3">
-            <h2 class="text-base sm:text-lg font-bold text-slate-900">Mis Reservas</h2>
+        <div class="bg-white rounded-2xl border border-slate-200 p-3.5 sm:p-5 shadow-sm space-y-4">
+          <div class="border-b border-slate-100 pb-2.5">
+            <h2 class="text-base sm:text-lg font-bold text-slate-900">Mis reservas</h2>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="rounded-xl border border-yellow-300 bg-yellow-50/50 p-4 space-y-2.5">
+            <div class="rounded-xl border border-yellow-300 bg-yellow-50/50 p-3.5 space-y-2.5">
               <h3 class="text-sm font-bold text-yellow-950">Reservas pendientes</h3>
               <div id="pendingReservationsList" class="space-y-2"></div>
             </div>
 
-            <div class="rounded-xl border border-red-200 bg-red-50/40 p-4 space-y-2.5">
+            <div class="rounded-xl border border-red-200 bg-red-50/40 p-3.5 space-y-2.5">
               <h3 class="text-sm font-bold text-red-950">Reserva confirmada</h3>
               <div id="confirmedReservationsList" class="space-y-2"></div>
             </div>
           </div>
 
-          <div id="ownerCancelledReservationsBox" class="hidden rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
+          <div id="ownerCancelledReservationsBox" class="hidden rounded-xl border border-slate-200 bg-slate-50 p-3.5 space-y-2">
             <h3 class="text-sm font-bold text-slate-800">Anuladas por propietario</h3>
             <div id="ownerCancelledReservationsList" class="space-y-2"></div>
           </div>
         </div>
       </section>
 
-      <!-- TAB 3: NORMAS DE LA SALA (TEXTO LITERAL DEL PUNTO 12) -->
-      <section id="tab-normas" class="tab-panel hidden space-y-5">
-        <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-4 text-xs sm:text-sm text-slate-800 leading-relaxed">
-          <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">
-            12. Sobre el uso de la sala comunitaria o gastrobar
-          </h2>
+      <!-- VISTA NORMAS DE LA SALA (ACCESIBLE DESDE EL ENLACE SUBRAYADO SUPERIOR) -->
+      <section id="tab-normas" class="tab-panel hidden space-y-4">
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm space-y-4 text-xs sm:text-sm text-slate-800 leading-relaxed">
+          <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <h2 class="text-base sm:text-xl font-extrabold text-slate-900">
+              12. Sobre el uso de la sala comunitaria o gastrobar
+            </h2>
+            <button id="backFromNormsBtn" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold cursor-pointer">
+              Volver a Reservar sala
+            </button>
+          </div>
 
           <div class="space-y-2.5">
             <p>12.1. La reserva se hará con los mismos plazos (un mes) por correo electrónico a la administración, con una excepción, cuando se trate de una reserva para celebrar un acto con fecha fija (bautizo, comunión, etc.) en que podrá reservarse sin sujetarse al plazo general de un mes.</p>
@@ -754,127 +767,118 @@
   <!-- VISTA COMPLETA DEDICADA DE ADMINISTRADOR + CALENDARIO -->
   <section id="adminFullInterface" class="fixed inset-0 z-40 bg-slate-100 hidden flex-col overflow-y-auto">
     <header class="bg-slate-900 text-white sticky top-0 z-20 shadow-md">
-      <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
-        <div>
+      <div class="max-w-7xl mx-auto px-3 sm:px-4 py-2 flex items-start justify-between gap-2">
+        <div class="min-w-0">
           <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-            Administrador · v1.9.6
+            Admin · v1.9.7
           </span>
-          <h2 id="adminHeaderTitle" class="text-base sm:text-lg font-bold leading-tight">
-            Administrador — Sala Común Escalonia 15
+          <h2 id="adminHeaderTitle" class="text-sm sm:text-lg font-bold leading-snug truncate">
+            Administrador — Escalonia 15
           </h2>
         </div>
 
-        <div class="flex items-center gap-2">
-          <button id="adminLogoutBtn" type="button" class="px-3.5 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition cursor-pointer">
-            Cerrar sesión
-          </button>
-        </div>
+        <button id="adminLogoutBtn" type="button" class="px-2.5 py-1 rounded-md bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold transition cursor-pointer shrink-0">
+          Cerrar sesión
+        </button>
       </div>
 
       <nav class="bg-slate-950 border-t border-white/10">
-        <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap gap-2">
+        <div class="max-w-7xl mx-auto px-3 sm:px-4 py-1.5 flex flex-wrap gap-1.5">
           <button
             type="button"
             data-admin-tab="reservas-fianzas"
-            class="admin-tab px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-emerald-600 text-white transition"
+            class="admin-tab px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold bg-emerald-600 text-white transition cursor-pointer"
           >
-            Reservas por confirmar y control de fianzas
-          </button>
-          <button
-            type="button"
-            data-admin-tab="vecinos-reservas"
-            class="admin-tab px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
-          >
-            Vecinos y reservas
+            Reservas y fianzas
           </button>
           <button
             type="button"
             data-admin-tab="acto-comunitario"
-            class="admin-tab px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
+            class="admin-tab px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition cursor-pointer"
           >
-            Programar acto comunitario
+            Acto comunitario
           </button>
           <button
             type="button"
             data-admin-tab="alta-propietarios"
-            class="admin-tab px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
+            class="admin-tab px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition cursor-pointer"
           >
-            Alta de propietarios
+            Alta propietarios
           </button>
           <button
             type="button"
             data-admin-tab="plantilla-iban"
-            class="admin-tab px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
+            class="admin-tab px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition cursor-pointer"
           >
-            Plantilla de correo e IBAN
+            Correo, IBAN y margen
           </button>
           <button
             type="button"
             data-admin-tab="nuevo-admin"
-            class="admin-tab px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
+            class="admin-tab px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition cursor-pointer"
           >
-            Dar de alta otro administrador
+            Nuevo administrador
           </button>
         </div>
       </nav>
     </header>
 
-    <main id="adminMainContainer" class="flex-1 max-w-7xl w-full mx-auto px-4 py-4 space-y-4 text-xs sm:text-sm">
+    <main id="adminMainContainer" class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-4 py-3 sm:py-4 space-y-3 sm:space-y-4 text-xs sm:text-sm">
       <!-- CONTENEDOR DIVIDIDO PARA RESERVAS/FIANZAS (IZQUIERDA) Y CALENDARIO (DERECHA) -->
-      <div id="adminSplitLayout" class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        <div id="adminLeftColumn" class="lg:col-span-7 space-y-4">
+      <div id="adminSplitLayout" class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        <div id="adminLeftColumn" class="lg:col-span-7 space-y-3">
           <!-- PESTAÑA 1: RESERVAS POR CONFIRMAR Y CONTROL DE FIANZAS -->
-          <div id="admin-tab-reservas-fianzas" class="admin-panel bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
-            <div class="border-b border-slate-100 pb-3 flex flex-wrap items-center justify-between gap-2">
+          <div id="admin-tab-reservas-fianzas" class="admin-panel bg-white rounded-2xl border border-slate-200 p-3.5 sm:p-5 shadow-sm space-y-3">
+            <div class="border-b border-slate-100 pb-2.5 flex flex-wrap items-center justify-between gap-2">
               <div>
-                <h3 class="text-base sm:text-lg font-bold text-slate-900">Reservas por confirmar y control de fianzas</h3>
-                <p class="text-xs text-slate-500">
-                  Revisa reservas, margen configurado, da visto bueno (48h), confirma, modifica vecino, no autoriza o marca devolución de fianza.
+                <h3 class="text-sm sm:text-lg font-bold text-slate-900">Reservas por confirmar y control de fianzas</h3>
+                <p class="text-[11px] sm:text-xs text-slate-500">
+                  Visto bueno (48h), confirmar, no autorizar, modificar vecino o confirmar devolución de fianza.
                 </p>
               </div>
-              <span id="adminPriorityMarginBadge" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-950 text-xs font-bold">
-                Margen activo: 14 días
+              <span id="adminPriorityMarginBadge" class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-950 text-[11px] font-bold">
+                Margen: 14 días
               </span>
             </div>
-            <div id="adminReservationsList" class="space-y-3"></div>
+            <div id="adminReservationsList" class="space-y-2.5"></div>
           </div>
 
-          <!-- PESTAÑA 3: PROGRAMAR ACTO COMUNITARIO (VISTA COMPACTA PARA VER CALENDARIO SIN SCROLL) -->
-          <div id="admin-tab-acto-comunitario" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3">
+          <!-- PESTAÑA 2: PROGRAMAR ACTO COMUNITARIO (VISTA COMPACTA PARA VER CALENDARIO SIN SCROLL) -->
+          <div id="admin-tab-acto-comunitario" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-3.5 shadow-sm space-y-2.5">
             <div class="border-b border-slate-100 pb-2 flex flex-wrap items-center justify-between gap-2">
               <div>
-                <h3 class="text-base font-bold text-slate-900">Programar acto comunitario</h3>
+                <h3 class="text-sm sm:text-base font-bold text-slate-900">Programar acto comunitario</h3>
                 <p class="text-[11px] text-slate-500">
-                  Elige fecha y turno en los campos o pulsa directamente en el calendario.
+                  Elige fecha y turno en los campos o pulsa en el calendario.
                 </p>
               </div>
-              <span id="adminCommCounterBadge" class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-900 text-xs font-bold">
-                Actos comunitarios registrados: 0 (sin límite)
+              <span id="adminCommCounterBadge" class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-900 text-[11px] font-bold">
+                Actos: 0
               </span>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha</label>
+                <label class="block text-[11px] font-semibold text-slate-700 mb-1">Fecha</label>
                 <input id="commDateInput" type="date" class="w-full rounded-xl border border-slate-300 px-2.5 py-1.5 text-xs bg-white" />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Turno</label>
+                <label class="block text-[11px] font-semibold text-slate-700 mb-1">Turno</label>
                 <select id="commShiftInput" class="w-full rounded-xl border border-slate-300 px-2.5 py-1.5 text-xs bg-white">
                   <option value="manana">Mañana (10:00–16:30)</option>
                   <option value="tarde">Tarde (17:30–22:00 / 24:00)</option>
                 </select>
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Título del acto comunitario</label>
+                <label class="block text-[11px] font-semibold text-slate-700 mb-1">Título del acto</label>
                 <input id="commTitleInput" type="text" placeholder="Junta / Evento comunitario" class="w-full rounded-xl border border-slate-300 px-2.5 py-1.5 text-xs bg-white" />
               </div>
             </div>
 
-            <div id="commSelectedSlotPreview" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700"></div>
+            <div id="commSelectedSlotPreview" class="p-2 rounded-xl bg-slate-50 border border-slate-200 text-[11px] font-semibold text-slate-700"></div>
 
             <div class="flex justify-end">
-              <button id="createCommEventBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
+              <button id="createCommEventBtn" type="button" class="px-4 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold cursor-pointer">
                 Registrar acto comunitario
               </button>
             </div>
@@ -882,19 +886,19 @@
         </div>
 
         <!-- COLUMNA DERECHA: CALENDARIO -->
-        <div id="adminRightColumn" class="lg:col-span-5 lg:sticky lg:top-24">
-          <div id="adminCalendarSection" class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3">
+        <div id="adminRightColumn" class="lg:col-span-5 lg:sticky lg:top-20">
+          <div id="adminCalendarSection" class="bg-white rounded-2xl border border-slate-200 p-3 sm:p-4 shadow-sm space-y-2.5">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2">
               <div>
-                <h3 class="text-sm sm:text-base font-bold text-slate-900">Calendario de reservas</h3>
-                <p id="adminCalendarHint" class="text-[11px] text-slate-500">Vista en tiempo real de Mañana y Tarde.</p>
+                <h3 class="text-sm font-bold text-slate-900">Calendario de reservas</h3>
+                <p id="adminCalendarHint" class="text-[11px] text-slate-500">Estado en tiempo real de Mañana y Tarde.</p>
               </div>
-              <div class="flex items-center gap-1.5">
-                <button id="adminPrevMonthBtn" type="button" class="px-2.5 py-1 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
+              <div class="flex items-center gap-1">
+                <button id="adminPrevMonthBtn" type="button" class="px-2 py-1 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold cursor-pointer">
                   &larr;
                 </button>
-                <div id="adminCurrentMonthLabel" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-900 text-xs font-bold min-w-[125px] text-center"></div>
-                <button id="adminNextMonthBtn" type="button" class="px-2.5 py-1 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
+                <div id="adminCurrentMonthLabel" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-900 text-xs font-bold min-w-[120px] text-center"></div>
+                <button id="adminNextMonthBtn" type="button" class="px-2 py-1 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold cursor-pointer">
                   &rarr;
                 </button>
               </div>
@@ -909,24 +913,13 @@
               <div>Sáb</div>
               <div>Dom</div>
             </div>
-            <div id="adminCalendarGrid" class="grid grid-cols-7 gap-1.5"></div>
+            <div id="adminCalendarGrid" class="grid grid-cols-7 gap-1"></div>
           </div>
         </div>
       </div>
 
-      <!-- PESTAÑA 2: VECINOS Y RESERVAS -->
-      <div id="admin-tab-vecinos-reservas" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
-        <div class="border-b border-slate-100 pb-3">
-          <h3 class="text-base sm:text-lg font-bold text-slate-900">Vecinos y contador de reservas</h3>
-          <p class="text-xs text-slate-500">
-            Usa <strong>Modificar vecino</strong> para ajustar la vivienda o el número de reservas del año en curso (0, 1, 2, etc.) cuando incorpores el sistema a mitad de año o existan reservas previas.
-          </p>
-        </div>
-        <div id="adminNeighborsList" class="space-y-2.5"></div>
-      </div>
-
-      <!-- PESTAÑA 4: ALTA DE PROPIETARIOS -->
-      <div id="admin-tab-alta-propietarios" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+      <!-- PESTAÑA 3: ALTA DE PROPIETARIOS -->
+      <div id="admin-tab-alta-propietarios" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div>
             <h3 class="text-base sm:text-lg font-bold text-slate-900">Alta de propietarios</h3>
@@ -945,15 +938,15 @@
             <a id="manualMailtoLink" href="#" class="hidden px-3 py-2 rounded-xl border border-emerald-700 text-emerald-800 hover:bg-emerald-50 text-xs font-bold">
               Abrir correo manualmente
             </a>
-            <button id="saveBulkEmailsBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
+            <button id="saveBulkEmailsBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold cursor-pointer">
               Autorizar y abrir correo (123456)
             </button>
           </div>
         </div>
       </div>
 
-      <!-- PESTAÑA 5: PLANTILLA DE CORREO, IBAN Y MARGEN DE DÍAS -->
-      <div id="admin-tab-plantilla-iban" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+      <!-- PESTAÑA 4: PLANTILLA DE CORREO, IBAN Y MARGEN DE DÍAS -->
+      <div id="admin-tab-plantilla-iban" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
         <div class="border-b border-slate-100 pb-3">
           <h3 class="text-base sm:text-lg font-bold text-slate-900">Plantilla de correo, IBAN y margen de confirmación</h3>
           <p class="text-xs text-slate-500">
@@ -987,14 +980,14 @@
         </div>
 
         <div class="flex justify-end">
-          <button id="saveTemplateBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
+          <button id="saveTemplateBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold cursor-pointer">
             Guardar plantilla, IBAN y margen
           </button>
         </div>
       </div>
 
-      <!-- PESTAÑA 6: DAR DE ALTA OTRO ADMINISTRADOR -->
-      <div id="admin-tab-nuevo-admin" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+      <!-- PESTAÑA 5: DAR DE ALTA OTRO ADMINISTRADOR -->
+      <div id="admin-tab-nuevo-admin" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
         <div class="border-b border-slate-100 pb-3">
           <h3 class="text-base sm:text-lg font-bold text-slate-900">Dar de alta otro administrador</h3>
           <p class="text-xs text-slate-500">
@@ -1015,7 +1008,7 @@
 
         <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
           <div id="adminsListSummary" class="text-xs text-slate-600"></div>
-          <button id="addAdminBtn" type="button" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold">
+          <button id="addAdminBtn" type="button" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer">
             Guardar administrador
           </button>
         </div>
@@ -1069,6 +1062,7 @@
       let isSigningOut = false;
       let reservationsInitialSyncDone = false;
       let marginEvaluationInFlight = false;
+      const dismissedDepositIds = new Set();
 
       let state = {
         currentYearMonth: {
@@ -1755,7 +1749,7 @@ Administración Escalonia 15`
 
         for (let i = 0; i < offset; i++) {
           const empty = document.createElement("div");
-          empty.className = "h-[86px] rounded-xl bg-slate-50/50 border border-dashed border-slate-200/70";
+          empty.className = "h-[76px] sm:h-[84px] rounded-xl bg-slate-50/50 border border-dashed border-slate-200/70";
           grid.appendChild(empty);
         }
 
@@ -1840,7 +1834,6 @@ Administración Escalonia 15`
       }
 
       function renderAdminCalendar() {
-        const splitLayout = document.getElementById("adminSplitLayout");
         const leftCol = document.getElementById("adminLeftColumn");
         const rightCol = document.getElementById("adminRightColumn");
         const section = document.getElementById("adminCalendarSection");
@@ -1861,17 +1854,15 @@ Administración Escalonia 15`
         section.classList.remove("hidden");
 
         if (activeAdminTab === "acto-comunitario") {
-          // Vista compacta en 2 columnas para que el calendario entero entre sin scroll
           leftCol.className = "lg:col-span-5 space-y-3";
           rightCol.className = "lg:col-span-7";
           adminGrid.className = "grid grid-cols-7 gap-1 comm-compact-grid";
           hint.textContent = "Pulsa en Mañana o Tarde para rellenar fecha y turno.";
         } else {
-          // Pantalla dividida: reservas a la izquierda, calendario a la derecha
-          leftCol.className = "lg:col-span-7 space-y-4";
-          rightCol.className = "lg:col-span-5 lg:sticky lg:top-24";
-          adminGrid.className = "grid grid-cols-7 gap-1.5";
-          hint.textContent = "Vista en tiempo real del estado de cada turno.";
+          leftCol.className = "lg:col-span-7 space-y-3";
+          rightCol.className = "lg:col-span-5 lg:sticky lg:top-20";
+          adminGrid.className = "grid grid-cols-7 gap-1";
+          hint.textContent = "Estado en tiempo real de Mañana y Tarde.";
         }
 
         const { year, month } = state.currentYearMonth;
@@ -1967,13 +1958,13 @@ Administración Escalonia 15`
         const noBtn = document.getElementById("cancelConfirmNoBtn");
         const yesBtn = document.getElementById("cancelConfirmYesBtn");
 
-        header.className = actionConfig.headerClass || "bg-red-700 text-white px-5 py-3.5 flex items-center justify-between";
-        title.textContent = actionConfig.title || "¿Seguro que quieres anular esta reserva?";
+        header.className = actionConfig.headerClass || "bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between";
+        title.textContent = actionConfig.title || "Confirmar acción";
         slotEl.textContent = actionConfig.slotText || "";
-        warnEl.className = actionConfig.warningClass || "p-3.5 rounded-xl bg-red-50 text-red-950 border-2 border-red-400 font-bold leading-relaxed";
-        warnEl.textContent = actionConfig.message || "¿Seguro que quieres anular esta reserva?";
-        noBtn.textContent = actionConfig.cancelText || "No, mantener";
-        yesBtn.textContent = actionConfig.confirmText || "Sí, confirmar";
+        warnEl.className = actionConfig.warningClass || "p-3.5 rounded-xl bg-amber-50 text-amber-950 border border-amber-300 font-bold leading-relaxed";
+        warnEl.textContent = actionConfig.message || "¿Confirmas la acción?";
+        noBtn.textContent = actionConfig.cancelText || "No, cancelar";
+        yesBtn.textContent = actionConfig.confirmText || "Confirmar";
 
         modal.classList.remove("hidden");
         modal.classList.add("flex");
@@ -2155,49 +2146,6 @@ Administración Escalonia 15`
         return Array.from(map.values()).sort((a, b) => a.email.localeCompare(b.email));
       }
 
-      function renderAdminNeighborsList() {
-        const container = document.getElementById("adminNeighborsList");
-        if (!container) return;
-
-        const neighbors = getAllNeighborsList();
-        const currentYear = new Date().getFullYear();
-
-        if (!neighbors.length) {
-          container.innerHTML = `<p class="text-xs text-slate-500">No hay vecinos registrados todavía.</p>`;
-          return;
-        }
-
-        container.innerHTML = neighbors.map(n => {
-          const recorded = getUserRecordedReservationCount(n.email, currentYear);
-          const adjustment = getUserManualAdjustment(n.email, currentYear);
-          const total = recorded + adjustment;
-          const housing = getUserHousingLabel(n);
-
-          return `
-            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-              <div class="space-y-0.5">
-                <p class="font-bold text-slate-900 text-sm">${n.email}</p>
-                <p class="text-slate-600 font-semibold">${housing}</p>
-                <p class="text-emerald-900 font-bold">
-                  Reservas en ${currentYear}: <strong>${total}</strong>
-                  <span class="text-[11px] font-normal text-slate-500">(${recorded} en app + ${adjustment} ajuste manual)</span>
-                </p>
-              </div>
-              <button data-edit-neighbor="${encodeURIComponent(n.email)}" type="button" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer self-start sm:self-center">
-                Modificar vecino
-              </button>
-            </div>
-          `;
-        }).join("");
-
-        container.querySelectorAll("[data-edit-neighbor]").forEach(btn => {
-          btn.addEventListener("click", () => {
-            const email = decodeURIComponent(btn.dataset.editNeighbor);
-            openEditNeighborModal(email);
-          });
-        });
-      }
-
       function updateNeighborModalHelperText() {
         if (!editingNeighborContext) return;
         const year = new Date().getFullYear();
@@ -2249,7 +2197,7 @@ Administración Escalonia 15`
         const marginDays = getPriorityMarginDays();
         const marginBadge = document.getElementById("adminPriorityMarginBadge");
         if (marginBadge) {
-          marginBadge.textContent = `Margen activo: ${marginDays} días`;
+          marginBadge.textContent = `Margen: ${marginDays} días`;
         }
 
         const authItems = Object.values(state.authorizedEmails || {}).filter(x => x && x.authorized);
@@ -2260,7 +2208,7 @@ Administración Escalonia 15`
           .join("");
 
         document.getElementById("adminCommCounterBadge").textContent =
-          `Actos comunitarios registrados: ${getAdminEventsCount()} (sin límite)`;
+          `Actos comunitarios: ${getAdminEventsCount()}`;
         document.getElementById("cfgAdminEmail").value = state.adminConfig.adminEmail || ADMIN_EMAIL;
         document.getElementById("cfgAdminIban").value = state.adminConfig.iban || "";
         document.getElementById("cfgPaymentConcept").value = state.adminConfig.concept || "";
@@ -2273,12 +2221,12 @@ Administración Escalonia 15`
           document.getElementById("commDateInput").value = formatDateISO(new Date());
         }
         updateCommSelectionPreview();
-        renderAdminNeighborsList();
 
         const listEl = document.getElementById("adminReservationsList");
         const activeList = sortRequestsByPriority(
           state.reservations.filter(
             r => r &&
+              !dismissedDepositIds.has(r.id) &&
               r.status !== "cancelada" &&
               r.status !== "no_autorizada" &&
               r.status !== "no_adjudicada"
@@ -2296,19 +2244,27 @@ Administración Escalonia 15`
 
           if (r.createdByAdmin) {
             return `
-              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col gap-3 text-xs">
-                <div class="space-y-1">
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-stretch justify-between gap-3 text-xs">
+                <div class="space-y-1 flex-1">
                   <p class="font-bold text-slate-800">${cleanDate ? formatDateSpanish(cleanDate) : (r.date || "Fecha sin formato")} — ${cleanShift ? getShiftLabel(cleanShift) : (r.shift || "Sin turno")}</p>
-                  <p class="text-base font-extrabold text-slate-950">${r.eventType || r.housing || "Acto comunitario"}</p>
+                  <p class="text-sm sm:text-base font-extrabold text-slate-950">${r.eventType || r.housing || "Acto comunitario"}</p>
                   <p class="text-slate-700 font-semibold">Estado: <strong>RESERVADO</strong></p>
-                  <p class="text-emerald-800 font-semibold">Contador de actos comunitarios: <strong>${getAdminEventsCount()}</strong> (sin límite)</p>
+                  <div class="flex flex-wrap items-center gap-2 pt-1">
+                    <button data-admin-cancel="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold cursor-pointer">
+                      Cancelar reserva
+                    </button>
+                    <button data-delete-ghost="${r.id}" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold cursor-pointer">
+                      Eliminar registro
+                    </button>
+                  </div>
                 </div>
-                <div class="flex flex-wrap items-center gap-2">
-                  <button data-admin-cancel="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold">
-                    Cancelar reserva
-                  </button>
-                  <button data-delete-ghost="${r.id}" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold">
-                    Eliminar registro
+                <div class="sm:w-44 shrink-0 rounded-xl border-2 border-emerald-300 bg-emerald-50/70 p-3 flex flex-col items-center justify-center text-center gap-2">
+                  <label class="inline-flex items-center gap-2 text-xs font-extrabold text-emerald-950 cursor-pointer select-none">
+                    <input data-deposit-check="${r.id}" type="checkbox" ${r.depositReturned ? "checked" : ""} class="w-4 h-4 rounded border-emerald-500 text-emerald-700 cursor-pointer" />
+                    <span>Fianza devuelta</span>
+                  </label>
+                  <button data-confirm-deposit-close="${r.id}" type="button" class="w-full py-2 px-3 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-extrabold shadow-sm cursor-pointer">
+                    Confirmar
                   </button>
                 </div>
               </div>
@@ -2341,7 +2297,7 @@ Administración Escalonia 15`
           const canConfirmPayment = r.status === "pendiente" || r.status === "en_espera_margen";
 
           return `
-            <div class="p-4 rounded-xl border flex flex-col gap-3 text-xs ${
+            <div class="p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-stretch justify-between gap-3 text-xs ${
               needsManualDecision
                 ? "bg-rose-50/60 border-rose-400"
                 : isPendingPaymentActive
@@ -2350,88 +2306,124 @@ Administración Escalonia 15`
                     ? "bg-amber-50/40 border-amber-400"
                     : "bg-slate-50 border-slate-200"
             }">
-              <div class="space-y-1.5">
+              <div class="space-y-1 flex-1 min-w-0">
                 <p class="font-bold text-slate-700">${cleanDate ? formatDateSpanish(cleanDate) : (r.date || "Fecha sin formato")} — ${cleanShift ? getShiftLabel(cleanShift) : (r.shift || "Sin turno")}</p>
-                <p class="text-base font-extrabold text-slate-950 tracking-tight">
+                <p class="text-sm sm:text-base font-extrabold text-slate-950 tracking-tight">
                   ${r.housing || "Vivienda por completar"}
                 </p>
-                <p class="text-xs font-bold text-emerald-950 bg-white border border-slate-200 rounded-lg px-2.5 py-1 inline-block">
-                  ${r.ownerEmail || "Sin correo (registro huérfano)"}
+                <p class="text-xs font-bold text-emerald-950 bg-white border border-slate-200 rounded-lg px-2 py-0.5 inline-block break-all">
+                  ${r.ownerEmail || "Sin correo"}
                 </p>
                 ${isOutsideMargin ? `
                   <div>
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-100 text-sky-950 border border-sky-300 text-xs font-extrabold">
-                      Fuera del margen de ${marginDays} días (${daysLeft} días restantes)
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-sky-100 text-sky-950 border border-sky-300 text-[11px] font-extrabold">
+                      Fuera del margen de ${marginDays} días (${daysLeft} d)
                     </span>
                   </div>
                 ` : ""}
                 ${needsManualDecision ? `
                   <div>
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-200 text-rose-950 border border-rose-400 text-xs font-extrabold">
-                      Adjudicación manual requerida: ${contendersInSlot.length} solicitud(es) dentro del margen de ${marginDays} días
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-rose-200 text-rose-950 border border-rose-400 text-[11px] font-extrabold">
+                      Adjudicación manual (${contendersInSlot.length} solicitudes en margen)
                     </span>
                   </div>
                 ` : ""}
                 ${isSpecialFixedDate ? `
                   <div>
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-200 text-amber-950 border border-amber-400 text-xs font-extrabold">
-                      ★ Acto especial con fecha fija (Bautizo / Comunión / Evento señalado)
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-200 text-amber-950 border border-amber-400 text-[11px] font-extrabold">
+                      ★ Acto con fecha fija
                     </span>
                   </div>
                 ` : ""}
                 ${deadlineInfo ? `
                   <div>
-                    <span class="pending-payment-blink inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-extrabold border-2 ${
+                    <span class="pending-payment-blink inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold border ${
                       deadlineInfo.expired
                         ? "bg-red-200 text-red-950 border-red-500"
-                        : "bg-orange-500 text-white border-orange-700 shadow-sm"
+                        : "bg-orange-500 text-white border-orange-700"
                     }">
-                      Pendiente de pago · Fecha límite: ${deadlineInfo.text}
+                      Pago 48h hasta: ${deadlineInfo.text}
                     </span>
                   </div>
                 ` : ""}
-                <p class="text-slate-700 font-semibold pt-0.5">
-                  Motivo: <strong>${r.eventType || "Celebración familiar"}</strong> · Estado: <strong>${(r.status || "").toUpperCase()}</strong>
+                <p class="text-slate-700 font-semibold">
+                  Motivo: <strong>${r.eventType || "Celebración familiar"}</strong> · Estado: <strong>${(r.status || "").toUpperCase()}</strong> · Reservas año (${year}): <strong>${yearCount}</strong>
                 </p>
-                <p class="text-emerald-800 font-semibold">Veces reservado este año (${year}): <strong>${yearCount}</strong></p>
+                <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                  <button data-visto-bueno="${r.id}" type="button" class="px-2.5 py-1.5 rounded-lg font-bold cursor-pointer ${
+                    isPendingPaymentActive
+                      ? "bg-orange-500 hover:bg-orange-600 text-white border border-orange-700"
+                      : "bg-amber-500 hover:bg-amber-600 text-slate-950"
+                  }">
+                    Visto bueno
+                  </button>
+                  ${canConfirmPayment ? `
+                    <button data-confirm-pay="${r.id}" type="button" class="px-2.5 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold cursor-pointer">
+                      Confirmar reserva
+                    </button>
+                  ` : ""}
+                  <button data-no-autorizar="${r.id}" type="button" class="px-2.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold cursor-pointer">
+                    No autorizar
+                  </button>
+                  ${r.ownerEmail ? `
+                    <button data-modify-neighbor-email="${encodeURIComponent(r.ownerEmail)}" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold cursor-pointer">
+                      Modificar vecino
+                    </button>
+                  ` : ""}
+                  ${isMalformedOrGhost ? `
+                    <button data-delete-ghost="${r.id}" type="button" class="px-2.5 py-1.5 rounded-lg border border-red-400 bg-red-50 hover:bg-red-100 text-red-900 font-bold cursor-pointer">
+                      Liberar hueco pillado
+                    </button>
+                  ` : ""}
+                </div>
               </div>
-              <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-200/70">
-                <button data-visto-bueno="${r.id}" type="button" class="px-3 py-1.5 rounded-lg font-bold cursor-pointer ${
-                  isPendingPaymentActive
-                    ? "bg-orange-500 hover:bg-orange-600 text-white border border-orange-700 shadow-sm"
-                    : "bg-amber-500 hover:bg-amber-600 text-slate-950"
-                }">
-                  Visto bueno (Correo pago 48h)
+
+              <!-- ESQUINA DERECHA: BLOQUE AMPLIO DE FIANZA DEVUELTA + CONFIRMAR -->
+              <div class="sm:w-44 shrink-0 rounded-xl border-2 border-emerald-300 bg-emerald-50/80 p-3 flex flex-col items-center justify-center text-center gap-2.5">
+                <label class="inline-flex items-center gap-2 text-xs font-extrabold text-emerald-950 cursor-pointer select-none">
+                  <input data-deposit-check="${r.id}" type="checkbox" ${r.depositReturned ? "checked" : ""} class="w-4 h-4 rounded border-emerald-500 text-emerald-700 cursor-pointer" />
+                  <span>Fianza devuelta</span>
+                </label>
+                <button data-confirm-deposit-close="${r.id}" type="button" class="w-full py-2 px-3 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-extrabold shadow-sm cursor-pointer">
+                  Confirmar
                 </button>
-                ${canConfirmPayment ? `
-                  <button data-confirm-pay="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold cursor-pointer">
-                    Confirmar reserva
-                  </button>
-                ` : ""}
-                <button data-no-autorizar="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold cursor-pointer">
-                  No autorizar
-                </button>
-                <button data-refund-dep="${r.id}" type="button" class="px-3 py-1.5 rounded-lg border cursor-pointer ${
-                  r.depositReturned
-                    ? "bg-emerald-100 border-emerald-400 text-emerald-950"
-                    : "bg-white border-slate-300 hover:bg-slate-100 text-slate-800"
-                } font-bold">
-                  ${r.depositReturned ? "Fianza devuelta ✓" : "Fianza devuelta"}
-                </button>
-                ${r.ownerEmail ? `
-                  <button data-modify-neighbor-email="${encodeURIComponent(r.ownerEmail)}" type="button" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold cursor-pointer">
-                    Modificar vecino
-                  </button>
-                ` : ""}
-                ${isMalformedOrGhost ? `
-                  <button data-delete-ghost="${r.id}" type="button" class="px-3 py-1.5 rounded-lg border border-red-400 bg-red-50 hover:bg-red-100 text-red-900 font-bold cursor-pointer">
-                    Liberar hueco pillado
-                  </button>
-                ` : ""}
               </div>
             </div>
           `;
         }).join("");
+
+        listEl.querySelectorAll("[data-deposit-check]").forEach(chk => {
+          chk.addEventListener("change", async () => {
+            const id = chk.dataset.depositCheck;
+            const nextVal = chk.checked;
+            upsertReservationInLocalState(id, { depositReturned: nextVal });
+            try {
+              await db.ref(`escalonia15/reservations/${id}`).update({ depositReturned: nextVal });
+            } catch (err) {
+              showToast("Error al guardar marca de fianza: " + err.message, true);
+            }
+          });
+        });
+
+        listEl.querySelectorAll("[data-confirm-deposit-close]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = btn.dataset.confirmDepositClose;
+            const item = state.reservations.find(x => x.id === id);
+            if (!item) return;
+            const slotLabel = `${normalizeDateISO(item.date) ? formatDateSpanish(normalizeDateISO(item.date)) : (item.date || "Fecha")} — ${item.housing || item.ownerEmail || ""}`;
+            openConfirmModal({
+              type: "confirm-deposit-dismiss",
+              id,
+              headerClass: "bg-emerald-800 text-white px-5 py-3.5 flex items-center justify-between",
+              title: "Confirmación de fianza devuelta",
+              slotText: slotLabel,
+              warningClass: "p-3.5 rounded-xl bg-emerald-50 text-emerald-950 border-2 border-emerald-400 font-bold leading-relaxed",
+              message: "¿Me confirmas que la fianza está devuelta? Si das a confirmar, esta reserva se eliminará de la pantalla.",
+              cancelText: "Cancelar",
+              confirmText: "Confirmar"
+            });
+          });
+        });
 
         listEl.querySelectorAll("[data-modify-neighbor-email]").forEach(btn => {
           btn.addEventListener("click", () => {
@@ -2547,21 +2539,6 @@ Administración Escalonia 15`
             });
           });
         });
-
-        listEl.querySelectorAll("[data-refund-dep]").forEach(btn => {
-          btn.addEventListener("click", async () => {
-            const item = state.reservations.find(x => x.id === btn.dataset.refundDep);
-            if (!item) return;
-            const nextVal = !item.depositReturned;
-            upsertReservationInLocalState(item.id, { depositReturned: nextVal });
-            try {
-              await db.ref(`escalonia15/reservations/${item.id}`).update({ depositReturned: nextVal });
-              showToast(nextVal ? "Fianza marcada como devuelta." : "Marca de fianza devuelta quitada.");
-            } catch (err) {
-              showToast("Error al actualizar fianza: " + err.message, true);
-            }
-          });
-        });
       }
 
       function refreshAllViewsNow() {
@@ -2632,6 +2609,16 @@ Administración Escalonia 15`
           panel.classList.toggle("hidden", panel.id !== `admin-tab-${target}`);
         });
         refreshAllViewsNow();
+      }
+
+      function openOwnerNormsView() {
+        document.querySelectorAll(".nav-tab").forEach(b => {
+          b.classList.remove("bg-emerald-700", "text-white");
+          b.classList.add("bg-white/10", "text-emerald-100");
+        });
+        document.querySelectorAll(".tab-panel").forEach(panel => panel.classList.add("hidden"));
+        document.getElementById("tab-normas").classList.remove("hidden");
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
       function formatReservationNotificationLabel(item) {
@@ -2775,6 +2762,16 @@ Administración Escalonia 15`
         refreshAllViewsNow();
       });
 
+      document.getElementById("btnTopNormasLink").addEventListener("click", openOwnerNormsView);
+      document.getElementById("inlineNormsTrigger").addEventListener("click", e => {
+        e.preventDefault();
+        openOwnerNormsView();
+      });
+      document.getElementById("backFromNormsBtn").addEventListener("click", () => {
+        const calTab = document.querySelector('.nav-tab[data-tab="calendario"]');
+        if (calTab) calTab.click();
+      });
+
       document.getElementById("closeEditNeighborModal").addEventListener("click", closeEditNeighborModal);
       document.getElementById("cancelEditNeighborBtn").addEventListener("click", closeEditNeighborModal);
       document.getElementById("editNeighborDecBtn").addEventListener("click", () => {
@@ -2837,6 +2834,20 @@ Administración Escalonia 15`
         if (!pendingConfirmAction) return;
         const action = pendingConfirmAction;
         closeCancelConfirmModal();
+
+        if (action.type === "confirm-deposit-dismiss") {
+          const id = action.id;
+          dismissedDepositIds.add(id);
+          upsertReservationInLocalState(id, { depositReturned: true, depositConfirmedAndDismissed: true });
+          try {
+            await db.ref(`escalonia15/reservations/${id}`).update({
+              depositReturned: true,
+              depositConfirmedAndDismissed: true
+            });
+          } catch (_) {}
+          showToast("Fianza confirmada. La reserva se ha retirado de la pantalla.");
+          return;
+        }
 
         if (action.type === "owner-cancel") {
           const found = action.reservation;
