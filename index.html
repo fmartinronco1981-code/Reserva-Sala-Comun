@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reserva Sala Común Escalonia 15 — v1.8</title>
+  <title>Reserva Sala Común Escalonia 15 — v1.9</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -135,7 +135,7 @@
     <div class="max-w-xl w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-7 sm:p-10 text-center shadow-2xl space-y-7">
       <div class="space-y-1">
         <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-emerald-200 px-3 py-1 rounded-full bg-white/10">
-          Versión 1.8 · Tiempo Real
+          Versión 1.9 · Tiempo Real
         </span>
         <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight pt-2">
           Bienvenido a reserva sala común Escalonia 15
@@ -172,14 +172,12 @@
           </div>
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-emerald-300">
-              Reserva Sala Común Escalonia 15 · v1.8
+              Reserva Sala Común Escalonia 15
             </p>
             <h2 id="ownerWelcomeTitle" class="text-base sm:text-lg font-extrabold tracking-tight leading-tight">
-              Bienvenido · Vivienda
+              Bienvenido
             </h2>
-            <p id="activeUserBanner" class="text-xs text-emerald-200/85">
-              Sin sesión iniciada
-            </p>
+            <p id="activeUserBanner" class="hidden"></p>
           </div>
         </div>
 
@@ -541,11 +539,11 @@
             <select id="firstPortalSelect" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs bg-white font-medium"></select>
           </div>
           <div>
-            <label for="firstFloorSelect" class="block text-xs font-semibold text-slate-700 mb-1">Piso</label>
+            <label for="firstFloorSelect" class="block text-xs font-semibold text-slate-700 mb-1">Planta</label>
             <select id="firstFloorSelect" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs bg-white font-medium">
               <option value="Bajo">Bajo</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
+              <option value="1">Primero</option>
+              <option value="2">Segundo</option>
             </select>
           </div>
           <div>
@@ -644,7 +642,7 @@
       <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-            Administrador · v1.8
+            Administrador · v1.9
           </span>
           <h2 id="adminHeaderTitle" class="text-base sm:text-lg font-bold leading-tight">
             Administrador — Sala Común Escalonia 15
@@ -705,7 +703,7 @@
         <div class="border-b border-slate-100 pb-3">
           <h3 class="text-base sm:text-lg font-bold text-slate-900">Reservas por confirmar y control de fianzas</h3>
           <p class="text-xs text-slate-500">
-            Revisa cuántas veces ha reservado ese propietario en el año, si es un acto especial con fecha fija, da el visto bueno para abrir el correo de pago (48h), confirma o no autoriza la reserva y marca la devolución de fianza.
+            Revisa cuántas veces ha reservado ese propietario en el año, si es un acto especial con fecha fija, da el visto bueno para abrir el correo de pago (48h), controla el contador de horas de pago, confirma o no autoriza la reserva y marca la devolución de fianza.
           </p>
         </div>
         <div id="adminReservationsList" class="space-y-3"></div>
@@ -879,6 +877,7 @@
       const ADMIN_UID = "frJdxFWkPgOs7neTSQZEoOpN2Ot2";
       const ADMIN_EMAIL = "fmartinronco1981@gmail.com";
       const INITIAL_OWNER_PASS = "123456";
+      const PAYMENT_WINDOW_MS = 48 * 60 * 60 * 1000;
 
       const firebaseConfig = {
         apiKey: "AIzaSyCB15Exkb3uDkYrSzapnXNGbpHJsb32EHs",
@@ -904,6 +903,7 @@
 
       let activeScreen = "landing";
       let selectedSlot = null;
+      let activePaymentModalReservationId = null;
       let authUser = null;
       let isCurrentUserAdmin = false;
       let currentUserProfile = null;
@@ -912,6 +912,7 @@
       let pendingScreenAfterLogin = null;
       let lastEnteredPassword = "";
       let isSigningOut = false;
+      let renderRafId = null;
 
       let state = {
         currentYearMonth: {
@@ -1061,13 +1062,31 @@ Administración Escalonia 15`
         }
       }
 
+      function formatFloorShort(floor) {
+        const val = String(floor || "").trim().toLowerCase();
+        if (val === "bajo") return "Bajo";
+        if (val === "1" || val === "primero" || val === "1º") return "Primero";
+        if (val === "2" || val === "segundo" || val === "2º") return "Segundo";
+        return String(floor || "").trim();
+      }
+
+      function getOwnerHeaderWelcomeText(profile) {
+        if (!profile) return "Bienvenido";
+        if (profile.role === "admin") return "Bienvenido";
+        const parts = [];
+        if (profile.portal) parts.push(`P${String(profile.portal).trim()}`);
+        if (profile.floor) parts.push(formatFloorShort(profile.floor));
+        if (profile.letter) parts.push(String(profile.letter).trim().toUpperCase());
+        return parts.length ? `Bienvenido · ${parts.join(" · ")}` : "Bienvenido";
+      }
+
       function getUserHousingLabel(profile) {
         if (!profile) return "Vivienda por completar";
         if (profile.role === "admin") return "Administración";
         const parts = [];
         if (profile.portal) parts.push(`Portal ${profile.portal}`);
-        if (profile.floor) parts.push(`Piso ${profile.floor}`);
-        if (profile.letter) parts.push(`Letra ${profile.letter}`);
+        if (profile.floor) parts.push(`Piso ${formatFloorShort(profile.floor)}`);
+        if (profile.letter) parts.push(`Letra ${String(profile.letter).trim().toUpperCase()}`);
         return parts.length ? parts.join(" · ") : "Vivienda por completar";
       }
 
@@ -1108,15 +1127,36 @@ Administración Escalonia 15`
         return state.reservations.filter(r => r.createdByAdmin === true && r.status === "reservado").length;
       }
 
+      function getPaymentCountdownInfo(reservation) {
+        if (!reservation || !reservation.paymentWindowStartedAt) return null;
+        const startMs = Date.parse(reservation.paymentWindowStartedAt);
+        if (Number.isNaN(startMs)) return null;
+        const remainingMs = PAYMENT_WINDOW_MS - (Date.now() - startMs);
+        if (remainingMs <= 0) {
+          return {
+            expired: true,
+            text: "Plazo de 48h vencido — Pendiente de anular o confirmar"
+          };
+        }
+        const hoursLeft = Math.ceil(remainingMs / (1000 * 60 * 60));
+        return {
+          expired: false,
+          text: `Tiempo restante para pagar y confirmar: ${hoursLeft}h (de 48h)`
+        };
+      }
+
       function updateHeaderAndUserInfo() {
         const btnLogout = document.getElementById("btnOwnerLogout");
         const btnSettings = document.getElementById("btnOpenSettings");
+        const welcomeEl = document.getElementById("ownerWelcomeTitle");
+        const bannerEl = document.getElementById("activeUserBanner");
+        bannerEl.classList.add("hidden");
+        bannerEl.textContent = "";
 
         if (!authUser) {
           btnLogout.classList.add("hidden");
           btnSettings.classList.add("hidden");
-          document.getElementById("ownerWelcomeTitle").textContent = "Bienvenido · Sala Común Escalonia 15";
-          document.getElementById("activeUserBanner").textContent = "Sin sesión iniciada.";
+          welcomeEl.textContent = "Bienvenido";
           document.getElementById("formUserEmail").textContent = "Sin sesión";
           document.getElementById("formUserUnit").textContent = "-";
           document.getElementById("formUserCount").textContent = "0 / 2";
@@ -1127,11 +1167,9 @@ Administración Escalonia 15`
         btnLogout.classList.remove("hidden");
         btnSettings.classList.remove("hidden");
 
-        const housingLabel = getUserHousingLabel(currentUserProfile);
-        document.getElementById("ownerWelcomeTitle").textContent = `Bienvenido · ${housingLabel}`;
-        document.getElementById("activeUserBanner").textContent = `${authUser.email} · ${housingLabel}`;
+        welcomeEl.textContent = getOwnerHeaderWelcomeText(currentUserProfile);
         document.getElementById("formUserEmail").textContent = authUser.email;
-        document.getElementById("formUserUnit").textContent = housingLabel;
+        document.getElementById("formUserUnit").textContent = getUserHousingLabel(currentUserProfile);
 
         const targetYear = selectedSlot ? Number(selectedSlot.date.split("-")[0]) : new Date().getFullYear();
         const usedCount = getUserYearReservationCount(authUser.email, targetYear);
@@ -1223,7 +1261,7 @@ Administración Escalonia 15`
         }
 
         if (diffDays > 30 && !isFixedEvent) {
-          msgBox.textContent = `No está permitida esta reserva porque faltan más de 30 días para esa fecha (${diffDays} días). Solo se permite con más de 30 días si es un acto con fecha fija (bautizo, comunión o evento especial, punto 12.1).`;
+          msgBox.textContent = `Este tipo de acto no se puede reservar con más de 30 días de antelación (${diffDays} días). Solo está permitido si seleccionas un acto con fecha fija especial.`;
           msgBox.className = "p-3 rounded-xl text-xs font-bold bg-red-50 text-red-900 border-2 border-red-400";
           btn.disabled = true;
           return false;
@@ -1234,13 +1272,6 @@ Administración Escalonia 15`
           msgBox.className = "p-3 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 border border-slate-300";
           btn.disabled = true;
           return false;
-        }
-
-        if (diffDays > 30 && isFixedEvent) {
-          msgBox.textContent = "Excepción aplicada: acto con fecha fija (>30 días). Se notificará como acto especial al administrador.";
-          msgBox.className = "p-3 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-900 border border-emerald-300";
-          btn.disabled = false;
-          return true;
         }
 
         msgBox.classList.add("hidden");
@@ -1372,6 +1403,7 @@ Administración Escalonia 15`
       }
 
       function openPaymentModalForReservation(reservation) {
+        activePaymentModalReservationId = reservation.id;
         const tpl = state.adminConfig.mailTemplate || "";
         const shiftLabel = getShiftLabel(reservation.shift);
         const schedule = getShiftScheduleText(reservation.date, reservation.shift);
@@ -1397,6 +1429,24 @@ Administración Escalonia 15`
         modal.classList.add("flex");
       }
 
+      async function start48hPaymentCountdownForActiveModal() {
+        if (!activePaymentModalReservationId) return;
+        const resId = activePaymentModalReservationId;
+        const found = state.reservations.find(r => r.id === resId);
+        if (!found) return;
+
+        const startedAt = found.paymentWindowStartedAt || new Date().toISOString();
+        upsertReservationInLocalState(resId, { paymentWindowStartedAt: startedAt });
+
+        try {
+          await db.ref(`escalonia15/reservations/${resId}`).update({
+            paymentWindowStartedAt: startedAt
+          });
+        } catch (err) {
+          showToast("No se pudo guardar el inicio del contador de 48h: " + err.message, true);
+        }
+      }
+
       function upsertReservationInLocalState(id, patchOrFull) {
         const idx = state.reservations.findIndex(r => r.id === id);
         if (idx >= 0) {
@@ -1404,7 +1454,7 @@ Administración Escalonia 15`
         } else {
           state.reservations.push({ ...patchOrFull, id });
         }
-        refreshAllViews();
+        scheduleRefreshAllViews();
       }
 
       function renderMyReservations() {
@@ -1547,6 +1597,7 @@ Administración Escalonia 15`
             r.isFixedDateException ||
             (r.eventType && r.eventType.toLowerCase().includes("fecha fija"))
           );
+          const countdown = r.status === "pendiente" ? getPaymentCountdownInfo(r) : null;
 
           return `
             <div class="p-4 rounded-xl bg-slate-50 border ${isSpecialFixedDate ? "border-amber-400 bg-amber-50/40" : "border-slate-200"} flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
@@ -1562,6 +1613,17 @@ Administración Escalonia 15`
                   <div>
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-200 text-amber-950 border border-amber-400 text-xs font-extrabold">
                       ★ Acto especial con fecha fija (Bautizo / Comunión / Evento señalado · &gt;30 días)
+                    </span>
+                  </div>
+                ` : ""}
+                ${countdown ? `
+                  <div>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-extrabold border ${
+                      countdown.expired
+                        ? "bg-red-100 text-red-900 border-red-300"
+                        : "bg-sky-100 text-sky-950 border-sky-300"
+                    }">
+                      ⏱ ${countdown.text}
                     </span>
                   </div>
                 ` : ""}
@@ -1643,12 +1705,20 @@ Administración Escalonia 15`
         });
       }
 
-      function refreshAllViews() {
+      function refreshAllViewsNow() {
         updateHeaderAndUserInfo();
         renderCalendar();
         renderAdminCalendar();
         renderMyReservations();
         renderAdminDashboard();
+      }
+
+      function scheduleRefreshAllViews() {
+        if (renderRafId !== null) return;
+        renderRafId = window.requestAnimationFrame(() => {
+          renderRafId = null;
+          refreshAllViewsNow();
+        });
       }
 
       function detachUserProfileListener() {
@@ -1680,7 +1750,7 @@ Administración Escalonia 15`
         document.getElementById("adminLoginModal").classList.remove("flex");
 
         applyScreenVisibility();
-        refreshAllViews();
+        refreshAllViewsNow();
 
         try {
           await auth.signOut();
@@ -1696,20 +1766,31 @@ Administración Escalonia 15`
           if (Array.isArray(snap.val().admins) && snap.val().admins.length) {
             state.admins = snap.val().admins;
           }
-          refreshAllViews();
+          scheduleRefreshAllViews();
         }
       });
 
       db.ref("escalonia15/authorizedEmails").on("value", snap => {
         state.authorizedEmails = snap.val() || {};
-        refreshAllViews();
+        scheduleRefreshAllViews();
       });
 
       db.ref("escalonia15/reservations").on("value", snap => {
         const rawObj = snap.val() || {};
-        state.reservations = Object.entries(rawObj).map(([id, val]) => ({ id, ...val }));
-        refreshAllViews();
+        const serverItems = Object.entries(rawObj).map(([id, val]) => ({ id, ...val }));
+        const optimisticTempItems = state.reservations.filter(
+          localItem => String(localItem.id || "").startsWith("tmp_") &&
+            !serverItems.some(srv => srv.date === localItem.date && srv.shift === localItem.shift && srv.createdAt === localItem.createdAt)
+        );
+        state.reservations = [...serverItems, ...optimisticTempItems];
+        scheduleRefreshAllViews();
       });
+
+      window.setInterval(() => {
+        if (activeScreen === "admin" && authUser && isCurrentUserAdmin) {
+          renderAdminDashboard();
+        }
+      }, 60000);
 
       function openForcePasswordModal() {
         const modal = document.getElementById("forcePasswordModal");
@@ -1742,7 +1823,7 @@ Administración Escalonia 15`
           currentUserProfile = null;
           activeScreen = "landing";
           applyScreenVisibility();
-          refreshAllViews();
+          refreshAllViewsNow();
           return;
         }
 
@@ -1777,7 +1858,7 @@ Administración Escalonia 15`
           pendingScreenAfterLogin = null;
 
           applyScreenVisibility();
-          refreshAllViews();
+          refreshAllViewsNow();
 
           const needsFirstSetup = !isCurrentUserAdmin && (
             !currentUserProfile ||
@@ -1800,7 +1881,7 @@ Administración Escalonia 15`
         if (authUser) {
           activeScreen = "owner";
           applyScreenVisibility();
-          refreshAllViews();
+          refreshAllViewsNow();
           return;
         }
         activeScreen = "landing";
@@ -1869,7 +1950,7 @@ Administración Escalonia 15`
 
           document.querySelectorAll(".tab-panel").forEach(panel => panel.classList.add("hidden"));
           document.getElementById(`tab-${target}`).classList.remove("hidden");
-          refreshAllViews();
+          refreshAllViewsNow();
         });
       });
 
@@ -1885,7 +1966,7 @@ Administración Escalonia 15`
 
           document.querySelectorAll(".admin-panel").forEach(panel => panel.classList.add("hidden"));
           document.getElementById(`admin-tab-${target}`).classList.remove("hidden");
-          refreshAllViews();
+          refreshAllViewsNow();
         });
       });
 
@@ -1893,7 +1974,7 @@ Administración Escalonia 15`
         const { year, month } = state.currentYearMonth;
         const targetDate = new Date(year, month + delta, 1);
         state.currentYearMonth = { year: targetDate.getFullYear(), month: targetDate.getMonth() };
-        refreshAllViews();
+        refreshAllViewsNow();
       }
 
       document.getElementById("prevMonthBtn").addEventListener("click", () => shiftMonthBy(-1));
@@ -1933,15 +2014,18 @@ Administración Escalonia 15`
           createdByAdmin: false,
           createdAt: new Date().toISOString(),
           depositReturned: false,
-          cancelledByOwner: false
+          cancelledByOwner: false,
+          paymentWindowStartedAt: null
         };
 
         upsertReservationInLocalState(tempId, payload);
 
         try {
-          const ref = await db.ref("escalonia15/reservations").push(payload);
+          const newRef = db.ref("escalonia15/reservations").push();
+          const realId = newRef.key;
           state.reservations = state.reservations.filter(r => r.id !== tempId);
-          upsertReservationInLocalState(ref.key, payload);
+          upsertReservationInLocalState(realId, payload);
+          await newRef.set(payload);
           showToast(
             isFixedDateException
               ? "Solicitud enviada como acto especial con fecha fija. Queda pendiente de revisión."
@@ -1949,12 +2033,13 @@ Administración Escalonia 15`
           );
         } catch (err) {
           state.reservations = state.reservations.filter(r => r.id !== tempId);
-          refreshAllViews();
+          refreshAllViewsNow();
           showToast("No se pudo registrar la reserva: " + err.message, true);
         }
       });
 
       document.getElementById("closePaymentModal").addEventListener("click", () => {
+        activePaymentModalReservationId = null;
         const modal = document.getElementById("paymentModal");
         modal.classList.add("hidden");
         modal.classList.remove("flex");
@@ -1972,7 +2057,8 @@ Administración Escalonia 15`
         }
       });
 
-      document.getElementById("sendMailBtn").addEventListener("click", () => {
+      document.getElementById("sendMailBtn").addEventListener("click", async () => {
+        await start48hPaymentCountdownForActiveModal();
         const to = encodeURIComponent(document.getElementById("mailToInput").value.trim());
         const cc = encodeURIComponent(document.getElementById("mailFromInput").value.trim() || ADMIN_EMAIL);
         const subject = encodeURIComponent(document.getElementById("mailSubjectInput").value.trim());
@@ -1983,6 +2069,7 @@ Administración Escalonia 15`
         document.body.appendChild(a);
         a.click();
         a.remove();
+        showToast("Correo preparado y contador de 48h iniciado.");
       });
 
       const authModal = document.getElementById("authModal");
@@ -2069,7 +2156,7 @@ Administración Escalonia 15`
           const modal = document.getElementById("forcePasswordModal");
           modal.classList.add("hidden");
           modal.classList.remove("flex");
-          refreshAllViews();
+          refreshAllViewsNow();
           showToast("Vivienda confirmada y contraseña actualizada.");
         } catch (err) {
           showToast("No se pudo actualizar la contraseña: " + err.message, true);
@@ -2082,7 +2169,7 @@ Administración Escalonia 15`
         if (authUser && isCurrentUserAdmin) {
           activeScreen = "admin";
           applyScreenVisibility();
-          refreshAllViews();
+          refreshAllViewsNow();
           return;
         }
         activeScreen = "landing";
@@ -2125,7 +2212,7 @@ Administración Escalonia 15`
           adminLoginModal.classList.remove("flex");
           activeScreen = "admin";
           applyScreenVisibility();
-          refreshAllViews();
+          refreshAllViewsNow();
         } catch (err) {
           pendingScreenAfterLogin = null;
           showToast("Error de acceso de administrador: " + err.message, true);
@@ -2152,6 +2239,7 @@ Administración Escalonia 15`
           return;
         }
 
+        const tempId = "tmp_" + Date.now();
         const payload = {
           date: dateVal,
           shift: shiftVal,
@@ -2166,12 +2254,19 @@ Administración Escalonia 15`
           cancelledByOwner: false
         };
 
+        upsertReservationInLocalState(tempId, payload);
+
         try {
-          const ref = await db.ref("escalonia15/reservations").push(payload);
-          upsertReservationInLocalState(ref.key, payload);
+          const newRef = db.ref("escalonia15/reservations").push();
+          const realId = newRef.key;
+          state.reservations = state.reservations.filter(r => r.id !== tempId);
+          upsertReservationInLocalState(realId, payload);
+          await newRef.set(payload);
           document.getElementById("commTitleInput").value = "";
           showToast("Acto comunitario registrado en estado Reservado.");
         } catch (err) {
+          state.reservations = state.reservations.filter(r => r.id !== tempId);
+          refreshAllViewsNow();
           showToast("Error al registrar acto comunitario: " + err.message, true);
         }
       });
@@ -2229,7 +2324,7 @@ Administración Escalonia 15`
           Object.entries(updates).forEach(([k, v]) => {
             state.authorizedEmails[k] = v;
           });
-          refreshAllViews();
+          refreshAllViewsNow();
           document.getElementById("bulkEmailsInput").value = "";
           openOutlookInvite(parts);
           showToast(`${parts.length} propietario(s) autorizado(s) con clave ${INITIAL_OWNER_PASS}. Abriendo correo...`);
@@ -2256,7 +2351,7 @@ Administración Escalonia 15`
         };
 
         state.adminConfig = updatedConfig;
-        refreshAllViews();
+        refreshAllViewsNow();
 
         try {
           await db.ref("escalonia15/adminConfig").set(updatedConfig);
@@ -2284,7 +2379,7 @@ Administración Escalonia 15`
           state.admins.push({ email: newEmail, uid: newUid || "" });
         }
 
-        refreshAllViews();
+        refreshAllViewsNow();
 
         try {
           await db.ref("escalonia15/adminConfig/admins").set(state.admins);
@@ -2298,7 +2393,7 @@ Administración Escalonia 15`
 
       populatePortalSelect();
       applyScreenVisibility();
-      refreshAllViews();
+      refreshAllViewsNow();
     })();
   </script>
 </body>
