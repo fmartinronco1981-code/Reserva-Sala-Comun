@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reserva Sala Común Escalonia 15 — v1.9.5</title>
+  <title>Reserva Sala Común Escalonia 15 — v1.9.6</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -51,6 +51,16 @@
       transform: translateY(-1px);
       box-shadow: 0 6px 14px rgba(15, 41, 34, 0.08);
     }
+    .comm-compact-grid .day-tile,
+    .comm-compact-grid > div {
+      height: 66px;
+    }
+    @media (min-width: 1024px) {
+      .comm-compact-grid .day-tile,
+      .comm-compact-grid > div {
+        height: 68px;
+      }
+    }
     .diag-top-left {
       position: absolute;
       inset: 0;
@@ -58,7 +68,7 @@
       display: flex;
       align-items: flex-start;
       justify-content: flex-start;
-      padding: 6px 7px;
+      padding: 5px 6px;
       cursor: pointer;
     }
     .diag-bottom-right {
@@ -68,7 +78,7 @@
       display: flex;
       align-items: flex-end;
       justify-content: flex-end;
-      padding: 6px 7px;
+      padding: 5px 6px;
       cursor: pointer;
     }
     .diag-divider {
@@ -107,18 +117,18 @@
       z-index: 4;
       pointer-events: none;
       font-weight: 800;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       line-height: 1;
       padding: 2px 5px;
       border-radius: 6px;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.92);
       color: #0f172a;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
     }
     .slot-label {
-      font-size: 0.62rem;
+      font-size: 0.6rem;
       font-weight: 700;
-      line-height: 1.1;
+      line-height: 1.05;
       letter-spacing: -0.01em;
     }
     @keyframes softPendingBlink {
@@ -136,13 +146,13 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- TOAST NOTIFICATION -->
-  <div id="toastBox" class="fixed bottom-4 right-4 z-50 max-w-sm pointer-events-none hidden">
-    <div id="toastInner" class="pointer-events-auto rounded-xl px-4 py-3 text-xs sm:text-sm font-medium shadow-xl border bg-slate-900 text-white border-slate-700"></div>
+  <!-- TOAST NOTIFICATION (SIEMPRE POR ENCIMA DE CUALQUIER MODAL) -->
+  <div id="toastBox" class="fixed bottom-4 right-4 z-[70] max-w-sm pointer-events-none hidden">
+    <div id="toastInner" class="pointer-events-auto rounded-xl px-4 py-3 text-xs sm:text-sm font-medium shadow-2xl border bg-slate-900 text-white border-slate-700"></div>
   </div>
 
   <!-- MODAL DE CONFIRMACIÓN DE ANULACIÓN / ELIMINACIÓN -->
-  <div id="cancelConfirmModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-[1px] hidden items-center justify-center p-4">
+  <div id="cancelConfirmModal" class="fixed inset-0 z-[60] bg-slate-950/75 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div id="cancelConfirmHeader" class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
         <h3 id="cancelConfirmTitle" class="text-sm sm:text-base font-bold">Confirmar anulación de reserva</h3>
@@ -166,7 +176,7 @@
   </div>
 
   <!-- MODAL MODIFICAR VECINO (ADMINISTRADOR) -->
-  <div id="editNeighborModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-[1px] hidden items-center justify-center p-4">
+  <div id="editNeighborModal" class="fixed inset-0 z-[60] bg-slate-950/75 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
         <h3 class="text-sm sm:text-base font-bold">Modificar vecino</h3>
@@ -220,6 +230,8 @@
           <p id="editNeighborAutoInfo" class="text-[11px] text-emerald-900"></p>
         </div>
 
+        <div id="editNeighborError" class="hidden p-3 rounded-xl bg-red-50 text-red-900 border border-red-300 text-xs font-bold"></div>
+
         <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
           <button id="cancelEditNeighborBtn" type="button" class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold cursor-pointer">
             Cancelar
@@ -237,7 +249,7 @@
     <div class="max-w-xl w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-7 sm:p-10 text-center shadow-2xl space-y-7">
       <div class="space-y-1">
         <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-emerald-200 px-3 py-1 rounded-full bg-white/10">
-          Versión 1.9.5 · Tiempo Real
+          Versión 1.9.6 · Tiempo Real
         </span>
         <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight pt-2">
           Bienvenido a reserva sala común Escalonia 15
@@ -535,7 +547,7 @@
   </div>
 
   <!-- MODAL 1: SOLICITUD DE PAGO (48H) -->
-  <div id="paymentModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
+  <div id="paymentModal" class="fixed inset-0 z-[60] bg-slate-950/70 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
         <h3 class="text-sm sm:text-base font-bold flex items-center gap-2">
@@ -581,7 +593,7 @@
   </div>
 
   <!-- MODAL 2: INICIAR SESIÓN DE PROPIETARIO -->
-  <div id="authModal" class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm hidden items-center justify-center p-4">
+  <div id="authModal" class="fixed inset-0 z-[60] bg-slate-950/80 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-brand-dark text-white px-5 py-3.5 flex items-center justify-between">
         <h3 class="text-sm sm:text-base font-bold">Acceso de Propietarios — Escalonia 15</h3>
@@ -611,6 +623,8 @@
             </button>
           </div>
 
+          <div id="authModalError" class="hidden p-3 rounded-xl bg-red-50 text-red-950 border-2 border-red-300 text-xs font-bold"></div>
+
           <button id="doLoginBtn" type="button" class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm transition cursor-pointer">
             Entrar
           </button>
@@ -620,7 +634,7 @@
   </div>
 
   <!-- MODAL 2B: PRIMER ACCESO (VIVIENDA UNA SOLA VEZ + CAMBIO DE CONTRASEÑA) -->
-  <div id="forcePasswordModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+  <div id="forcePasswordModal" class="fixed inset-0 z-[60] bg-slate-950/85 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-emerald-900 text-white px-5 py-3.5">
         <h3 class="text-sm sm:text-base font-bold">Primer acceso: vivienda y nueva contraseña</h3>
@@ -662,6 +676,8 @@
           <input id="confirmOwnerPasswordInput" type="password" minlength="6" autocomplete="new-password" placeholder="Repite la contraseña" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
         </div>
 
+        <div id="forcePasswordError" class="hidden p-3 rounded-xl bg-red-50 text-red-950 border-2 border-red-300 text-xs font-bold"></div>
+
         <button id="saveNewPasswordBtn" type="button" class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm transition cursor-pointer">
           Confirmar que está correcto
         </button>
@@ -670,7 +686,7 @@
   </div>
 
   <!-- MODAL 2C: AJUSTES DE PROPIETARIO (SOLO CAMBIAR CONTRASEÑA) -->
-  <div id="ownerSettingsModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-[1px] hidden items-center justify-center p-4">
+  <div id="ownerSettingsModal" class="fixed inset-0 z-[60] bg-slate-950/75 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-brand-dark text-white px-5 py-3.5 flex items-center justify-between">
         <h3 class="text-sm sm:text-base font-bold">Ajustes · Cambiar contraseña</h3>
@@ -694,6 +710,8 @@
           <input id="settingsConfirmPassInput" type="password" minlength="6" autocomplete="new-password" placeholder="Repite la nueva contraseña" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
         </div>
 
+        <div id="ownerSettingsError" class="hidden p-3 rounded-xl bg-red-50 text-red-950 border-2 border-red-300 text-xs font-bold"></div>
+
         <button id="saveSettingsBtn" type="button" class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm transition cursor-pointer">
           Confirmar contraseña
         </button>
@@ -702,7 +720,7 @@
   </div>
 
   <!-- MODAL 3A: INICIO DE SESIÓN DE ADMINISTRADOR -->
-  <div id="adminLoginModal" class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm hidden items-center justify-center p-4">
+  <div id="adminLoginModal" class="fixed inset-0 z-[60] bg-slate-950/80 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
         <div>
@@ -724,6 +742,8 @@
           <input id="adminPasswordInput" type="password" autocomplete="current-password" placeholder="Tu contraseña" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
         </div>
 
+        <div id="adminLoginError" class="hidden p-3 rounded-xl bg-red-50 text-red-950 border-2 border-red-300 text-xs font-bold"></div>
+
         <button id="unlockAdminBtn" type="button" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm transition cursor-pointer">
           Entrar como administrador
         </button>
@@ -734,10 +754,10 @@
   <!-- VISTA COMPLETA DEDICADA DE ADMINISTRADOR + CALENDARIO -->
   <section id="adminFullInterface" class="fixed inset-0 z-40 bg-slate-100 hidden flex-col overflow-y-auto">
     <header class="bg-slate-900 text-white sticky top-0 z-20 shadow-md">
-      <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-            Administrador · v1.9.5
+            Administrador · v1.9.6
           </span>
           <h2 id="adminHeaderTitle" class="text-base sm:text-lg font-bold leading-tight">
             Administrador — Sala Común Escalonia 15
@@ -752,46 +772,46 @@
       </div>
 
       <nav class="bg-slate-950 border-t border-white/10">
-        <div class="max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap gap-2">
+        <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap gap-2">
           <button
             type="button"
             data-admin-tab="reservas-fianzas"
-            class="admin-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-emerald-600 text-white transition"
+            class="admin-tab px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-emerald-600 text-white transition"
           >
             Reservas por confirmar y control de fianzas
           </button>
           <button
             type="button"
             data-admin-tab="vecinos-reservas"
-            class="admin-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
+            class="admin-tab px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
           >
             Vecinos y reservas
           </button>
           <button
             type="button"
             data-admin-tab="acto-comunitario"
-            class="admin-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
+            class="admin-tab px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
           >
             Programar acto comunitario
           </button>
           <button
             type="button"
             data-admin-tab="alta-propietarios"
-            class="admin-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
+            class="admin-tab px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
           >
             Alta de propietarios
           </button>
           <button
             type="button"
             data-admin-tab="plantilla-iban"
-            class="admin-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
+            class="admin-tab px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
           >
             Plantilla de correo e IBAN
           </button>
           <button
             type="button"
             data-admin-tab="nuevo-admin"
-            class="admin-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
+            class="admin-tab px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
           >
             Dar de alta otro administrador
           </button>
@@ -799,24 +819,102 @@
       </nav>
     </header>
 
-    <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 space-y-6 text-xs sm:text-sm">
-      <!-- PESTAÑA 1: RESERVAS POR CONFIRMAR Y CONTROL DE FIANZAS -->
-      <div id="admin-tab-reservas-fianzas" class="admin-panel bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
-        <div class="border-b border-slate-100 pb-3 flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h3 class="text-base sm:text-lg font-bold text-slate-900">Reservas por confirmar y control de fianzas</h3>
-            <p class="text-xs text-slate-500">
-              Revisa cuántas veces ha reservado ese propietario en el año, el margen configurado (por defecto 14 días), si es un acto con fecha fija, da el visto bueno para el pago de 48h, confirma o no autoriza la reserva y marca la devolución de fianza.
-            </p>
+    <main id="adminMainContainer" class="flex-1 max-w-7xl w-full mx-auto px-4 py-4 space-y-4 text-xs sm:text-sm">
+      <!-- CONTENEDOR DIVIDIDO PARA RESERVAS/FIANZAS (IZQUIERDA) Y CALENDARIO (DERECHA) -->
+      <div id="adminSplitLayout" class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <div id="adminLeftColumn" class="lg:col-span-7 space-y-4">
+          <!-- PESTAÑA 1: RESERVAS POR CONFIRMAR Y CONTROL DE FIANZAS -->
+          <div id="admin-tab-reservas-fianzas" class="admin-panel bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
+            <div class="border-b border-slate-100 pb-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 class="text-base sm:text-lg font-bold text-slate-900">Reservas por confirmar y control de fianzas</h3>
+                <p class="text-xs text-slate-500">
+                  Revisa reservas, margen configurado, da visto bueno (48h), confirma, modifica vecino, no autoriza o marca devolución de fianza.
+                </p>
+              </div>
+              <span id="adminPriorityMarginBadge" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-950 text-xs font-bold">
+                Margen activo: 14 días
+              </span>
+            </div>
+            <div id="adminReservationsList" class="space-y-3"></div>
           </div>
-          <span id="adminPriorityMarginBadge" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-950 text-xs font-bold">
-            Margen activo: 14 días
-          </span>
+
+          <!-- PESTAÑA 3: PROGRAMAR ACTO COMUNITARIO (VISTA COMPACTA PARA VER CALENDARIO SIN SCROLL) -->
+          <div id="admin-tab-acto-comunitario" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3">
+            <div class="border-b border-slate-100 pb-2 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 class="text-base font-bold text-slate-900">Programar acto comunitario</h3>
+                <p class="text-[11px] text-slate-500">
+                  Elige fecha y turno en los campos o pulsa directamente en el calendario.
+                </p>
+              </div>
+              <span id="adminCommCounterBadge" class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-900 text-xs font-bold">
+                Actos comunitarios registrados: 0 (sin límite)
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha</label>
+                <input id="commDateInput" type="date" class="w-full rounded-xl border border-slate-300 px-2.5 py-1.5 text-xs bg-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Turno</label>
+                <select id="commShiftInput" class="w-full rounded-xl border border-slate-300 px-2.5 py-1.5 text-xs bg-white">
+                  <option value="manana">Mañana (10:00–16:30)</option>
+                  <option value="tarde">Tarde (17:30–22:00 / 24:00)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Título del acto comunitario</label>
+                <input id="commTitleInput" type="text" placeholder="Junta / Evento comunitario" class="w-full rounded-xl border border-slate-300 px-2.5 py-1.5 text-xs bg-white" />
+              </div>
+            </div>
+
+            <div id="commSelectedSlotPreview" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700"></div>
+
+            <div class="flex justify-end">
+              <button id="createCommEventBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
+                Registrar acto comunitario
+              </button>
+            </div>
+          </div>
         </div>
-        <div id="adminReservationsList" class="space-y-3"></div>
+
+        <!-- COLUMNA DERECHA: CALENDARIO -->
+        <div id="adminRightColumn" class="lg:col-span-5 lg:sticky lg:top-24">
+          <div id="adminCalendarSection" class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2">
+              <div>
+                <h3 class="text-sm sm:text-base font-bold text-slate-900">Calendario de reservas</h3>
+                <p id="adminCalendarHint" class="text-[11px] text-slate-500">Vista en tiempo real de Mañana y Tarde.</p>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button id="adminPrevMonthBtn" type="button" class="px-2.5 py-1 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
+                  &larr;
+                </button>
+                <div id="adminCurrentMonthLabel" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-900 text-xs font-bold min-w-[125px] text-center"></div>
+                <button id="adminNextMonthBtn" type="button" class="px-2.5 py-1 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
+                  &rarr;
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-500 uppercase">
+              <div>Lun</div>
+              <div>Mar</div>
+              <div>Mié</div>
+              <div>Jue</div>
+              <div>Vie</div>
+              <div>Sáb</div>
+              <div>Dom</div>
+            </div>
+            <div id="adminCalendarGrid" class="grid grid-cols-7 gap-1.5"></div>
+          </div>
+        </div>
       </div>
 
-      <!-- PESTAÑA 2: VECINOS Y RESERVAS (MODIFICAR VECINO) -->
+      <!-- PESTAÑA 2: VECINOS Y RESERVAS -->
       <div id="admin-tab-vecinos-reservas" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div class="border-b border-slate-100 pb-3">
           <h3 class="text-base sm:text-lg font-bold text-slate-900">Vecinos y contador de reservas</h3>
@@ -825,47 +923,6 @@
           </p>
         </div>
         <div id="adminNeighborsList" class="space-y-2.5"></div>
-      </div>
-
-      <!-- PESTAÑA 3: PROGRAMAR ACTO COMUNITARIO -->
-      <div id="admin-tab-acto-comunitario" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
-        <div class="border-b border-slate-100 pb-3 flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h3 class="text-base sm:text-lg font-bold text-slate-900">Programar acto comunitario</h3>
-            <p class="text-xs text-slate-500">
-              Selecciona fecha y turno desde los campos o pinchando directamente en el calendario de abajo (sincronizado con todas las reservas).
-            </p>
-          </div>
-          <span id="adminCommCounterBadge" class="px-3 py-1 rounded-full bg-slate-100 text-slate-900 text-xs font-bold">
-            Actos comunitarios registrados: 0 (sin límite)
-          </span>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha</label>
-            <input id="commDateInput" type="date" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Turno</label>
-            <select id="commShiftInput" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white">
-              <option value="manana">Mañana (10:00–16:30)</option>
-              <option value="tarde">Tarde (17:30–22:00 / 24:00)</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Título del acto comunitario</label>
-            <input id="commTitleInput" type="text" placeholder="Junta / Evento comunitario" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white" />
-          </div>
-        </div>
-
-        <div id="commSelectedSlotPreview" class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700"></div>
-
-        <div class="flex justify-end">
-          <button id="createCommEventBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
-            Registrar acto comunitario
-          </button>
-        </div>
       </div>
 
       <!-- PESTAÑA 4: ALTA DE PROPIETARIOS -->
@@ -963,36 +1020,6 @@
           </button>
         </div>
       </div>
-
-      <!-- CALENDARIO VISIBLE EN RESERVAS/FIANZAS Y PROGRAMAR ACTO COMUNITARIO -->
-      <div id="adminCalendarSection" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
-          <div>
-            <h3 class="text-base sm:text-lg font-bold text-slate-900">Calendario de reservas</h3>
-            <p id="adminCalendarHint" class="text-xs text-slate-500">Vista en tiempo real del estado de cada turno de mañana y tarde.</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button id="adminPrevMonthBtn" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
-              &larr; Anterior
-            </button>
-            <div id="adminCurrentMonthLabel" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-900 text-xs sm:text-sm font-bold min-w-[155px] text-center"></div>
-            <button id="adminNextMonthBtn" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
-              Siguiente &rarr;
-            </button>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold text-slate-500 uppercase">
-          <div>Lun</div>
-          <div>Mar</div>
-          <div>Mié</div>
-          <div>Jue</div>
-          <div>Vie</div>
-          <div>Sáb</div>
-          <div>Dom</div>
-        </div>
-        <div id="adminCalendarGrid" class="grid grid-cols-7 gap-1.5 sm:gap-2"></div>
-      </div>
     </main>
   </section>
 
@@ -1071,6 +1098,26 @@ Tienes 48 horas para hacer el pago. Una vez que lo hagas se te confirmará la re
         users: {},
         reservations: []
       };
+
+      function setModalError(elementId, message) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        if (!message) {
+          el.textContent = "";
+          el.classList.add("hidden");
+        } else {
+          el.textContent = message;
+          el.classList.remove("hidden");
+        }
+      }
+
+      function clearAllModalErrors() {
+        setModalError("authModalError", "");
+        setModalError("forcePasswordError", "");
+        setModalError("ownerSettingsError", "");
+        setModalError("adminLoginError", "");
+        setModalError("editNeighborError", "");
+      }
 
       function populatePortalSelects() {
         const optionsHtml = Array.from({ length: 18 }, (_, i) => {
@@ -1180,16 +1227,16 @@ Tienes 48 horas para hacer el pago. Una vez que lo hagas se te confirmará la re
         const box = document.getElementById("toastBox");
         const inner = document.getElementById("toastInner");
         inner.textContent = message;
-        inner.className = `pointer-events-auto rounded-xl px-4 py-3 text-xs sm:text-sm font-medium shadow-xl border ${
+        inner.className = `pointer-events-auto rounded-xl px-4 py-3 text-xs sm:text-sm font-bold shadow-2xl border ${
           isError
-            ? "bg-red-950 text-red-100 border-red-700"
+            ? "bg-red-950 text-red-50 border-red-500"
             : "bg-slate-900 text-white border-slate-700"
         }`;
         box.classList.remove("hidden");
         clearTimeout(window.__toastTimer);
         window.__toastTimer = setTimeout(() => {
           box.classList.add("hidden");
-        }, 4200);
+        }, 4600);
       }
 
       function buildMailtoUrl(emails) {
@@ -1317,8 +1364,6 @@ Administración Escalonia 15`
         return getUserRecordedReservationCount(email, year) + getUserManualAdjustment(email, year);
       }
 
-      // Bloquea el calendario en rojo ("reservado") solo si está confirmado,
-      // o si es un acto comunitario, o si está confirmado y dentro del margen de días.
       function isBlockingSlotReservation(r) {
         if (!r || typeof r !== "object") return false;
         const cleanDate = normalizeDateISO(r.date);
@@ -1337,7 +1382,6 @@ Administración Escalonia 15`
         if (r.status !== "pendiente") return false;
         const marginDays = getPriorityMarginDays();
         const daysLeft = getDaysUntilDate(cleanDate);
-        // Si la fecha está por encima del margen (ej. >14 días), no bloquea el calendario en amarillo
         if (daysLeft !== null && daysLeft > marginDays && !isFixedDateSpecialEvent(r.eventType)) {
           return false;
         }
@@ -1420,9 +1464,6 @@ Administración Escalonia 15`
         });
       }
 
-      // Evalúa automáticamente al entrar dentro del margen de X días (por defecto 14):
-      // - Si hay 1 sola solicitud pagada/confirmada en el hueco (y no es acto de fecha fija), pasa a "reservado" automáticamente.
-      // - Si hay más de 1 solicitud en el hueco, queda pendiente de adjudicación manual por administración.
       async function evaluateMarginTransitions() {
         if (marginEvaluationInFlight || !reservationsInitialSyncDone) return;
         const marginDays = getPriorityMarginDays();
@@ -1694,8 +1735,8 @@ Administración Escalonia 15`
         }
         const existing = getActiveSlotReservation(dateVal, shiftVal);
         const conflictNote = existing
-          ? ` · Aviso: ya hay un registro (${existing.housing || existing.eventType || existing.status}) en ese hueco; al registrar el acto comunitario tendrá prioridad.`
-          : " · Hueco sin reservas activas.";
+          ? ` · Aviso: ya hay un registro (${existing.housing || existing.eventType || existing.status}) en ese hueco.`
+          : " · Hueco libre.";
         preview.innerHTML =
           `Seleccionado: <strong class="text-slate-950">${formatDateSpanish(dateVal)}</strong> · Turno <strong class="text-emerald-800">${getShiftLabel(shiftVal)}</strong> (${getShiftScheduleText(dateVal, shiftVal)})${conflictNote}`;
       }
@@ -1799,19 +1840,39 @@ Administración Escalonia 15`
       }
 
       function renderAdminCalendar() {
+        const splitLayout = document.getElementById("adminSplitLayout");
+        const leftCol = document.getElementById("adminLeftColumn");
+        const rightCol = document.getElementById("adminRightColumn");
         const section = document.getElementById("adminCalendarSection");
+        const adminGrid = document.getElementById("adminCalendarGrid");
         const hint = document.getElementById("adminCalendarHint");
-        const showCalendar = activeAdminTab === "reservas-fianzas" || activeAdminTab === "acto-comunitario";
 
-        if (!showCalendar) {
+        const isSplitTab = activeAdminTab === "reservas-fianzas" || activeAdminTab === "acto-comunitario";
+
+        if (!isSplitTab) {
+          leftCol.classList.add("hidden");
+          rightCol.classList.add("hidden");
           section.classList.add("hidden");
           return;
         }
+
+        leftCol.classList.remove("hidden");
+        rightCol.classList.remove("hidden");
         section.classList.remove("hidden");
 
-        hint.textContent = activeAdminTab === "acto-comunitario"
-          ? "Pulsa en Mañana o Tarde de cualquier día para rellenar automáticamente la fecha y el turno del acto comunitario."
-          : "Vista en tiempo real del estado de cada turno de mañana y tarde.";
+        if (activeAdminTab === "acto-comunitario") {
+          // Vista compacta en 2 columnas para que el calendario entero entre sin scroll
+          leftCol.className = "lg:col-span-5 space-y-3";
+          rightCol.className = "lg:col-span-7";
+          adminGrid.className = "grid grid-cols-7 gap-1 comm-compact-grid";
+          hint.textContent = "Pulsa en Mañana o Tarde para rellenar fecha y turno.";
+        } else {
+          // Pantalla dividida: reservas a la izquierda, calendario a la derecha
+          leftCol.className = "lg:col-span-7 space-y-4";
+          rightCol.className = "lg:col-span-5 lg:sticky lg:top-24";
+          adminGrid.className = "grid grid-cols-7 gap-1.5";
+          hint.textContent = "Vista en tiempo real del estado de cada turno.";
+        }
 
         const { year, month } = state.currentYearMonth;
         const monthText = new Date(year, month, 1).toLocaleDateString("es-ES", {
@@ -1820,7 +1881,7 @@ Administración Escalonia 15`
         }).replace(/^./, c => c.toUpperCase());
 
         document.getElementById("adminCurrentMonthLabel").textContent = monthText;
-        buildMonthGridInto(document.getElementById("adminCalendarGrid"), true);
+        buildMonthGridInto(adminGrid, true);
         updateCommSelectionPreview();
       }
 
@@ -1925,7 +1986,6 @@ Administración Escalonia 15`
         modal.classList.remove("flex");
       }
 
-      // Aviso en anulación de reserva confirmada solo si faltan <7 días
       function openCancelConfirmModal(reservation) {
         const isConfirmed = reservation.status === "reservado";
         const cleanDate = normalizeDateISO(reservation.date) || reservation.date;
@@ -2149,9 +2209,18 @@ Administración Escalonia 15`
       }
 
       function openEditNeighborModal(email) {
+        if (!email) return;
+        setModalError("editNeighborError", "");
         const neighbors = getAllNeighborsList();
-        const found = neighbors.find(n => n.email.toLowerCase() === email.toLowerCase());
-        if (!found) return;
+        const found = neighbors.find(n => n.email.toLowerCase() === email.toLowerCase()) || {
+          key: normalizeEmailKey(email),
+          email: email.trim().toLowerCase(),
+          uid: "",
+          portal: "",
+          floor: "",
+          letter: "",
+          manualYearAdjustments: {}
+        };
 
         const year = new Date().getFullYear();
         editingNeighborContext = found;
@@ -2170,6 +2239,7 @@ Administración Escalonia 15`
 
       function closeEditNeighborModal() {
         editingNeighborContext = null;
+        setModalError("editNeighborError", "");
         const modal = document.getElementById("editNeighborModal");
         modal.classList.add("hidden");
         modal.classList.remove("flex");
@@ -2226,10 +2296,10 @@ Administración Escalonia 15`
 
           if (r.createdByAdmin) {
             return `
-              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col gap-3 text-xs">
                 <div class="space-y-1">
                   <p class="font-bold text-slate-800">${cleanDate ? formatDateSpanish(cleanDate) : (r.date || "Fecha sin formato")} — ${cleanShift ? getShiftLabel(cleanShift) : (r.shift || "Sin turno")}</p>
-                  <p class="text-base sm:text-lg font-extrabold text-slate-950">${r.eventType || r.housing || "Acto comunitario"}</p>
+                  <p class="text-base font-extrabold text-slate-950">${r.eventType || r.housing || "Acto comunitario"}</p>
                   <p class="text-slate-700 font-semibold">Estado: <strong>RESERVADO</strong></p>
                   <p class="text-emerald-800 font-semibold">Contador de actos comunitarios: <strong>${getAdminEventsCount()}</strong> (sin límite)</p>
                 </div>
@@ -2271,7 +2341,7 @@ Administración Escalonia 15`
           const canConfirmPayment = r.status === "pendiente" || r.status === "en_espera_margen";
 
           return `
-            <div class="p-4 rounded-xl border flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs ${
+            <div class="p-4 rounded-xl border flex flex-col gap-3 text-xs ${
               needsManualDecision
                 ? "bg-rose-50/60 border-rose-400"
                 : isPendingPaymentActive
@@ -2282,10 +2352,10 @@ Administración Escalonia 15`
             }">
               <div class="space-y-1.5">
                 <p class="font-bold text-slate-700">${cleanDate ? formatDateSpanish(cleanDate) : (r.date || "Fecha sin formato")} — ${cleanShift ? getShiftLabel(cleanShift) : (r.shift || "Sin turno")}</p>
-                <p class="text-base sm:text-lg font-extrabold text-slate-950 tracking-tight">
+                <p class="text-base font-extrabold text-slate-950 tracking-tight">
                   ${r.housing || "Vivienda por completar"}
                 </p>
-                <p class="text-xs sm:text-sm font-bold text-emerald-950 bg-white border border-slate-200 rounded-lg px-2.5 py-1 inline-block">
+                <p class="text-xs font-bold text-emerald-950 bg-white border border-slate-200 rounded-lg px-2.5 py-1 inline-block">
                   ${r.ownerEmail || "Sin correo (registro huérfano)"}
                 </p>
                 ${isOutsideMargin ? `
@@ -2298,7 +2368,7 @@ Administración Escalonia 15`
                 ${needsManualDecision ? `
                   <div>
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-200 text-rose-950 border border-rose-400 text-xs font-extrabold">
-                      Adjudicación manual requerida: hay ${contendersInSlot.length} solicitud(es) dentro del margen de ${marginDays} días (prioridad: menor nº reservas, luego antigüedad)
+                      Adjudicación manual requerida: ${contendersInSlot.length} solicitud(es) dentro del margen de ${marginDays} días
                     </span>
                   </div>
                 ` : ""}
@@ -2325,8 +2395,8 @@ Administración Escalonia 15`
                 </p>
                 <p class="text-emerald-800 font-semibold">Veces reservado este año (${year}): <strong>${yearCount}</strong></p>
               </div>
-              <div class="flex flex-wrap items-center gap-2">
-                <button data-visto-bueno="${r.id}" type="button" class="px-3 py-1.5 rounded-lg font-bold ${
+              <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-200/70">
+                <button data-visto-bueno="${r.id}" type="button" class="px-3 py-1.5 rounded-lg font-bold cursor-pointer ${
                   isPendingPaymentActive
                     ? "bg-orange-500 hover:bg-orange-600 text-white border border-orange-700 shadow-sm"
                     : "bg-amber-500 hover:bg-amber-600 text-slate-950"
@@ -2334,22 +2404,27 @@ Administración Escalonia 15`
                   Visto bueno (Correo pago 48h)
                 </button>
                 ${canConfirmPayment ? `
-                  <button data-confirm-pay="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold">
+                  <button data-confirm-pay="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold cursor-pointer">
                     Confirmar reserva
                   </button>
                 ` : ""}
-                <button data-no-autorizar="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold">
+                <button data-no-autorizar="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold cursor-pointer">
                   No autorizar
                 </button>
-                <button data-refund-dep="${r.id}" type="button" class="px-3 py-1.5 rounded-lg border ${
+                <button data-refund-dep="${r.id}" type="button" class="px-3 py-1.5 rounded-lg border cursor-pointer ${
                   r.depositReturned
                     ? "bg-emerald-100 border-emerald-400 text-emerald-950"
                     : "bg-white border-slate-300 hover:bg-slate-100 text-slate-800"
                 } font-bold">
                   ${r.depositReturned ? "Fianza devuelta ✓" : "Fianza devuelta"}
                 </button>
+                ${r.ownerEmail ? `
+                  <button data-modify-neighbor-email="${encodeURIComponent(r.ownerEmail)}" type="button" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold cursor-pointer">
+                    Modificar vecino
+                  </button>
+                ` : ""}
                 ${isMalformedOrGhost ? `
-                  <button data-delete-ghost="${r.id}" type="button" class="px-3 py-1.5 rounded-lg border border-red-400 bg-red-50 hover:bg-red-100 text-red-900 font-bold">
+                  <button data-delete-ghost="${r.id}" type="button" class="px-3 py-1.5 rounded-lg border border-red-400 bg-red-50 hover:bg-red-100 text-red-900 font-bold cursor-pointer">
                     Liberar hueco pillado
                   </button>
                 ` : ""}
@@ -2357,6 +2432,12 @@ Administración Escalonia 15`
             </div>
           `;
         }).join("");
+
+        listEl.querySelectorAll("[data-modify-neighbor-email]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            openEditNeighborModal(decodeURIComponent(btn.dataset.modifyNeighborEmail));
+          });
+        });
 
         listEl.querySelectorAll("[data-admin-cancel]").forEach(btn => {
           btn.addEventListener("click", () => {
@@ -2414,8 +2495,6 @@ Administración Escalonia 15`
           });
         });
 
-        // Al confirmar pago: si está dentro del margen de X días (o es adjudicación manual), pasa a "reservado";
-        // si está fuera del margen (>X días), pasa a "en_espera_margen" hasta entrar en el margen.
         listEl.querySelectorAll("[data-confirm-pay]").forEach(btn => {
           btn.addEventListener("click", async () => {
             const id = btn.dataset.confirmPay;
@@ -2513,6 +2592,7 @@ Administración Escalonia 15`
         editingNeighborContext = null;
         selectedSlot = null;
         activeScreen = "landing";
+        clearAllModalErrors();
 
         document.getElementById("forcePasswordModal").classList.add("hidden");
         document.getElementById("forcePasswordModal").classList.remove("flex");
@@ -2712,6 +2792,7 @@ Administración Escalonia 15`
       document.getElementById("editNeighborTotalCountInput").addEventListener("input", updateNeighborModalHelperText);
 
       document.getElementById("saveEditNeighborBtn").addEventListener("click", async () => {
+        setModalError("editNeighborError", "");
         if (!editingNeighborContext || !authUser) return;
         const portal = document.getElementById("editNeighborPortal").value;
         const floor = document.getElementById("editNeighborFloor").value;
@@ -2745,6 +2826,7 @@ Administración Escalonia 15`
           await db.ref(`escalonia15/users/${targetUid}`).set(updatedUserRecord);
           showToast("Datos y contador de reservas del vecino actualizados.");
         } catch (err) {
+          setModalError("editNeighborError", "Error al guardar cambios del vecino: " + err.message);
           showToast("Error al guardar cambios del vecino: " + err.message, true);
         }
       });
@@ -2819,6 +2901,7 @@ Administración Escalonia 15`
       });
 
       function openForcePasswordModal() {
+        setModalError("forcePasswordError", "");
         const modal = document.getElementById("forcePasswordModal");
         document.getElementById("firstPortalSelect").value = (currentUserProfile && currentUserProfile.portal) || "1";
         document.getElementById("firstFloorSelect").value = (currentUserProfile && currentUserProfile.floor) || "Bajo";
@@ -2830,6 +2913,7 @@ Administración Escalonia 15`
       }
 
       function openOwnerSettingsModal() {
+        setModalError("ownerSettingsError", "");
         const modal = document.getElementById("ownerSettingsModal");
         document.getElementById("settingsFixedUnitLabel").textContent = getUserHousingLabel(currentUserProfile);
         document.getElementById("settingsNewPassInput").value = "";
@@ -2923,22 +3007,28 @@ Administración Escalonia 15`
 
       document.getElementById("btnOpenSettings").addEventListener("click", openOwnerSettingsModal);
       document.getElementById("closeSettingsModal").addEventListener("click", () => {
+        setModalError("ownerSettingsError", "");
         const modal = document.getElementById("ownerSettingsModal");
         modal.classList.add("hidden");
         modal.classList.remove("flex");
       });
 
       document.getElementById("saveSettingsBtn").addEventListener("click", async () => {
+        setModalError("ownerSettingsError", "");
         if (!authUser) return;
         const p1 = document.getElementById("settingsNewPassInput").value;
         const p2 = document.getElementById("settingsConfirmPassInput").value;
 
         if (!p1 || p1.length < 6) {
-          showToast("La nueva contraseña debe tener al menos 6 caracteres.", true);
+          const msg = "La nueva contraseña debe tener al menos 6 caracteres.";
+          setModalError("ownerSettingsError", msg);
+          showToast(msg, true);
           return;
         }
         if (p1 !== p2) {
-          showToast("Las contraseñas no coinciden.", true);
+          const msg = "Las contraseñas no coinciden.";
+          setModalError("ownerSettingsError", msg);
+          showToast(msg, true);
           return;
         }
 
@@ -2955,7 +3045,9 @@ Administración Escalonia 15`
           modal.classList.remove("flex");
           showToast("Contraseña actualizada.");
         } catch (err) {
-          showToast("Error al cambiar la contraseña: " + err.message, true);
+          const msg = "Error al cambiar la contraseña: " + err.message;
+          setModalError("ownerSettingsError", msg);
+          showToast(msg, true);
         }
       });
 
@@ -3107,6 +3199,7 @@ Administración Escalonia 15`
 
       const authModal = document.getElementById("authModal");
       function openAuthModal() {
+        setModalError("authModalError", "");
         document.getElementById("loginEmailInput").value = "";
         document.getElementById("loginPasswordInput").value = "";
         authModal.classList.remove("hidden");
@@ -3114,6 +3207,7 @@ Administración Escalonia 15`
       }
 
       document.getElementById("closeAuthModal").addEventListener("click", () => {
+        setModalError("authModalError", "");
         authModal.classList.add("hidden");
         authModal.classList.remove("flex");
         pendingScreenAfterLogin = null;
@@ -3122,38 +3216,50 @@ Administración Escalonia 15`
       });
 
       document.getElementById("doLoginBtn").addEventListener("click", async () => {
+        setModalError("authModalError", "");
         const email = document.getElementById("loginEmailInput").value.trim().toLowerCase();
         const pass = document.getElementById("loginPasswordInput").value;
         if (!email || !pass) {
-          showToast("Introduce correo y contraseña.", true);
+          const msg = "Introduce correo y contraseña.";
+          setModalError("authModalError", msg);
+          showToast(msg, true);
           return;
         }
         try {
           lastEnteredPassword = pass;
           await auth.signInWithEmailAndPassword(email, pass);
+          setModalError("authModalError", "");
           authModal.classList.add("hidden");
           authModal.classList.remove("flex");
           showToast("Sesión iniciada.");
         } catch (err) {
-          showToast("Error al iniciar sesión: " + err.message, true);
+          const msg = "Error al iniciar sesión: " + err.message;
+          setModalError("authModalError", msg);
+          showToast(msg, true);
         }
       });
 
       document.getElementById("forgotPasswordBtn").addEventListener("click", async () => {
+        setModalError("authModalError", "");
         const email = document.getElementById("loginEmailInput").value.trim();
         if (!email) {
-          showToast("Escribe tu correo para enviar el enlace de recuperación.", true);
+          const msg = "Escribe tu correo para enviar el enlace de recuperación.";
+          setModalError("authModalError", msg);
+          showToast(msg, true);
           return;
         }
         try {
           await auth.sendPasswordResetEmail(email);
           showToast(`Correo de recuperación enviado a ${email}.`);
         } catch (err) {
-          showToast("No se pudo enviar el correo: " + err.message, true);
+          const msg = "No se pudo enviar el correo: " + err.message;
+          setModalError("authModalError", msg);
+          showToast(msg, true);
         }
       });
 
       document.getElementById("saveNewPasswordBtn").addEventListener("click", async () => {
+        setModalError("forcePasswordError", "");
         if (!authUser) return;
         const portal = document.getElementById("firstPortalSelect").value;
         const floor = document.getElementById("firstFloorSelect").value;
@@ -3162,11 +3268,15 @@ Administración Escalonia 15`
         const pass2 = document.getElementById("confirmOwnerPasswordInput").value;
 
         if (pass1.length < 6 || pass1 === INITIAL_OWNER_PASS) {
-          showToast("Elige una contraseña distinta a 123456 (mínimo 6 caracteres).", true);
+          const msg = "Elige una contraseña distinta a 123456 (mínimo 6 caracteres).";
+          setModalError("forcePasswordError", msg);
+          showToast(msg, true);
           return;
         }
         if (pass1 !== pass2) {
-          showToast("Las contraseñas no coinciden.", true);
+          const msg = "Las contraseñas no coinciden.";
+          setModalError("forcePasswordError", msg);
+          showToast(msg, true);
           return;
         }
 
@@ -3195,7 +3305,9 @@ Administración Escalonia 15`
           refreshAllViewsNow();
           showToast("Vivienda confirmada y contraseña actualizada.");
         } catch (err) {
-          showToast("No se pudo actualizar la contraseña: " + err.message, true);
+          const msg = "No se pudo actualizar la contraseña: " + err.message;
+          setModalError("forcePasswordError", msg);
+          showToast(msg, true);
         }
       });
 
@@ -3208,6 +3320,7 @@ Administración Escalonia 15`
           refreshAllViewsNow();
           return;
         }
+        setModalError("adminLoginError", "");
         activeScreen = "landing";
         pendingScreenAfterLogin = "admin";
         applyScreenVisibility();
@@ -3218,6 +3331,7 @@ Administración Escalonia 15`
       });
 
       document.getElementById("closeAdminLoginModal").addEventListener("click", () => {
+        setModalError("adminLoginError", "");
         adminLoginModal.classList.add("hidden");
         adminLoginModal.classList.remove("flex");
         pendingScreenAfterLogin = null;
@@ -3226,10 +3340,13 @@ Administración Escalonia 15`
       });
 
       document.getElementById("unlockAdminBtn").addEventListener("click", async () => {
+        setModalError("adminLoginError", "");
         const email = document.getElementById("adminEmailInput").value.trim();
         const pass = document.getElementById("adminPasswordInput").value;
         if (!email || !pass) {
-          showToast("Introduce correo y contraseña de administrador.", true);
+          const msg = "Introduce correo y contraseña de administrador.";
+          setModalError("adminLoginError", msg);
+          showToast(msg, true);
           return;
         }
 
@@ -3240,10 +3357,13 @@ Administración Escalonia 15`
           const extraAdmins = (state.admins || []).map(a => (a.uid || "").trim()).filter(Boolean);
           if (cred.user.uid !== ADMIN_UID && !extraAdmins.includes(cred.user.uid)) {
             pendingScreenAfterLogin = null;
-            showToast("Esta cuenta no tiene permisos de administrador.", true);
+            const msg = "Esta cuenta no tiene permisos de administrador.";
+            setModalError("adminLoginError", msg);
+            showToast(msg, true);
             return;
           }
           isCurrentUserAdmin = true;
+          setModalError("adminLoginError", "");
           adminLoginModal.classList.add("hidden");
           adminLoginModal.classList.remove("flex");
           activeScreen = "admin";
@@ -3251,7 +3371,9 @@ Administración Escalonia 15`
           refreshAllViewsNow();
         } catch (err) {
           pendingScreenAfterLogin = null;
-          showToast("Error de acceso de administrador: " + err.message, true);
+          const msg = "Error de acceso de administrador: " + err.message;
+          setModalError("adminLoginError", msg);
+          showToast(msg, true);
         }
       });
 
