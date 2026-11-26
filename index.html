@@ -148,6 +148,31 @@
     .pending-payment-blink {
       animation: softPendingBlink 1.3s infinite ease-in-out;
     }
+    .swipe-row-wrapper {
+      position: relative;
+      overflow: hidden;
+      border-radius: 0.75rem;
+      touch-action: pan-y;
+    }
+    .swipe-delete-tray {
+      position: absolute;
+      inset-y: 0;
+      right: 0;
+      width: 96px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #dc2626;
+      color: #ffffff;
+    }
+    .swipe-card-foreground {
+      position: relative;
+      z-index: 2;
+      transition: transform 0.18s ease;
+    }
+    .swipe-card-foreground.dragging {
+      transition: none;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -175,6 +200,49 @@
           </button>
           <button id="cancelConfirmYesBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm cursor-pointer">
             Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL MODIFICAR MARGEN (ADMINISTRADOR) -->
+  <div id="editMarginModal" class="fixed inset-0 z-[60] bg-slate-950/75 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+        <h3 class="text-sm sm:text-base font-bold">Modificar margen de días</h3>
+        <button id="closeEditMarginModal" type="button" class="text-slate-300 hover:text-white text-lg font-bold leading-none px-1 cursor-pointer">
+          &times;
+        </button>
+      </div>
+      <div class="p-5 space-y-4 text-xs sm:text-sm">
+        <p class="text-xs text-slate-600">
+          Ajusta el margen de días previo a la fecha del evento (por defecto <strong>14 días</strong>).
+        </p>
+
+        <div class="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-2">
+          <label for="quickMarginDaysInput" class="block text-xs font-bold text-emerald-950">
+            Margen activo (días)
+          </label>
+          <div class="flex items-center gap-2">
+            <button id="quickMarginDecBtn" type="button" class="w-9 h-9 rounded-lg border border-emerald-300 bg-white hover:bg-emerald-100 text-emerald-950 font-extrabold text-base cursor-pointer">
+              -
+            </button>
+            <input id="quickMarginDaysInput" type="number" min="0" max="90" step="1" class="w-24 text-center rounded-xl border border-emerald-300 bg-white px-2 py-1.5 text-sm font-extrabold text-slate-900" />
+            <button id="quickMarginIncBtn" type="button" class="w-9 h-9 rounded-lg border border-emerald-300 bg-white hover:bg-emerald-100 text-emerald-950 font-extrabold text-base cursor-pointer">
+              +
+            </button>
+          </div>
+        </div>
+
+        <div id="editMarginError" class="hidden p-3 rounded-xl bg-red-50 text-red-900 border border-red-300 text-xs font-bold"></div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button id="cancelEditMarginBtn" type="button" class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold cursor-pointer">
+            Cancelar
+          </button>
+          <button id="saveQuickMarginBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm cursor-pointer">
+            Guardar margen
           </button>
         </div>
       </div>
@@ -485,7 +553,7 @@
 
       <!-- TAB 2: MIS RESERVAS -->
       <section id="tab-mis-reservas" class="tab-panel hidden space-y-4">
-        <div class="bg-white rounded-2xl border border-slate-200 p-3.5 sm:p-5 shadow-sm space-y-4">
+        <div class="bg-white rounded-2xl border border-slate-200 p-3.5 sm:p-5 shadow-sm space-y-5">
           <div class="border-b border-slate-100 pb-2.5">
             <h2 class="text-base sm:text-lg font-bold text-slate-900">Mis reservas</h2>
           </div>
@@ -503,8 +571,19 @@
           </div>
 
           <div id="ownerCancelledReservationsBox" class="hidden rounded-xl border border-slate-200 bg-slate-50 p-3.5 space-y-2">
-            <h3 class="text-sm font-bold text-slate-800">Anuladas por propietario</h3>
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="text-sm font-bold text-slate-800">Anuladas por propietario</h3>
+              <span class="text-[11px] text-slate-500">Desliza hacia un lado para eliminar</span>
+            </div>
             <div id="ownerCancelledReservationsList" class="space-y-2"></div>
+          </div>
+
+          <div id="ownerHistoryByYearContainer" class="space-y-4 pt-2 border-t border-slate-200">
+            <div>
+              <h3 class="text-sm sm:text-base font-extrabold text-slate-900">Historial de reservas</h3>
+              <p class="text-[11px] text-slate-500">Reservas ya disfrutadas organizadas por año.</p>
+            </div>
+            <div id="ownerHistoryYearsList" class="space-y-4"></div>
           </div>
         </div>
       </section>
@@ -836,9 +915,14 @@
                   Visto bueno (48h), confirmar, no autorizar, modificar vecino o confirmar devolución de fianza.
                 </p>
               </div>
-              <span id="adminPriorityMarginBadge" class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-950 text-[11px] font-bold">
-                Margen: 14 días
-              </span>
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span id="adminPriorityMarginBadge" class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-950 text-[11px] font-bold">
+                  Margen activo: 14 días
+                </span>
+                <button id="btnModifyMarginInline" type="button" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold cursor-pointer">
+                  Modificar margen
+                </button>
+              </div>
             </div>
             <div id="adminReservationsList" class="space-y-2.5"></div>
           </div>
@@ -1063,6 +1147,7 @@
       let reservationsInitialSyncDone = false;
       let marginEvaluationInFlight = false;
       const dismissedDepositIds = new Set();
+      const hiddenCancelledIds = new Set();
 
       let state = {
         currentYearMonth: {
@@ -1111,6 +1196,7 @@ Tienes 48 horas para hacer el pago. Una vez que lo hagas se te confirmará la re
         setModalError("ownerSettingsError", "");
         setModalError("adminLoginError", "");
         setModalError("editNeighborError", "");
+        setModalError("editMarginError", "");
       }
 
       function populatePortalSelects() {
@@ -1176,6 +1262,26 @@ Tienes 48 horas para hacer el pago. Una vez que lo hagas se te confirmará la re
         const [y, m, d] = clean.split("-").map(Number);
         const target = new Date(y, m - 1, d);
         return Math.round((target - today) / (1000 * 60 * 60 * 24));
+      }
+
+      function isPastReservationSlot(reservation) {
+        if (!reservation) return false;
+        const cleanDate = normalizeDateISO(reservation.date);
+        if (!cleanDate) return false;
+        const [y, m, d] = cleanDate.split("-").map(Number);
+        const shift = normalizeShift(reservation.shift);
+        const endOfSlot = new Date(y, m - 1, d);
+        if (shift === "manana") {
+          endOfSlot.setHours(16, 30, 0, 0);
+        } else {
+          const dayOfWeek = endOfSlot.getDay();
+          if (dayOfWeek === 5 || dayOfWeek === 6) {
+            endOfSlot.setHours(23, 59, 59, 999);
+          } else {
+            endOfSlot.setHours(22, 0, 0, 0);
+          }
+        }
+        return Date.now() > endOfSlot.getTime();
       }
 
       function getPriorityMarginDays() {
@@ -2002,16 +2108,70 @@ Administración Escalonia 15`
         });
       }
 
+      function attachSwipeToDeleteHandlers() {
+        document.querySelectorAll(".swipe-row-wrapper").forEach(wrapper => {
+          const card = wrapper.querySelector(".swipe-card-foreground");
+          if (!card) return;
+
+          let startX = 0;
+          let currentOffset = 0;
+          let isDragging = false;
+          const maxReveal = 96;
+
+          const setOffset = (px, animate = true) => {
+            if (!animate) {
+              card.classList.add("dragging");
+            } else {
+              card.classList.remove("dragging");
+            }
+            card.style.transform = `translateX(${px}px)`;
+          };
+
+          card.addEventListener("pointerdown", e => {
+            if (e.target.closest("button")) return;
+            isDragging = true;
+            startX = e.clientX - currentOffset;
+            card.setPointerCapture(e.pointerId);
+            card.classList.add("dragging");
+          });
+
+          card.addEventListener("pointermove", e => {
+            if (!isDragging) return;
+            const deltaX = e.clientX - startX;
+            const clamped = Math.max(-maxReveal, Math.min(0, deltaX));
+            currentOffset = clamped;
+            setOffset(clamped, false);
+          });
+
+          const finishDrag = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            if (currentOffset <= -42) {
+              currentOffset = -maxReveal;
+              setOffset(-maxReveal, true);
+            } else {
+              currentOffset = 0;
+              setOffset(0, true);
+            }
+          };
+
+          card.addEventListener("pointerup", finishDrag);
+          card.addEventListener("pointercancel", finishDrag);
+        });
+      }
+
       function renderMyReservations() {
         const pendingEl = document.getElementById("pendingReservationsList");
         const confirmedEl = document.getElementById("confirmedReservationsList");
         const ownerCancelledBox = document.getElementById("ownerCancelledReservationsBox");
         const ownerCancelledEl = document.getElementById("ownerCancelledReservationsList");
+        const historyYearsEl = document.getElementById("ownerHistoryYearsList");
 
         if (!authUser) {
           pendingEl.innerHTML = `<p class="text-xs text-slate-500">Inicia sesión para ver tus reservas pendientes.</p>`;
           confirmedEl.innerHTML = `<p class="text-xs text-slate-500">Inicia sesión para ver tus reservas confirmadas.</p>`;
           ownerCancelledBox.classList.add("hidden");
+          historyYearsEl.innerHTML = `<p class="text-xs text-slate-500">Inicia sesión para ver tu historial de reservas por años.</p>`;
           return;
         }
 
@@ -2020,8 +2180,13 @@ Administración Escalonia 15`
           r => r && !r.createdByAdmin && (r.ownerEmail || "").toLowerCase() === authUser.email.toLowerCase()
         );
         const pending = mine.filter(r => r.status === "pendiente" || r.status === "en_espera_margen");
-        const confirmed = mine.filter(r => r.status === "reservado");
-        const cancelledByOwner = mine.filter(r => r.status === "cancelada" && r.cancelledByOwner === true);
+        const confirmedFuture = mine.filter(r => r.status === "reservado" && !isPastReservationSlot(r));
+        const pastEnjoyed = mine
+          .filter(r => r.status === "reservado" && isPastReservationSlot(r))
+          .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+        const cancelledByOwner = mine.filter(
+          r => r.status === "cancelada" && r.cancelledByOwner === true && !hiddenCancelledIds.has(r.id)
+        );
 
         pendingEl.innerHTML = pending.length
           ? pending.map(r => {
@@ -2054,8 +2219,8 @@ Administración Escalonia 15`
             }).join("")
           : `<p class="text-xs text-slate-500">Sin reservas pendientes.</p>`;
 
-        confirmedEl.innerHTML = confirmed.length
-          ? confirmed.map(r => `
+        confirmedEl.innerHTML = confirmedFuture.length
+          ? confirmedFuture.map(r => `
               <div class="p-3 rounded-xl bg-white border border-red-200 flex items-center justify-between gap-2 text-xs">
                 <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
                 <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold cursor-pointer">
@@ -2063,20 +2228,65 @@ Administración Escalonia 15`
                 </button>
               </div>
             `).join("")
-          : `<p class="text-xs text-slate-500">Sin reservas confirmadas.</p>`;
+          : `<p class="text-xs text-slate-500">Sin reservas confirmadas pendientes de disfrutar.</p>`;
 
         if (!cancelledByOwner.length) {
           ownerCancelledBox.classList.add("hidden");
         } else {
           ownerCancelledBox.classList.remove("hidden");
           ownerCancelledEl.innerHTML = cancelledByOwner.map(r => `
-            <div class="p-3 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-2 text-xs">
-              <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
-              <span class="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-800 text-xs font-bold">
-                Anulada por propietario
-              </span>
+            <div class="swipe-row-wrapper border border-slate-200 bg-red-600">
+              <div class="swipe-delete-tray">
+                <button data-delete-cancelled="${r.id}" type="button" class="px-3 py-2 text-xs font-extrabold text-white cursor-pointer">
+                  Eliminar
+                </button>
+              </div>
+              <div class="swipe-card-foreground p-3 bg-white flex items-center justify-between gap-2 text-xs">
+                <div>
+                  <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
+                  <p class="text-[11px] text-slate-500">Desliza a la izquierda para mostrar «Eliminar»</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-800 text-[11px] font-bold shrink-0">
+                  Anulada
+                </span>
+              </div>
             </div>
           `).join("");
+        }
+
+        if (!pastEnjoyed.length) {
+          historyYearsEl.innerHTML = `<p class="text-xs text-slate-500">Aún no tienes reservas disfrutadas en el historial.</p>`;
+        } else {
+          const byYear = new Map();
+          pastEnjoyed.forEach(item => {
+            const cleanDate = normalizeDateISO(item.date);
+            const yr = cleanDate ? cleanDate.split("-")[0] : String(new Date().getFullYear());
+            if (!byYear.has(yr)) byYear.set(yr, []);
+            byYear.get(yr).push(item);
+          });
+
+          const sortedYears = Array.from(byYear.keys()).sort((a, b) => Number(b) - Number(a));
+          historyYearsEl.innerHTML = sortedYears.map(yr => {
+            const list = byYear.get(yr) || [];
+            return `
+              <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-3.5 space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                  <h4 class="text-xs sm:text-sm font-extrabold text-emerald-950">Historial de reservas ${yr}</h4>
+                  <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[11px] font-bold">
+                    ${list.length} disfrutada(s)
+                  </span>
+                </div>
+                <div class="space-y-1.5">
+                  ${list.map(r => `
+                    <div class="p-2.5 rounded-xl bg-white border border-emerald-200/80 flex items-center justify-between gap-2 text-xs">
+                      <span class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</span>
+                      <span class="text-[11px] font-semibold text-emerald-800">${r.eventType || "Reserva"}</span>
+                    </div>
+                  `).join("")}
+                </div>
+              </div>
+            `;
+          }).join("");
         }
 
         document.querySelectorAll("[data-cancel-res]").forEach(btn => {
@@ -2085,6 +2295,20 @@ Administración Escalonia 15`
             if (found) openCancelConfirmModal(found);
           });
         });
+
+        document.querySelectorAll("[data-delete-cancelled]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const id = btn.dataset.deleteCancelled;
+            hiddenCancelledIds.add(id);
+            renderMyReservations();
+            try {
+              await db.ref(`escalonia15/reservations/${id}`).update({ hiddenByOwner: true });
+            } catch (_) {}
+            showToast("Reserva anulada eliminada de tu lista.");
+          });
+        });
+
+        attachSwipeToDeleteHandlers();
       }
 
       function getAllNeighborsList() {
@@ -2193,11 +2417,26 @@ Administración Escalonia 15`
         modal.classList.remove("flex");
       }
 
+      function openEditMarginModal() {
+        setModalError("editMarginError", "");
+        document.getElementById("quickMarginDaysInput").value = String(getPriorityMarginDays());
+        const modal = document.getElementById("editMarginModal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+
+      function closeEditMarginModal() {
+        setModalError("editMarginError", "");
+        const modal = document.getElementById("editMarginModal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+
       function renderAdminDashboard() {
         const marginDays = getPriorityMarginDays();
         const marginBadge = document.getElementById("adminPriorityMarginBadge");
         if (marginBadge) {
-          marginBadge.textContent = `Margen: ${marginDays} días`;
+          marginBadge.textContent = `Margen activo: ${marginDays} días`;
         }
 
         const authItems = Object.values(state.authorizedEmails || {}).filter(x => x && x.authorized);
@@ -2583,6 +2822,8 @@ Administración Escalonia 15`
         document.getElementById("cancelConfirmModal").classList.remove("flex");
         document.getElementById("editNeighborModal").classList.add("hidden");
         document.getElementById("editNeighborModal").classList.remove("flex");
+        document.getElementById("editMarginModal").classList.add("hidden");
+        document.getElementById("editMarginModal").classList.remove("flex");
 
         applyScreenVisibility();
         refreshAllViewsNow();
@@ -2770,6 +3011,45 @@ Administración Escalonia 15`
       document.getElementById("backFromNormsBtn").addEventListener("click", () => {
         const calTab = document.querySelector('.nav-tab[data-tab="calendario"]');
         if (calTab) calTab.click();
+      });
+
+      document.getElementById("btnModifyMarginInline").addEventListener("click", openEditMarginModal);
+      document.getElementById("closeEditMarginModal").addEventListener("click", closeEditMarginModal);
+      document.getElementById("cancelEditMarginBtn").addEventListener("click", closeEditMarginModal);
+      document.getElementById("quickMarginDecBtn").addEventListener("click", () => {
+        const input = document.getElementById("quickMarginDaysInput");
+        input.value = String(Math.max(0, (Number(input.value) || 0) - 1));
+      });
+      document.getElementById("quickMarginIncBtn").addEventListener("click", () => {
+        const input = document.getElementById("quickMarginDaysInput");
+        input.value = String(Math.min(90, (Number(input.value) || 0) + 1));
+      });
+      document.getElementById("saveQuickMarginBtn").addEventListener("click", async () => {
+        setModalError("editMarginError", "");
+        const raw = Number(document.getElementById("quickMarginDaysInput").value);
+        if (!Number.isFinite(raw) || raw < 0 || raw > 90) {
+          const msg = "Introduce un número de días válido entre 0 y 90.";
+          setModalError("editMarginError", msg);
+          showToast(msg, true);
+          return;
+        }
+        const priorityMarginDays = Math.floor(raw);
+        const updatedConfig = {
+          ...state.adminConfig,
+          priorityMarginDays,
+          admins: state.admins
+        };
+        state.adminConfig = updatedConfig;
+        closeEditMarginModal();
+        refreshAllViewsNow();
+        evaluateMarginTransitions();
+
+        if (authUser) {
+          try {
+            await db.ref("escalonia15/adminConfig").set(updatedConfig);
+          } catch (_) {}
+        }
+        showToast(`Margen actualizado a ${priorityMarginDays} días.`);
       });
 
       document.getElementById("closeEditNeighborModal").addEventListener("click", closeEditNeighborModal);
