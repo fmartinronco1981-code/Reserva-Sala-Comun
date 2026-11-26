@@ -1628,6 +1628,27 @@ Administración Escalonia 15`
         const toManualFlagIds = [];
 
         groups.forEach(list => {
+          list.forEach(item => {
+            if (
+              item &&
+              !item.createdByAdmin &&
+              item.status === "pendiente" &&
+              item.paymentWindowOnMarginOnly === true &&
+              !item.paymentWindowStartedAt
+            ) {
+              const startedAt = new Date().toISOString();
+              item.paymentWindowStartedAt = startedAt;
+              item.paymentWindowOnMarginOnly = false;
+              upsertReservationInLocalState(item.id, {
+                paymentWindowStartedAt: startedAt,
+                paymentWindowOnMarginOnly: false
+              }, false);
+              db.ref(`escalonia15/reservations/${item.id}`).update({
+                paymentWindowStartedAt: startedAt,
+                paymentWindowOnMarginOnly: false
+              }).catch(() => {});
+            }
+          });
           const alreadyConfirmed = list.some(x => x.status === "reservado");
           if (alreadyConfirmed) return;
 
@@ -2051,14 +2072,24 @@ Administración Escalonia 15`
         }
       }
 
-      function activatePaymentWindowInstant(reservation) {
+      function activatePaymentWindowInstant(reservation, marginOnly = false) {
         if (!reservation) return reservation;
-        const startedAt = reservation.paymentWindowStartedAt || new Date().toISOString();
-        const updated = { ...reservation, paymentWindowStartedAt: startedAt };
-        upsertReservationInLocalState(reservation.id, { paymentWindowStartedAt: startedAt });
+        const marginDays = getPriorityMarginDays();
+        const cleanDate = normalizeDateISO(reservation.date);
+        const daysLeft = cleanDate ? getDaysUntilDate(cleanDate) : null;
+        const shouldWaitForMargin = Boolean(marginOnly && daysLeft !== null && daysLeft > marginDays);
+        const startedAt = shouldWaitForMargin
+          ? null
+          : (reservation.paymentWindowStartedAt || new Date().toISOString());
+        const patch = {
+          paymentWindowStartedAt: startedAt,
+          paymentWindowOnMarginOnly: shouldWaitForMargin
+        };
+        const updated = { ...reservation, ...patch };
+        upsertReservationInLocalState(reservation.id, patch);
 
         db.ref(`escalonia15/reservations/${reservation.id}`)
-          .update({ paymentWindowStartedAt: startedAt })
+          .update(patch)
           .catch(err => {
             showToast("No se pudo guardar el plazo de pago de 48h: " + err.message, true);
           });
@@ -2232,6 +2263,7 @@ Administración Escalonia 15`
         pendingEl.innerHTML = pending.length
           ? pending.map(r => {
               const deadlineInfo = r.status === "pendiente" ? getPaymentDeadlineInfo(r) : null;
+              const isMarginOnlyWindow = r.status === "pendiente" && r.paymentWindowOnMarginOnly === true && !deadlineInfo;
               const isWaitingMargin = r.status === "en_espera_margen";
               return `
               <div class="p-3 rounded-xl bg-white border border-yellow-200 space-y-2 text-xs">
@@ -2246,13 +2278,18 @@ Administración Escalonia 15`
                     Pago confirmado. Tu reserva no se confirmará definitivamente hasta entrar dentro del margen de <strong>${marginDays} días</strong> para la fecha del evento.
                   </p>
                 ` : ""}
+                ${isMarginOnlyWindow ? `
+                  <p class="text-[11px] font-bold leading-snug text-sky-950 bg-sky-50 border border-sky-300 rounded-lg px-2.5 py-1.5">
+                    Fuera del margen de <strong>${marginDays} días</strong>: se esperará a entrar en ese margen para abrir el plazo de <strong>48 horas</strong> de pago (50,00 € cuota + 100,00 € fianza = <strong>150,00 €</strong>). Si finalmente no se te otorga la sala, se te devolverá la fianza.
+                  </p>
+                ` : ""}
                 ${deadlineInfo ? `
                   <p class="text-[11px] font-bold leading-snug ${
                     deadlineInfo.expired
                       ? "text-red-800 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5"
                       : "text-amber-950 bg-amber-100/80 border border-amber-300 rounded-lg px-2.5 py-1.5"
                   }">
-                    VISTO_BUENO_48H dado · Pendiente de pago (48 h): tienes hasta el <strong>${deadlineInfo.text}</strong> para realizar el pago de la reserva (50,00 €) y la fianza (100,00 €), total <strong>150,00 €</strong>.
+                    VISTO_BUENO_48H dado · Pendiente de pago (48 h): tienes hasta el <strong>${deadlineInfo.text}</strong> para realizar el pago de la reserva (50,00 €) y la fianza (100,00 €), total <strong>150,00 €</strong>. Si finalmente no se te otorga la sala, se te devolverá la fianza.
                   </p>
                 ` : ""}
               </div>
@@ -2597,7 +2634,7 @@ Administración Escalonia 15`
                 ${isOutsideMargin ? `
                   <div>
                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-sky-100 text-sky-950 border border-sky-300 text-[11px] font-extrabold">
-                      Fuera del margen de ${marginDays} días (${daysLeft} d)
+                      Fuera del margen de ${marginDays} días (${daysLeft} d) · Pago 48h en margen por defecto
                     </span>
                   </div>
                 ` : ""}
@@ -2637,6 +2674,15 @@ Administración Escalonia 15`
                   }">
                     VISTO_BUENO_48H
                   </button>
+                  ${isOutsideMargin ? `
+                    <button data-visto-bueno-margen="${r.id}" type="button" class="px-2.5 py-1.5 rounded-lg font-bold cursor-pointer ${
+                      r.paymentWindowOnMarginOnly
+                        ? "bg-sky-700 hover:bg-sky-800 text-white border border-sky-900"
+                        : "bg-sky-100 hover:bg-sky-200 text-sky-950 border border-sky-400"
+                    }">
+                      Pago 48h en margen (${marginDays}d)
+                    </button>
+                  ` : ""}
                   ${canConfirmPayment ? `
                     <button data-confirm-pay="${r.id}" type="button" class="px-2.5 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold cursor-pointer">
                       Confirmar reserva
@@ -2762,7 +2808,21 @@ Administración Escalonia 15`
               showToast("No se encontró la reserva seleccionada.", true);
               return;
             }
-            const updatedItem = activatePaymentWindowInstant(item);
+            const updatedItem = activatePaymentWindowInstant(item, false);
+            openPaymentModalForReservation(updatedItem);
+          });
+        });
+
+        listEl.querySelectorAll("[data-visto-bueno-margen]").forEach(btn => {
+          btn.addEventListener("click", e => {
+            e.preventDefault();
+            const targetId = btn.dataset.vistoBuenoMargen;
+            const item = state.reservations.find(x => String(x.id) === String(targetId));
+            if (!item) {
+              showToast("No se encontró la reserva seleccionada.", true);
+              return;
+            }
+            const updatedItem = activatePaymentWindowInstant(item, true);
             openPaymentModalForReservation(updatedItem);
           });
         });
@@ -2781,13 +2841,41 @@ Administración Escalonia 15`
             const patch = {
               status: nextStatus,
               paymentConfirmed: true,
+              paymentWindowOnMarginOnly: false,
               requiresManualMarginDecision: false,
               ...(nextStatus === "reservado" ? { confirmedAt: new Date().toISOString() } : {})
             };
 
+            const siblingUpdates = {};
+            if (nextStatus === "reservado") {
+              const targetDate = normalizeDateISO(item.date);
+              const targetShift = normalizeShift(item.shift);
+              state.reservations.forEach(other => {
+                if (!other || other.id === id || other.createdByAdmin) return;
+                if (other.status === "cancelada" || other.status === "no_autorizada" || other.status === "no_adjudicada") return;
+                if (normalizeDateISO(other.date) === targetDate && normalizeShift(other.shift) === targetShift) {
+                  siblingUpdates[`escalonia15/reservations/${other.id}`] = {
+                    status: "no_adjudicada",
+                    paymentWindowStartedAt: null,
+                    paymentWindowOnMarginOnly: false,
+                    requiresManualMarginDecision: false
+                  };
+                  upsertReservationInLocalState(other.id, {
+                    status: "no_adjudicada",
+                    paymentWindowStartedAt: null,
+                    paymentWindowOnMarginOnly: false,
+                    requiresManualMarginDecision: false
+                  }, false);
+                }
+              });
+            }
+
             upsertReservationInLocalState(id, patch);
             try {
               await db.ref(`escalonia15/reservations/${id}`).update(patch);
+              if (Object.keys(siblingUpdates).length) {
+                await db.ref().update(siblingUpdates);
+              }
               showToast(
                 nextStatus === "reservado"
                   ? "Pago confirmado: reserva confirmada y visible en el calendario."
@@ -3033,7 +3121,6 @@ Administración Escalonia 15`
       }
 
       function syncReservationsFromSnapshot(rawObj) {
-        const wasInitialDone = reservationsInitialSyncDone;
         const cleanObj = rawObj || {};
         const serverItems = Object.entries(cleanObj).map(([id, val]) => ({ id, ...val }));
         const optimisticTempItems = state.reservations.filter(
@@ -3046,9 +3133,7 @@ Administración Escalonia 15`
         );
         state.reservations = [...serverItems, ...optimisticTempItems];
         reservationsInitialSyncDone = true;
-        if (!wasInitialDone) {
-          refreshAllViewsNow();
-        }
+        refreshAllViewsNow();
         evaluateMarginTransitions();
       }
 
@@ -3558,7 +3643,8 @@ Administración Escalonia 15`
           depositReturned: false,
           cancelledByOwner: false,
           paymentConfirmed: false,
-          paymentWindowStartedAt: null
+          paymentWindowStartedAt: null,
+          paymentWindowOnMarginOnly: isOutsideMargin
         };
 
         upsertReservationInLocalState(tempId, payload);
@@ -3567,14 +3653,20 @@ Administración Escalonia 15`
           const newRef = db.ref("escalonia15/reservations").push();
           const realId = newRef.key;
           const txResult = await db.ref("escalonia15/reservations").transaction(currentAll => {
-            const map = (currentAll && typeof currentAll === "object") ? currentAll : {};
+            const map = (currentAll && typeof currentAll === "object") ? { ...currentAll } : {};
             const hasConflict = Object.values(map).some(existing => {
               if (!existing || typeof existing !== "object") return false;
-              if (existing.status === "cancelada" || existing.status === "no_autorizada" || existing.status === "no_adjudicada") {
+              if (existing.depositConfirmedAndDismissed === true) return false;
+              if (
+                existing.status === "cancelada" ||
+                existing.status === "no_autorizada" ||
+                existing.status === "no_adjudicada"
+              ) {
                 return false;
               }
               const exDate = normalizeDateISO(existing.date);
               const exShift = normalizeShift(existing.shift);
+              if (!exDate || !exShift) return false;
               if (exDate !== cleanDate) return false;
               return exShift === cleanShift || exShift === otherShift;
             });
@@ -3587,8 +3679,25 @@ Administración Escalonia 15`
 
           state.reservations = state.reservations.filter(r => r.id !== tempId);
           if (!txResult.committed) {
+            try {
+              const freshSnap = await db.ref("escalonia15/reservations").once("value");
+              syncReservationsFromSnapshot(freshSnap.val() || {});
+            } catch (_) {}
+            const stillBlocked = Boolean(getActiveSlotReservation(cleanDate, cleanShift) || getActiveSlotReservation(cleanDate, otherShift));
+            if (!stillBlocked) {
+              await db.ref(`escalonia15/reservations/${realId}`).set(payload);
+              upsertReservationInLocalState(realId, payload);
+              showToast(
+                isOutsideMargin
+                  ? `Solicitud enviada (fuera del margen de ${marginDays} días). No se confirmará definitivamente hasta entrar dentro del margen de ${marginDays} días.`
+                  : (isFixedDateException
+                    ? "Solicitud enviada como acto especial con fecha fija. Queda pendiente de revisión."
+                    : "Solicitud de reserva enviada. Queda pendiente de revisión por la administración.")
+              );
+              return;
+            }
             refreshAllViewsNow(true);
-            showToast("Otro usuario acaba de ocupar este día o turno. Calendario actualizado en tiempo real.", true);
+            showToast("Otro usuario acaba de ocupar este día o turno.", true);
             return;
           }
           upsertReservationInLocalState(realId, payload);
