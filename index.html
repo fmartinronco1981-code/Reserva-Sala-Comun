@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reserva Sala Común Escalonia 15 — v1.9.3</title>
+  <title>Reserva Sala Común Escalonia 15 — v1.9.4</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -141,7 +141,7 @@
     <div id="toastInner" class="pointer-events-auto rounded-xl px-4 py-3 text-xs sm:text-sm font-medium shadow-xl border bg-slate-900 text-white border-slate-700"></div>
   </div>
 
-  <!-- MODAL DE CONFIRMACIÓN DE ANULACIÓN (PROPIETARIO) -->
+  <!-- MODAL DE CONFIRMACIÓN DE ANULACIÓN / ELIMINACIÓN -->
   <div id="cancelConfirmModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-[1px] hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
       <div id="cancelConfirmHeader" class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
@@ -155,10 +155,10 @@
         <div id="cancelConfirmWarning" class="p-3.5 rounded-xl font-bold leading-relaxed"></div>
         <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
           <button id="cancelConfirmNoBtn" type="button" class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold cursor-pointer">
-            No, mantener reserva
+            No, mantener
           </button>
           <button id="cancelConfirmYesBtn" type="button" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm cursor-pointer">
-            Sí, anular reserva
+            Sí, confirmar
           </button>
         </div>
       </div>
@@ -170,7 +170,7 @@
     <div class="max-w-xl w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-7 sm:p-10 text-center shadow-2xl space-y-7">
       <div class="space-y-1">
         <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-emerald-200 px-3 py-1 rounded-full bg-white/10">
-          Versión 1.9.3 · Tiempo Real
+          Versión 1.9.4 · Tiempo Real
         </span>
         <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight pt-2">
           Bienvenido a reserva sala común Escalonia 15
@@ -670,7 +670,7 @@
       <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-            Administrador · v1.9.3
+            Administrador · v1.9.4
           </span>
           <h2 id="adminHeaderTitle" class="text-base sm:text-lg font-bold leading-tight">
             Administrador — Sala Común Escalonia 15
@@ -935,7 +935,7 @@
       let activeAdminTab = "reservas-fianzas";
       let selectedSlot = null;
       let activePaymentModalReservationId = null;
-      let pendingCancelReservation = null;
+      let pendingConfirmAction = null;
       let authUser = null;
       let isCurrentUserAdmin = false;
       let currentUserProfile = null;
@@ -1571,20 +1571,23 @@ Administración Escalonia 15`
         }
       }
 
-      async function activatePaymentWindowOnly(reservation) {
-        if (!reservation) return;
+      function activatePaymentWindowInstant(reservation) {
+        if (!reservation) return reservation;
         const startedAt = reservation.paymentWindowStartedAt || new Date().toISOString();
+        const updated = { ...reservation, paymentWindowStartedAt: startedAt };
         upsertReservationInLocalState(reservation.id, { paymentWindowStartedAt: startedAt });
-        try {
-          await db.ref(`escalonia15/reservations/${reservation.id}`).update({
-            paymentWindowStartedAt: startedAt
+
+        db.ref(`escalonia15/reservations/${reservation.id}`)
+          .update({ paymentWindowStartedAt: startedAt })
+          .catch(err => {
+            showToast("No se pudo guardar el plazo de pago de 48h: " + err.message, true);
           });
-        } catch (err) {
-          showToast("No se pudo guardar el plazo de pago de 48h: " + err.message, true);
-        }
+
+        return updated;
       }
 
       function openPaymentModalForReservation(reservation) {
+        if (!reservation) return;
         activePaymentModalReservationId = reservation.id;
 
         const tpl = state.adminConfig.mailTemplate || "";
@@ -1612,38 +1615,56 @@ Administración Escalonia 15`
         modal.classList.add("flex");
       }
 
-      function openCancelConfirmModal(reservation) {
-        pendingCancelReservation = reservation;
-        const isConfirmed = reservation.status === "reservado";
+      function openConfirmModal(actionConfig) {
+        pendingConfirmAction = actionConfig;
         const modal = document.getElementById("cancelConfirmModal");
         const header = document.getElementById("cancelConfirmHeader");
         const title = document.getElementById("cancelConfirmTitle");
         const slotEl = document.getElementById("cancelConfirmSlot");
         const warnEl = document.getElementById("cancelConfirmWarning");
+        const noBtn = document.getElementById("cancelConfirmNoBtn");
+        const yesBtn = document.getElementById("cancelConfirmYesBtn");
 
-        slotEl.textContent = `${formatDateSpanish(reservation.date)} — Turno ${getShiftLabel(reservation.shift)}`;
-
-        if (isConfirmed) {
-          header.className = "bg-red-700 text-white px-5 py-3.5 flex items-center justify-between";
-          title.textContent = "Confirmar anulación de reserva confirmada";
-          warnEl.className = "p-3.5 rounded-xl bg-red-50 text-red-950 border-2 border-red-400 font-bold leading-relaxed";
-          warnEl.textContent = "¿Está seguro de que quiere anular? Perderá la reserva de 50 euros.";
-        } else {
-          header.className = "bg-amber-600 text-white px-5 py-3.5 flex items-center justify-between";
-          title.textContent = "Confirmar anulación de reserva pendiente";
-          warnEl.className = "p-3.5 rounded-xl bg-amber-50 text-amber-950 border border-amber-300 font-semibold leading-relaxed";
-          warnEl.textContent = "¿Confirma que desea anular esta reserva pendiente?";
-        }
+        header.className = actionConfig.headerClass || "bg-red-700 text-white px-5 py-3.5 flex items-center justify-between";
+        title.textContent = actionConfig.title || "¿Seguro que quieres anular esta reserva?";
+        slotEl.textContent = actionConfig.slotText || "";
+        warnEl.className = actionConfig.warningClass || "p-3.5 rounded-xl bg-red-50 text-red-950 border-2 border-red-400 font-bold leading-relaxed";
+        warnEl.textContent = actionConfig.message || "¿Seguro que quieres anular esta reserva?";
+        noBtn.textContent = actionConfig.cancelText || "No, mantener";
+        yesBtn.textContent = actionConfig.confirmText || "Sí, confirmar";
 
         modal.classList.remove("hidden");
         modal.classList.add("flex");
       }
 
       function closeCancelConfirmModal() {
-        pendingCancelReservation = null;
+        pendingConfirmAction = null;
         const modal = document.getElementById("cancelConfirmModal");
         modal.classList.add("hidden");
         modal.classList.remove("flex");
+      }
+
+      function openCancelConfirmModal(reservation) {
+        const isConfirmed = reservation.status === "reservado";
+        openConfirmModal({
+          type: "owner-cancel",
+          reservation,
+          headerClass: isConfirmed
+            ? "bg-red-700 text-white px-5 py-3.5 flex items-center justify-between"
+            : "bg-amber-600 text-white px-5 py-3.5 flex items-center justify-between",
+          title: isConfirmed
+            ? "¿Seguro que quieres anular esta reserva confirmada?"
+            : "¿Seguro que quieres anular esta reserva pendiente?",
+          slotText: `${formatDateSpanish(reservation.date)} — Turno ${getShiftLabel(reservation.shift)}`,
+          warningClass: isConfirmed
+            ? "p-3.5 rounded-xl bg-red-50 text-red-950 border-2 border-red-400 font-bold leading-relaxed"
+            : "p-3.5 rounded-xl bg-amber-50 text-amber-950 border border-amber-300 font-semibold leading-relaxed",
+          message: isConfirmed
+            ? "¿Seguro que quieres anular esta reserva? Perderá la reserva de 50 euros."
+            : "¿Seguro que quieres anular esta reserva pendiente?",
+          cancelText: "No, mantener reserva",
+          confirmText: "Sí, anular reserva"
+        });
       }
 
       function renderMyReservations() {
@@ -1861,38 +1882,57 @@ Administración Escalonia 15`
         }).join("");
 
         listEl.querySelectorAll("[data-admin-cancel]").forEach(btn => {
-          btn.addEventListener("click", async () => {
+          btn.addEventListener("click", () => {
             const id = btn.dataset.adminCancel;
-            const patch = { status: "cancelada", cancelledByOwner: false };
-            upsertReservationInLocalState(id, patch);
-            try {
-              await db.ref(`escalonia15/reservations/${id}`).update(patch);
-              showToast("Reserva cancelada.");
-            } catch (err) {
-              showToast("Error al cancelar: " + err.message, true);
-            }
+            const item = state.reservations.find(x => x.id === id);
+            const slotLabel = item
+              ? `${normalizeDateISO(item.date) ? formatDateSpanish(normalizeDateISO(item.date)) : (item.date || "Fecha")} — ${normalizeShift(item.shift) ? getShiftLabel(item.shift) : "Turno"}`
+              : "Reserva seleccionada";
+            openConfirmModal({
+              type: "admin-cancel",
+              id,
+              headerClass: "bg-red-700 text-white px-5 py-3.5 flex items-center justify-between",
+              title: "¿Seguro que quieres anular esta reserva?",
+              slotText: slotLabel,
+              warningClass: "p-3.5 rounded-xl bg-red-50 text-red-950 border-2 border-red-400 font-bold leading-relaxed",
+              message: "¿Seguro que quieres anular esta reserva? Esta acción cancelará la reserva en el calendario.",
+              cancelText: "No, mantener",
+              confirmText: "Sí, anular reserva"
+            });
           });
         });
 
         listEl.querySelectorAll("[data-delete-ghost]").forEach(btn => {
-          btn.addEventListener("click", async () => {
+          btn.addEventListener("click", () => {
             const id = btn.dataset.deleteGhost;
-            removeReservationFromLocalState(id);
-            try {
-              await db.ref(`escalonia15/reservations/${id}`).remove();
-              showToast("Registro eliminado y hueco liberado.");
-            } catch (err) {
-              showToast("Error al eliminar registro: " + err.message, true);
-            }
+            const item = state.reservations.find(x => x.id === id);
+            const slotLabel = item
+              ? `${normalizeDateISO(item.date) ? formatDateSpanish(normalizeDateISO(item.date)) : (item.date || "Registro")} — ${item.housing || item.eventType || "Sin turno"}`
+              : "Registro seleccionado";
+            openConfirmModal({
+              type: "delete-record",
+              id,
+              headerClass: "bg-red-700 text-white px-5 py-3.5 flex items-center justify-between",
+              title: "¿Seguro que quieres eliminar este registro?",
+              slotText: slotLabel,
+              warningClass: "p-3.5 rounded-xl bg-red-50 text-red-950 border-2 border-red-400 font-bold leading-relaxed",
+              message: "¿Seguro que quieres eliminar este registro de forma permanente?",
+              cancelText: "No, mantener",
+              confirmText: "Sí, eliminar"
+            });
           });
         });
 
         listEl.querySelectorAll("[data-visto-bueno]").forEach(btn => {
-          btn.addEventListener("click", async () => {
-            const item = state.reservations.find(x => x.id === btn.dataset.vistoBueno);
-            if (!item) return;
-            await activatePaymentWindowOnly(item);
-            const updatedItem = state.reservations.find(x => x.id === item.id) || item;
+          btn.addEventListener("click", e => {
+            e.preventDefault();
+            const targetId = btn.dataset.vistoBueno;
+            const item = state.reservations.find(x => String(x.id) === String(targetId));
+            if (!item) {
+              showToast("No se encontró la reserva seleccionada.", true);
+              return;
+            }
+            const updatedItem = activatePaymentWindowInstant(item);
             openPaymentModalForReservation(updatedItem);
           });
         });
@@ -1912,16 +1952,23 @@ Administración Escalonia 15`
         });
 
         listEl.querySelectorAll("[data-no-autorizar]").forEach(btn => {
-          btn.addEventListener("click", async () => {
+          btn.addEventListener("click", () => {
             const id = btn.dataset.noAutorizar;
-            const patch = { status: "no_autorizada", cancelledByOwner: false };
-            upsertReservationInLocalState(id, patch);
-            try {
-              await db.ref(`escalonia15/reservations/${id}`).update(patch);
-              showToast("Reserva marcada como NO AUTORIZADA.");
-            } catch (err) {
-              showToast("Error al marcar no autorizada: " + err.message, true);
-            }
+            const item = state.reservations.find(x => x.id === id);
+            const slotLabel = item
+              ? `${normalizeDateISO(item.date) ? formatDateSpanish(normalizeDateISO(item.date)) : (item.date || "Fecha")} — ${normalizeShift(item.shift) ? getShiftLabel(item.shift) : "Turno"}`
+              : "Reserva seleccionada";
+            openConfirmModal({
+              type: "no-autorizar",
+              id,
+              headerClass: "bg-red-700 text-white px-5 py-3.5 flex items-center justify-between",
+              title: "¿Seguro que quieres marcar esta reserva como no autorizada?",
+              slotText: slotLabel,
+              warningClass: "p-3.5 rounded-xl bg-red-50 text-red-950 border-2 border-red-400 font-bold leading-relaxed",
+              message: "¿Seguro que quieres anular y marcar esta solicitud como NO AUTORIZADA?",
+              cancelText: "No, mantener",
+              confirmText: "Sí, no autorizar"
+            });
           });
         });
 
@@ -1965,7 +2012,7 @@ Administración Escalonia 15`
         currentUserProfile = null;
         lastEnteredPassword = "";
         pendingScreenAfterLogin = null;
-        pendingCancelReservation = null;
+        pendingConfirmAction = null;
         selectedSlot = null;
         activeScreen = "landing";
 
@@ -2139,34 +2186,75 @@ Administración Escalonia 15`
       document.getElementById("closeCancelConfirmModal").addEventListener("click", closeCancelConfirmModal);
       document.getElementById("cancelConfirmNoBtn").addEventListener("click", closeCancelConfirmModal);
       document.getElementById("cancelConfirmYesBtn").addEventListener("click", async () => {
-        if (!pendingCancelReservation) return;
-        const found = pendingCancelReservation;
+        if (!pendingConfirmAction) return;
+        const action = pendingConfirmAction;
         closeCancelConfirmModal();
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const cleanDate = normalizeDateISO(found.date) || found.date;
-        const [y, m, d] = cleanDate.split("-").map(Number);
-        const resDate = new Date(y, m - 1, d);
-        const daysBefore = Math.round((resDate - today) / (1000 * 60 * 60 * 24));
+        if (action.type === "owner-cancel") {
+          const found = action.reservation;
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const cleanDate = normalizeDateISO(found.date) || found.date;
+          const [y, m, d] = cleanDate.split("-").map(Number);
+          const resDate = new Date(y, m - 1, d);
+          const daysBefore = Math.round((resDate - today) / (1000 * 60 * 60 * 24));
 
-        const patch = {
-          status: "cancelada",
-          cancelledByOwner: true
-        };
-        upsertReservationInLocalState(found.id, patch);
+          const patch = {
+            status: "cancelada",
+            cancelledByOwner: true
+          };
+          upsertReservationInLocalState(found.id, patch);
 
-        try {
-          await db.ref(`escalonia15/reservations/${found.id}`).update(patch);
-          showToast(
-            found.status === "reservado"
-              ? "Reserva confirmada anulada. Se pierde la reserva de 50 euros."
-              : (daysBefore < 7
-                ? "Anulada fuera del plazo de 7 días: se devuelve la fianza pero no la parte del alquiler."
-                : "Anulada dentro del plazo de 7 días.")
-          );
-        } catch (err) {
-          showToast("Error al anular la reserva: " + err.message, true);
+          try {
+            await db.ref(`escalonia15/reservations/${found.id}`).update(patch);
+            showToast(
+              found.status === "reservado"
+                ? "Reserva confirmada anulada. Se pierde la reserva de 50 euros."
+                : (daysBefore < 7
+                  ? "Anulada fuera del plazo de 7 días: se devuelve la fianza pero no la parte del alquiler."
+                  : "Anulada dentro del plazo de 7 días.")
+            );
+          } catch (err) {
+            showToast("Error al anular la reserva: " + err.message, true);
+          }
+          return;
+        }
+
+        if (action.type === "admin-cancel") {
+          const id = action.id;
+          const patch = { status: "cancelada", cancelledByOwner: false };
+          upsertReservationInLocalState(id, patch);
+          try {
+            await db.ref(`escalonia15/reservations/${id}`).update(patch);
+            showToast("Reserva anulada.");
+          } catch (err) {
+            showToast("Error al anular: " + err.message, true);
+          }
+          return;
+        }
+
+        if (action.type === "delete-record") {
+          const id = action.id;
+          removeReservationFromLocalState(id);
+          try {
+            await db.ref(`escalonia15/reservations/${id}`).remove();
+            showToast("Registro eliminado.");
+          } catch (err) {
+            showToast("Error al eliminar registro: " + err.message, true);
+          }
+          return;
+        }
+
+        if (action.type === "no-autorizar") {
+          const id = action.id;
+          const patch = { status: "no_autorizada", cancelledByOwner: false };
+          upsertReservationInLocalState(id, patch);
+          try {
+            await db.ref(`escalonia15/reservations/${id}`).update(patch);
+            showToast("Reserva marcada como NO AUTORIZADA.");
+          } catch (err) {
+            showToast("Error al marcar no autorizada: " + err.message, true);
+          }
         }
       });
 
