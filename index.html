@@ -121,20 +121,16 @@
       line-height: 1.1;
       letter-spacing: -0.01em;
     }
-    @keyframes blink48hBtn {
+    @keyframes softPendingBlink {
       0%, 100% {
         opacity: 1;
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.75);
       }
       50% {
-        opacity: 0.45;
-        transform: scale(0.985);
-        box-shadow: 0 0 0 6px rgba(249, 115, 22, 0);
+        opacity: 0.48;
       }
     }
-    .btn-48h-blink {
-      animation: blink48hBtn 1.05s infinite ease-in-out;
+    .pending-payment-blink {
+      animation: softPendingBlink 1.3s infinite ease-in-out;
     }
   </style>
 </head>
@@ -735,7 +731,7 @@
         <div class="border-b border-slate-100 pb-3">
           <h3 class="text-base sm:text-lg font-bold text-slate-900">Reservas por confirmar y control de fianzas</h3>
           <p class="text-xs text-slate-500">
-            Revisa cuántas veces ha reservado ese propietario en el año, si es un acto especial con fecha fija, da el visto bueno para activar el contador de 48h y abrir el correo de pago, confirma o no autoriza la reserva y marca la devolución de fianza.
+            Revisa cuántas veces ha reservado ese propietario en el año, si es un acto especial con fecha fija, da el visto bueno para activar el aviso de pago de 48h y abrir el correo de pago, confirma o no autoriza la reserva y marca la devolución de fianza.
           </p>
         </div>
         <div id="adminReservationsList" class="space-y-3"></div>
@@ -912,7 +908,6 @@
       const ADMIN_EMAIL = "fmartinronco1981@gmail.com";
       const INITIAL_OWNER_PASS = "123456";
       const PAYMENT_WINDOW_MS = 48 * 60 * 60 * 1000;
-      const HOUR_MS = 60 * 60 * 1000;
 
       const firebaseConfig = {
         apiKey: "AIzaSyCB15Exkb3uDkYrSzapnXNGbpHJsb32EHs",
@@ -950,7 +945,6 @@
       let lastEnteredPassword = "";
       let isSigningOut = false;
       let reservationsInitialSyncDone = false;
-      let adminCountdownIntervalId = null;
 
       let state = {
         currentYearMonth: {
@@ -1034,6 +1028,25 @@ Tienes 48 horas para hacer el pago. Una vez que lo hagas se te confirmará la re
         });
       }
 
+      function formatDeadlineSpanish(startIsoStr) {
+        if (!startIsoStr) return null;
+        const startMs = Date.parse(startIsoStr);
+        if (Number.isNaN(startMs)) return null;
+        const deadline = new Date(startMs + PAYMENT_WINDOW_MS);
+        const dayMonthText = deadline.toLocaleDateString("es-ES", {
+          weekday: "long",
+          day: "numeric",
+          month: "long"
+        });
+        const hh = String(deadline.getHours()).padStart(2, "0");
+        const mm = String(deadline.getMinutes()).padStart(2, "0");
+        return {
+          deadlineDate: deadline,
+          expired: Date.now() >= deadline.getTime(),
+          text: `${dayMonthText} a las ${hh}:${mm}`
+        };
+      }
+
       function getShiftLabel(shift) {
         return normalizeShift(shift) === "manana" ? "Mañana" : "Tarde";
       }
@@ -1101,24 +1114,6 @@ Administración Escalonia 15`
         a.remove();
       }
 
-      function stopAdminCountdownTicker() {
-        if (adminCountdownIntervalId !== null) {
-          window.clearInterval(adminCountdownIntervalId);
-          adminCountdownIntervalId = null;
-        }
-      }
-
-      function ensureAdminCountdownTicker() {
-        if (adminCountdownIntervalId !== null) return;
-        adminCountdownIntervalId = window.setInterval(() => {
-          if (activeScreen === "admin" && authUser && isCurrentUserAdmin) {
-            renderAdminDashboard();
-          } else {
-            stopAdminCountdownTicker();
-          }
-        }, 60000);
-      }
-
       function applyScreenVisibility() {
         const landing = document.getElementById("landingScreen");
         const ownerApp = document.getElementById("ownerApp");
@@ -1131,15 +1126,12 @@ Administración Escalonia 15`
         adminFull.classList.remove("flex");
 
         if (activeScreen === "owner" && authUser) {
-          stopAdminCountdownTicker();
           ownerApp.classList.remove("hidden");
           ownerApp.classList.add("flex");
         } else if (activeScreen === "admin" && authUser && isCurrentUserAdmin) {
           adminFull.classList.remove("hidden");
           adminFull.classList.add("flex");
-          ensureAdminCountdownTicker();
         } else {
-          stopAdminCountdownTicker();
           activeScreen = "landing";
           landing.classList.remove("hidden");
         }
@@ -1230,22 +1222,9 @@ Administración Escalonia 15`
         return state.reservations.filter(r => r && r.createdByAdmin === true && r.status === "reservado").length;
       }
 
-      function getPaymentCountdownInfo(reservation) {
+      function getPaymentDeadlineInfo(reservation) {
         if (!reservation || !reservation.paymentWindowStartedAt) return null;
-        const startMs = Date.parse(reservation.paymentWindowStartedAt);
-        if (Number.isNaN(startMs)) return null;
-        const elapsedMs = Date.now() - startMs;
-        const remainingMs = PAYMENT_WINDOW_MS - elapsedMs;
-        const hoursLeft = Math.max(0, Math.ceil(remainingMs / HOUR_MS));
-        const expired = remainingMs <= 0 || hoursLeft <= 0;
-        return {
-          expired,
-          hoursLeft,
-          badgeText: expired ? "0h · Vencido" : `${hoursLeft}h`,
-          text: expired
-            ? "Contador 48h: 0h restantes (Plazo vencido)"
-            : `Contador 48h activo: ${hoursLeft}h restantes`
-        };
+        return formatDeadlineSpanish(reservation.paymentWindowStartedAt);
       }
 
       function updateHeaderAndUserInfo() {
@@ -1592,7 +1571,7 @@ Administración Escalonia 15`
         }
       }
 
-      async function start48hCounterOnly(reservation) {
+      async function activatePaymentWindowOnly(reservation) {
         if (!reservation) return;
         const startedAt = reservation.paymentWindowStartedAt || new Date().toISOString();
         upsertReservationInLocalState(reservation.id, { paymentWindowStartedAt: startedAt });
@@ -1601,7 +1580,7 @@ Administración Escalonia 15`
             paymentWindowStartedAt: startedAt
           });
         } catch (err) {
-          showToast("No se pudo guardar el contador de 48h: " + err.message, true);
+          showToast("No se pudo guardar el plazo de pago de 48h: " + err.message, true);
         }
       }
 
@@ -1688,14 +1667,28 @@ Administración Escalonia 15`
         const cancelledByOwner = mine.filter(r => r.status === "cancelada" && r.cancelledByOwner === true);
 
         pendingEl.innerHTML = pending.length
-          ? pending.map(r => `
-              <div class="p-3 rounded-xl bg-white border border-yellow-200 flex items-center justify-between gap-2 text-xs">
-                <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
-                <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold cursor-pointer">
-                  Anular
-                </button>
+          ? pending.map(r => {
+              const deadlineInfo = getPaymentDeadlineInfo(r);
+              return `
+              <div class="p-3 rounded-xl bg-white border border-yellow-200 space-y-2 text-xs">
+                <div class="flex items-center justify-between gap-2">
+                  <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
+                  <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold cursor-pointer">
+                    Anular
+                  </button>
+                </div>
+                ${deadlineInfo ? `
+                  <p class="text-[11px] font-bold leading-snug ${
+                    deadlineInfo.expired
+                      ? "text-red-800 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5"
+                      : "text-amber-950 bg-amber-100/80 border border-amber-300 rounded-lg px-2.5 py-1.5"
+                  }">
+                    Visto bueno dado · Pendiente de pago (48 h): tienes hasta el <strong>${deadlineInfo.text}</strong> para realizar el pago de la reserva (50,00 €) y la fianza (100,00 €), total <strong>150,00 €</strong>.
+                  </p>
+                ` : ""}
               </div>
-            `).join("")
+            `;
+            }).join("")
           : `<p class="text-xs text-slate-500">Sin reservas pendientes.</p>`;
 
         confirmedEl.innerHTML = confirmed.length
@@ -1792,13 +1785,13 @@ Administración Escalonia 15`
             r.isFixedDateException ||
             (r.eventType && r.eventType.toLowerCase().includes("fecha fija"))
           );
-          const countdown = r.status === "pendiente" ? getPaymentCountdownInfo(r) : null;
-          const is48hActive = Boolean(countdown && !countdown.expired);
+          const deadlineInfo = r.status === "pendiente" ? getPaymentDeadlineInfo(r) : null;
+          const isPendingPaymentActive = Boolean(deadlineInfo);
 
           return `
             <div class="p-4 rounded-xl border flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs ${
-              is48hActive
-                ? "bg-orange-50 border-2 border-orange-500 shadow-md"
+              isPendingPaymentActive
+                ? "bg-orange-50/60 border-amber-400"
                 : isSpecialFixedDate
                   ? "bg-amber-50/40 border-amber-400"
                   : "bg-slate-50 border-slate-200"
@@ -1818,14 +1811,14 @@ Administración Escalonia 15`
                     </span>
                   </div>
                 ` : ""}
-                ${countdown ? `
+                ${deadlineInfo ? `
                   <div>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-extrabold border-2 ${
-                      countdown.expired
+                    <span class="pending-payment-blink inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-extrabold border-2 ${
+                      deadlineInfo.expired
                         ? "bg-red-200 text-red-950 border-red-500"
                         : "bg-orange-500 text-white border-orange-700 shadow-sm"
                     }">
-                      ⏱ ${countdown.text}
+                      Pendiente de pago · Fecha límite: ${deadlineInfo.text}
                     </span>
                   </div>
                 ` : ""}
@@ -1836,11 +1829,11 @@ Administración Escalonia 15`
               </div>
               <div class="flex flex-wrap items-center gap-2">
                 <button data-visto-bueno="${r.id}" type="button" class="px-3 py-1.5 rounded-lg font-bold ${
-                  countdown
-                    ? `bg-orange-500 hover:bg-orange-600 text-white border-2 border-orange-700 shadow-sm ${is48hActive ? "btn-48h-blink" : ""}`
+                  isPendingPaymentActive
+                    ? "bg-orange-500 hover:bg-orange-600 text-white border border-orange-700 shadow-sm"
                     : "bg-amber-500 hover:bg-amber-600 text-slate-950"
                 }">
-                  ${countdown ? `48h · ${countdown.badgeText}` : "Visto bueno (Correo pago 48h)"}
+                  Visto bueno (Correo pago 48h)
                 </button>
                 ${r.status === "pendiente" ? `
                   <button data-confirm-pay="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold">
@@ -1898,7 +1891,7 @@ Administración Escalonia 15`
           btn.addEventListener("click", async () => {
             const item = state.reservations.find(x => x.id === btn.dataset.vistoBueno);
             if (!item) return;
-            await start48hCounterOnly(item);
+            await activatePaymentWindowOnly(item);
             const updatedItem = state.reservations.find(x => x.id === item.id) || item;
             openPaymentModalForReservation(updatedItem);
           });
@@ -1966,7 +1959,6 @@ Administración Escalonia 15`
 
       async function performLogoutToLanding() {
         isSigningOut = true;
-        stopAdminCountdownTicker();
         detachUserProfileListener();
         authUser = null;
         isCurrentUserAdmin = false;
@@ -2072,7 +2064,12 @@ Administración Escalonia 15`
         }
 
         if (!prevItem.paymentWindowStartedAt && nextItem.paymentWindowStartedAt && isMine) {
-          showToast(`Visto bueno dado: tienes 48 horas para realizar el pago (${label}).`);
+          const dl = formatDeadlineSpanish(nextItem.paymentWindowStartedAt);
+          showToast(
+            dl
+              ? `Visto bueno dado: tienes hasta el ${dl.text} para realizar el pago (${label}).`
+              : `Visto bueno dado: tienes 48 horas para realizar el pago (${label}).`
+          );
         }
       }
 
