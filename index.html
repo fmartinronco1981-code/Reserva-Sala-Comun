@@ -2780,12 +2780,74 @@ Administración Escalonia 15`
         });
       }
 
-      function refreshAllViewsNow() {
-        updateHeaderAndUserInfo();
-        renderCalendar();
-        renderAdminCalendar();
-        renderMyReservations();
-        renderAdminDashboard();
+
+      // =========================================================================
+      // PARCHE DE SINCRONIZACIÓN EN TIEMPO REAL, TRANSACCIONES Y RENDER SELECTIVO
+      // =========================================================================
+      let scheduledRenderFrame = null;
+      let lastRealtimeSyncStamp = 0;
+
+      function escapeHtml(value) {
+        return String(value == null ? "" : value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function touchRealtimeSyncIndicator() {
+        lastRealtimeSyncStamp = Date.now();
+        const badges = [
+          document.getElementById("adminPriorityMarginBadge"),
+          document.getElementById("adminCommCounterBadge")
+        ];
+        badges.forEach(el => {
+          if (!el) return;
+          el.classList.add("ring-2", "ring-emerald-400");
+          setTimeout(() => {
+            el.classList.remove("ring-2", "ring-emerald-400");
+          }, 420);
+        });
+      }
+
+      function scheduleRealtimeRender() {
+        if (scheduledRenderFrame !== null) return;
+        scheduledRenderFrame = window.requestAnimationFrame(() => {
+          scheduledRenderFrame = null;
+          updateHeaderAndUserInfo();
+
+          if (activeScreen === "admin" && authUser && isCurrentUserAdmin) {
+            renderAdminDashboard();
+            renderAdminCalendar();
+          } else if (activeScreen === "owner" && authUser) {
+            renderCalendar();
+            renderMyReservations();
+          } else {
+            renderCalendar();
+            renderMyReservations();
+            renderAdminDashboard();
+            renderAdminCalendar();
+          }
+          touchRealtimeSyncIndicator();
+        });
+      }
+
+      function refreshAllViewsNow(immediate = false) {
+        if (immediate) {
+          if (scheduledRenderFrame !== null) {
+            window.cancelAnimationFrame(scheduledRenderFrame);
+            scheduledRenderFrame = null;
+          }
+          updateHeaderAndUserInfo();
+          renderCalendar();
+          renderAdminCalendar();
+          renderMyReservations();
+          renderAdminDashboard();
+          touchRealtimeSyncIndicator();
+          return;
+        }
+        scheduleRealtimeRender();
       }
 
       function detachUserProfileListener() {
@@ -2950,40 +3012,52 @@ Administración Escalonia 15`
 
       const reservationsDbRef = db.ref("escalonia15/reservations");
       reservationsDbRef.on("value", snap => {
-        syncReservationsFromSnapshot(snap.val());
-      });
-      reservationsDbRef.on("child_changed", snap => {
-        if (!snap.key) return;
-        const prevItem = state.reservations.find(r => r.id === snap.key) || null;
-        const val = snap.val() || {};
-        const nextItem = { ...(prevItem || {}), ...val, id: snap.key };
-        upsertReservationInLocalState(snap.key, val);
-        notifyReservationChangeInRealtime(prevItem, nextItem, false);
-        evaluateMarginTransitions();
-      });
-      reservationsDbRef.on("child_added", snap => {
-        if (!snap.key) return;
-        const prevItem = state.reservations.find(r => r.id === snap.key) || null;
-        const val = snap.val() || {};
-        const nextItem = { ...val, id: snap.key };
-        upsertReservationInLocalState(snap.key, val, reservationsInitialSyncDone);
-        if (!prevItem) {
-          notifyReservationChangeInRealtime(null, nextItem, false);
+        const rawObj = snap.val() || {};
+        const prevById = new Map(state.reservations.map(r => [r.id, r]));
+        const serverItems = Object.entries(rawObj).map(([id, val]) => ({ id, ...val }));
+
+        if (reservationsInitialSyncDone) {
+          const nextById = new Map(serverItems.map(r => [r.id, r]));
+          serverItems.forEach(nextItem => {
+            if (String(nextItem.id || "").startsWith("tmp_")) return;
+            const prevItem = prevById.get(nextItem.id) || null;
+            if (!prevItem) {
+              notifyReservationChangeInRealtime(null, nextItem, false);
+            } else if (
+              prevItem.status !== nextItem.status ||
+              prevItem.paymentWindowStartedAt !== nextItem.paymentWindowStartedAt ||
+              prevItem.depositReturned !== nextItem.depositReturned ||
+              prevItem.cancelledByOwner !== nextItem.cancelledByOwner
+            ) {
+              notifyReservationChangeInRealtime(prevItem, nextItem, false);
+            }
+          });
+          prevById.forEach((prevItem, id) => {
+            if (!String(id || "").startsWith("tmp_") && !nextById.has(id)) {
+              notifyReservationChangeInRealtime(prevItem, null, true);
+            }
+          });
         }
-        evaluateMarginTransitions();
-      });
-      reservationsDbRef.on("child_removed", snap => {
-        if (!snap.key) return;
-        const prevItem = state.reservations.find(r => r.id === snap.key) || null;
-        removeReservationFromLocalState(snap.key);
-        notifyReservationChangeInRealtime(prevItem, null, true);
+
+        syncReservationsFromSnapshot(rawObj);
       });
 
       db.ref("escalonia15/adminConfig").on("value", snap => {
         if (snap.exists()) {
-          state.adminConfig = { ...state.adminConfig, ...snap.val() };
-          if (Array.isArray(snap.val().admins) && snap.val().admins.length) {
-            state.admins = snap.val().admins;
+          const cfgVal = snap.val() || {};
+          state.adminConfig = { ...state.adminConfig, ...cfgVal };
+          if (Array.isArray(cfgVal.admins) && cfgVal.admins.length) {
+            state.admins = cfgVal.admins;
+          }
+          if (authUser) {
+            const extraAdmins = (state.admins || []).map(a => (a.uid || "").trim()).filter(Boolean);
+            const extraAdminEmails = (state.admins || []).map(a => String(a.email || "").trim().toLowerCase()).filter(Boolean);
+            const userEmailLower = String(authUser.email || "").trim().toLowerCase();
+            isCurrentUserAdmin =
+              authUser.uid === ADMIN_UID ||
+              extraAdmins.includes(authUser.uid) ||
+              (userEmailLower && extraAdminEmails.includes(userEmailLower));
+            applyScreenVisibility();
           }
           refreshAllViewsNow();
           evaluateMarginTransitions();
@@ -3438,9 +3512,32 @@ Administración Escalonia 15`
         try {
           const newRef = db.ref("escalonia15/reservations").push();
           const realId = newRef.key;
+          const txResult = await db.ref("escalonia15/reservations").transaction(currentAll => {
+            const map = (currentAll && typeof currentAll === "object") ? currentAll : {};
+            const hasConflict = Object.values(map).some(existing => {
+              if (!existing || typeof existing !== "object") return false;
+              if (existing.status === "cancelada" || existing.status === "no_autorizada" || existing.status === "no_adjudicada") {
+                return false;
+              }
+              const exDate = normalizeDateISO(existing.date);
+              const exShift = normalizeShift(existing.shift);
+              if (exDate !== cleanDate) return false;
+              return exShift === cleanShift || exShift === otherShift;
+            });
+            if (hasConflict) {
+              return;
+            }
+            map[realId] = payload;
+            return map;
+          });
+
           state.reservations = state.reservations.filter(r => r.id !== tempId);
+          if (!txResult.committed) {
+            refreshAllViewsNow(true);
+            showToast("Otro usuario acaba de ocupar este día o turno. Calendario actualizado en tiempo real.", true);
+            return;
+          }
           upsertReservationInLocalState(realId, payload);
-          await newRef.set(payload);
           showToast(
             isOutsideMargin
               ? `Solicitud enviada (fuera del margen de ${marginDays} días). No se confirmará definitivamente hasta entrar dentro del margen de ${marginDays} días.`
@@ -3704,9 +3801,28 @@ Administración Escalonia 15`
         try {
           const newRef = db.ref("escalonia15/reservations").push();
           const realId = newRef.key;
+          const txResult = await db.ref("escalonia15/reservations").transaction(currentAll => {
+            const map = (currentAll && typeof currentAll === "object") ? currentAll : {};
+            const hasBlocking = Object.values(map).some(existing => {
+              if (!existing || typeof existing !== "object") return false;
+              return normalizeDateISO(existing.date) === dateVal &&
+                normalizeShift(existing.shift) === shiftVal &&
+                existing.status === "reservado";
+            });
+            if (hasBlocking) {
+              return;
+            }
+            map[realId] = payload;
+            return map;
+          });
+
           state.reservations = state.reservations.filter(r => r.id !== tempId);
+          if (!txResult.committed) {
+            refreshAllViewsNow(true);
+            showToast("Ya existe un acto o reserva confirmada en esa fecha y turno.", true);
+            return;
+          }
           upsertReservationInLocalState(realId, payload);
-          await newRef.set(payload);
           document.getElementById("commTitleInput").value = "";
           showToast("Acto comunitario registrado en estado Reservado.");
         } catch (err) {
@@ -3842,6 +3958,17 @@ Administración Escalonia 15`
           showToast("Error al guardar administrador: " + err.message, true);
         }
       });
+
+
+      window.setInterval(() => {
+        if (!reservationsInitialSyncDone) return;
+        evaluateMarginTransitions();
+        if (activeScreen === "owner" && authUser) {
+          renderMyReservations();
+        } else if (activeScreen === "admin" && authUser && isCurrentUserAdmin) {
+          renderAdminDashboard();
+        }
+      }, 60000);
 
       populatePortalSelects();
       applyScreenVisibility();
