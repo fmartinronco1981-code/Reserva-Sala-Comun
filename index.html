@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reserva Sala Común Escalonia 15 — v1.9.4</title>
+  <title>Reserva Sala Común Escalonia 15 — v1.9.5</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -165,12 +165,79 @@
     </div>
   </div>
 
+  <!-- MODAL MODIFICAR VECINO (ADMINISTRADOR) -->
+  <div id="editNeighborModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-[1px] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+        <h3 class="text-sm sm:text-base font-bold">Modificar vecino</h3>
+        <button id="closeEditNeighborModal" type="button" class="text-slate-300 hover:text-white text-lg font-bold leading-none px-1 cursor-pointer">
+          &times;
+        </button>
+      </div>
+      <div class="p-5 space-y-4 text-xs sm:text-sm">
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="text-[11px] text-slate-500 font-semibold">Correo del vecino</p>
+          <p id="editNeighborEmailLabel" class="font-bold text-slate-900 break-all"></p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label for="editNeighborPortal" class="block text-xs font-semibold text-slate-700 mb-1">Portal</label>
+            <select id="editNeighborPortal" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs bg-white font-medium"></select>
+          </div>
+          <div>
+            <label for="editNeighborFloor" class="block text-xs font-semibold text-slate-700 mb-1">Planta</label>
+            <select id="editNeighborFloor" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs bg-white font-medium">
+              <option value="Bajo">Bajo</option>
+              <option value="1">Primero</option>
+              <option value="2">Segundo</option>
+            </select>
+          </div>
+          <div>
+            <label for="editNeighborLetter" class="block text-xs font-semibold text-slate-700 mb-1">Letra</label>
+            <select id="editNeighborLetter" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs bg-white font-medium">
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-2">
+          <label for="editNeighborTotalCountInput" class="block text-xs font-bold text-emerald-950">
+            Número de reservas en el año (ajustable a mitad de año)
+          </label>
+          <div class="flex items-center gap-2">
+            <button id="editNeighborDecBtn" type="button" class="w-9 h-9 rounded-lg border border-emerald-300 bg-white hover:bg-emerald-100 text-emerald-950 font-extrabold text-base cursor-pointer">
+              -
+            </button>
+            <input id="editNeighborTotalCountInput" type="number" min="0" max="20" step="1" class="w-24 text-center rounded-xl border border-emerald-300 bg-white px-2 py-1.5 text-sm font-extrabold text-slate-900" />
+            <button id="editNeighborIncBtn" type="button" class="w-9 h-9 rounded-lg border border-emerald-300 bg-white hover:bg-emerald-100 text-emerald-950 font-extrabold text-base cursor-pointer">
+              +
+            </button>
+          </div>
+          <p id="editNeighborAutoInfo" class="text-[11px] text-emerald-900"></p>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button id="cancelEditNeighborBtn" type="button" class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold cursor-pointer">
+            Cancelar
+          </button>
+          <button id="saveEditNeighborBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm cursor-pointer">
+            Guardar cambios
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- PANTALLA 0: ENTRADA PRINCIPAL -->
   <section id="landingScreen" class="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-brand-dark via-brand-primary to-emerald-900 text-white">
     <div class="max-w-xl w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-7 sm:p-10 text-center shadow-2xl space-y-7">
       <div class="space-y-1">
         <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-emerald-200 px-3 py-1 rounded-full bg-white/10">
-          Versión 1.9.4 · Tiempo Real
+          Versión 1.9.5 · Tiempo Real
         </span>
         <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight pt-2">
           Bienvenido a reserva sala común Escalonia 15
@@ -670,7 +737,7 @@
       <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-            Administrador · v1.9.4
+            Administrador · v1.9.5
           </span>
           <h2 id="adminHeaderTitle" class="text-base sm:text-lg font-bold leading-tight">
             Administrador — Sala Común Escalonia 15
@@ -692,6 +759,13 @@
             class="admin-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-emerald-600 text-white transition"
           >
             Reservas por confirmar y control de fianzas
+          </button>
+          <button
+            type="button"
+            data-admin-tab="vecinos-reservas"
+            class="admin-tab px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white/10 text-slate-200 hover:bg-white/20 transition"
+          >
+            Vecinos y reservas
           </button>
           <button
             type="button"
@@ -728,16 +802,32 @@
     <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 space-y-6 text-xs sm:text-sm">
       <!-- PESTAÑA 1: RESERVAS POR CONFIRMAR Y CONTROL DE FIANZAS -->
       <div id="admin-tab-reservas-fianzas" class="admin-panel bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
-        <div class="border-b border-slate-100 pb-3">
-          <h3 class="text-base sm:text-lg font-bold text-slate-900">Reservas por confirmar y control de fianzas</h3>
-          <p class="text-xs text-slate-500">
-            Revisa cuántas veces ha reservado ese propietario en el año, si es un acto especial con fecha fija, da el visto bueno para activar el aviso de pago de 48h y abrir el correo de pago, confirma o no autoriza la reserva y marca la devolución de fianza.
-          </p>
+        <div class="border-b border-slate-100 pb-3 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900">Reservas por confirmar y control de fianzas</h3>
+            <p class="text-xs text-slate-500">
+              Revisa cuántas veces ha reservado ese propietario en el año, el margen configurado (por defecto 14 días), si es un acto con fecha fija, da el visto bueno para el pago de 48h, confirma o no autoriza la reserva y marca la devolución de fianza.
+            </p>
+          </div>
+          <span id="adminPriorityMarginBadge" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-950 text-xs font-bold">
+            Margen activo: 14 días
+          </span>
         </div>
         <div id="adminReservationsList" class="space-y-3"></div>
       </div>
 
-      <!-- PESTAÑA 2: PROGRAMAR ACTO COMUNITARIO -->
+      <!-- PESTAÑA 2: VECINOS Y RESERVAS (MODIFICAR VECINO) -->
+      <div id="admin-tab-vecinos-reservas" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div class="border-b border-slate-100 pb-3">
+          <h3 class="text-base sm:text-lg font-bold text-slate-900">Vecinos y contador de reservas</h3>
+          <p class="text-xs text-slate-500">
+            Usa <strong>Modificar vecino</strong> para ajustar la vivienda o el número de reservas del año en curso (0, 1, 2, etc.) cuando incorpores el sistema a mitad de año o existan reservas previas.
+          </p>
+        </div>
+        <div id="adminNeighborsList" class="space-y-2.5"></div>
+      </div>
+
+      <!-- PESTAÑA 3: PROGRAMAR ACTO COMUNITARIO -->
       <div id="admin-tab-acto-comunitario" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div class="border-b border-slate-100 pb-3 flex flex-wrap items-center justify-between gap-2">
           <div>
@@ -778,7 +868,7 @@
         </div>
       </div>
 
-      <!-- PESTAÑA 3: ALTA DE PROPIETARIOS -->
+      <!-- PESTAÑA 4: ALTA DE PROPIETARIOS -->
       <div id="admin-tab-alta-propietarios" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div>
@@ -805,16 +895,16 @@
         </div>
       </div>
 
-      <!-- PESTAÑA 4: PLANTILLA DE CORREO E IBAN -->
+      <!-- PESTAÑA 5: PLANTILLA DE CORREO, IBAN Y MARGEN DE DÍAS -->
       <div id="admin-tab-plantilla-iban" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div class="border-b border-slate-100 pb-3">
-          <h3 class="text-base sm:text-lg font-bold text-slate-900">Plantilla de correo e IBAN</h3>
+          <h3 class="text-base sm:text-lg font-bold text-slate-900">Plantilla de correo, IBAN y margen de confirmación</h3>
           <p class="text-xs text-slate-500">
-            Configura el correo de administración, el IBAN, el concepto y el texto base enviado al propietario al dar el visto bueno.
+            Configura el correo de administración, el IBAN, el concepto, el margen de días (por defecto 14) y el texto base enviado al propietario al dar el visto bueno.
           </p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Correo de Administración</label>
             <input id="cfgAdminEmail" type="email" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
@@ -822,6 +912,10 @@
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">IBAN de cobro / fianza</label>
             <input id="cfgAdminIban" type="text" placeholder="ES00 0000 0000 0000 0000 0000" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+          </div>
+          <div>
+            <label for="cfgPriorityMarginDays" class="block text-xs font-semibold text-slate-700 mb-1">Margen de días (por defecto 14)</label>
+            <input id="cfgPriorityMarginDays" type="number" min="0" max="90" step="1" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold" />
           </div>
         </div>
 
@@ -837,12 +931,12 @@
 
         <div class="flex justify-end">
           <button id="saveTemplateBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
-            Guardar plantilla e IBAN
+            Guardar plantilla, IBAN y margen
           </button>
         </div>
       </div>
 
-      <!-- PESTAÑA 5: DAR DE ALTA OTRO ADMINISTRADOR -->
+      <!-- PESTAÑA 6: DAR DE ALTA OTRO ADMINISTRADOR -->
       <div id="admin-tab-nuevo-admin" class="admin-panel hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div class="border-b border-slate-100 pb-3">
           <h3 class="text-base sm:text-lg font-bold text-slate-900">Dar de alta otro administrador</h3>
@@ -908,6 +1002,7 @@
       const ADMIN_EMAIL = "fmartinronco1981@gmail.com";
       const INITIAL_OWNER_PASS = "123456";
       const PAYMENT_WINDOW_MS = 48 * 60 * 60 * 1000;
+      const DEFAULT_PRIORITY_MARGIN_DAYS = 14;
 
       const firebaseConfig = {
         apiKey: "AIzaSyCB15Exkb3uDkYrSzapnXNGbpHJsb32EHs",
@@ -936,6 +1031,7 @@
       let selectedSlot = null;
       let activePaymentModalReservationId = null;
       let pendingConfirmAction = null;
+      let editingNeighborContext = null;
       let authUser = null;
       let isCurrentUserAdmin = false;
       let currentUserProfile = null;
@@ -945,6 +1041,7 @@
       let lastEnteredPassword = "";
       let isSigningOut = false;
       let reservationsInitialSyncDone = false;
+      let marginEvaluationInFlight = false;
 
       let state = {
         currentYearMonth: {
@@ -955,6 +1052,7 @@
           adminEmail: ADMIN_EMAIL,
           iban: "",
           concept: "Reserva Sala Común Escalonia 15",
+          priorityMarginDays: DEFAULT_PRIORITY_MARGIN_DAYS,
           mailTemplate:
 `Estimado/a vecino/a ({{VIVIENDA}}),
 
@@ -974,12 +1072,13 @@ Tienes 48 horas para hacer el pago. Una vez que lo hagas se te confirmará la re
         reservations: []
       };
 
-      function populatePortalSelect() {
+      function populatePortalSelects() {
         const optionsHtml = Array.from({ length: 18 }, (_, i) => {
           const n = String(i + 1);
           return `<option value="${n}">${n}</option>`;
         }).join("");
         document.getElementById("firstPortalSelect").innerHTML = optionsHtml;
+        document.getElementById("editNeighborPortal").innerHTML = optionsHtml;
       }
 
       function normalizeEmailKey(email) {
@@ -1026,6 +1125,22 @@ Tienes 48 horas para hacer el pago. Una vez que lo hagas se te confirmará la re
           month: "long",
           year: "numeric"
         });
+      }
+
+      function getDaysUntilDate(isoStr) {
+        const clean = normalizeDateISO(isoStr);
+        if (!clean) return null;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const [y, m, d] = clean.split("-").map(Number);
+        const target = new Date(y, m - 1, d);
+        return Math.round((target - today) / (1000 * 60 * 60 * 24));
+      }
+
+      function getPriorityMarginDays() {
+        const raw = Number(state.adminConfig && state.adminConfig.priorityMarginDays);
+        if (Number.isFinite(raw) && raw >= 0) return Math.floor(raw);
+        return DEFAULT_PRIORITY_MARGIN_DAYS;
       }
 
       function formatDeadlineSpanish(startIsoStr) {
@@ -1173,22 +1288,98 @@ Administración Escalonia 15`
         return Boolean(eventType && eventType.toLowerCase().includes("fecha fija"));
       }
 
-      function isValidActiveReservation(r) {
+      function getUserManualAdjustment(email, year = new Date().getFullYear()) {
+        if (!email) return 0;
+        const lower = String(email).trim().toLowerCase();
+        const found = Object.values(state.users || {}).find(
+          u => u && String(u.email || "").trim().toLowerCase() === lower
+        );
+        if (!found || !found.manualYearAdjustments) return 0;
+        const val = Number(found.manualYearAdjustments[String(year)]);
+        return Number.isFinite(val) ? Math.max(0, Math.floor(val)) : 0;
+      }
+
+      function getUserRecordedReservationCount(email, year) {
+        if (!email) return 0;
+        return state.reservations.filter(r => {
+          if (!r || r.createdByAdmin) return false;
+          if ((r.ownerEmail || "").toLowerCase() !== email.toLowerCase()) return false;
+          if (r.status === "cancelada" || r.status === "no_autorizada" || r.status === "no_adjudicada") return false;
+          const cleanDate = normalizeDateISO(r.date);
+          if (!cleanDate) return false;
+          const resYear = Number(cleanDate.split("-")[0]);
+          return resYear === year;
+        }).length;
+      }
+
+      function getUserYearReservationCount(email, year) {
+        if (!email) return 0;
+        return getUserRecordedReservationCount(email, year) + getUserManualAdjustment(email, year);
+      }
+
+      // Bloquea el calendario en rojo ("reservado") solo si está confirmado,
+      // o si es un acto comunitario, o si está confirmado y dentro del margen de días.
+      function isBlockingSlotReservation(r) {
         if (!r || typeof r !== "object") return false;
         const cleanDate = normalizeDateISO(r.date);
         const cleanShift = normalizeShift(r.shift);
         if (!cleanDate || !cleanShift) return false;
-        return r.status === "pendiente" || r.status === "reservado";
+        if (r.createdByAdmin && r.status === "reservado") return true;
+        if (r.status === "reservado") return true;
+        return false;
+      }
+
+      function isPendingSlotReservation(r) {
+        if (!r || typeof r !== "object") return false;
+        const cleanDate = normalizeDateISO(r.date);
+        const cleanShift = normalizeShift(r.shift);
+        if (!cleanDate || !cleanShift) return false;
+        if (r.status !== "pendiente") return false;
+        const marginDays = getPriorityMarginDays();
+        const daysLeft = getDaysUntilDate(cleanDate);
+        // Si la fecha está por encima del margen (ej. >14 días), no bloquea el calendario en amarillo
+        if (daysLeft !== null && daysLeft > marginDays && !isFixedDateSpecialEvent(r.eventType)) {
+          return false;
+        }
+        return true;
+      }
+
+      function getSlotVisualState(dateISO, shift) {
+        const targetDate = normalizeDateISO(dateISO);
+        const targetShift = normalizeShift(shift);
+        if (!targetDate || !targetShift) return "libre";
+
+        const slotItems = state.reservations.filter(
+          r => r &&
+            normalizeDateISO(r.date) === targetDate &&
+            normalizeShift(r.shift) === targetShift
+        );
+
+        if (slotItems.some(isBlockingSlotReservation)) {
+          return "reservado";
+        }
+        if (slotItems.some(isPendingSlotReservation)) {
+          return "pendiente";
+        }
+        return "libre";
       }
 
       function getActiveSlotReservation(dateISO, shift) {
         const targetDate = normalizeDateISO(dateISO);
         const targetShift = normalizeShift(shift);
         if (!targetDate || !targetShift) return null;
+
+        const blocking = state.reservations.find(
+          r => normalizeDateISO(r.date) === targetDate &&
+            normalizeShift(r.shift) === targetShift &&
+            isBlockingSlotReservation(r)
+        );
+        if (blocking) return blocking;
+
         return state.reservations.find(
-          r => isValidActiveReservation(r) &&
-            normalizeDateISO(r.date) === targetDate &&
-            normalizeShift(r.shift) === targetShift
+          r => normalizeDateISO(r.date) === targetDate &&
+            normalizeShift(r.shift) === targetShift &&
+            isPendingSlotReservation(r)
         ) || null;
       }
 
@@ -1200,22 +1391,9 @@ Administración Escalonia 15`
           r => r &&
             normalizeDateISO(r.date) === targetDate &&
             normalizeShift(r.shift) === targetShift &&
-            r.status === "no_autorizada" &&
+            (r.status === "no_autorizada" || r.status === "no_adjudicada") &&
             (r.ownerEmail || "").toLowerCase() === email.toLowerCase()
         ) || null;
-      }
-
-      function getUserYearReservationCount(email, year) {
-        if (!email) return 0;
-        return state.reservations.filter(r => {
-          if (!r || r.createdByAdmin) return false;
-          if ((r.ownerEmail || "").toLowerCase() !== email.toLowerCase()) return false;
-          if (r.status === "cancelada" || r.status === "no_autorizada") return false;
-          const cleanDate = normalizeDateISO(r.date);
-          if (!cleanDate) return false;
-          const resYear = Number(cleanDate.split("-")[0]);
-          return resYear === year;
-        }).length;
       }
 
       function getAdminEventsCount() {
@@ -1225,6 +1403,98 @@ Administración Escalonia 15`
       function getPaymentDeadlineInfo(reservation) {
         if (!reservation || !reservation.paymentWindowStartedAt) return null;
         return formatDeadlineSpanish(reservation.paymentWindowStartedAt);
+      }
+
+      function sortRequestsByPriority(items) {
+        return [...items].sort((a, b) => {
+          const cleanDateA = normalizeDateISO(a.date);
+          const cleanDateB = normalizeDateISO(b.date);
+          const yearA = cleanDateA ? Number(cleanDateA.split("-")[0]) : new Date().getFullYear();
+          const yearB = cleanDateB ? Number(cleanDateB.split("-")[0]) : new Date().getFullYear();
+          const countA = getUserYearReservationCount(a.ownerEmail, yearA);
+          const countB = getUserYearReservationCount(b.ownerEmail, yearB);
+          if (countA !== countB) return countA - countB;
+          const timeA = Date.parse(a.createdAt || 0) || 0;
+          const timeB = Date.parse(b.createdAt || 0) || 0;
+          return timeA - timeB;
+        });
+      }
+
+      // Evalúa automáticamente al entrar dentro del margen de X días (por defecto 14):
+      // - Si hay 1 sola solicitud pagada/confirmada en el hueco (y no es acto de fecha fija), pasa a "reservado" automáticamente.
+      // - Si hay más de 1 solicitud en el hueco, queda pendiente de adjudicación manual por administración.
+      async function evaluateMarginTransitions() {
+        if (marginEvaluationInFlight || !reservationsInitialSyncDone) return;
+        const marginDays = getPriorityMarginDays();
+
+        const groups = new Map();
+        state.reservations.forEach(r => {
+          if (!r || r.createdByAdmin) return;
+          if (r.status === "cancelada" || r.status === "no_autorizada" || r.status === "no_adjudicada") return;
+          const cleanDate = normalizeDateISO(r.date);
+          const cleanShift = normalizeShift(r.shift);
+          if (!cleanDate || !cleanShift) return;
+          const daysLeft = getDaysUntilDate(cleanDate);
+          if (daysLeft === null || daysLeft > marginDays) return;
+
+          const key = `${cleanDate}__${cleanShift}`;
+          if (!groups.has(key)) groups.set(key, []);
+          groups.get(key).push(r);
+        });
+
+        const toConfirmIds = [];
+        const toManualFlagIds = [];
+
+        groups.forEach(list => {
+          const alreadyConfirmed = list.some(x => x.status === "reservado");
+          if (alreadyConfirmed) return;
+
+          const paidCandidates = list.filter(x => x.paymentConfirmed === true && x.status === "en_espera_margen");
+          if (!paidCandidates.length) return;
+
+          const hasMultipleContenders = list.length > 1;
+          const hasFixedDate = paidCandidates.some(x => isFixedDateSpecialEvent(x.eventType) || x.isFixedDateException);
+
+          if (!hasMultipleContenders && !hasFixedDate && paidCandidates.length === 1) {
+            toConfirmIds.push(paidCandidates[0].id);
+          } else {
+            paidCandidates.forEach(cand => {
+              if (!cand.requiresManualMarginDecision) {
+                toManualFlagIds.push(cand.id);
+              }
+            });
+          }
+        });
+
+        if (!toConfirmIds.length && !toManualFlagIds.length) return;
+
+        marginEvaluationInFlight = true;
+        try {
+          for (const id of toConfirmIds) {
+            const patch = {
+              status: "reservado",
+              confirmedAt: new Date().toISOString(),
+              autoConfirmedOnMargin: true,
+              requiresManualMarginDecision: false
+            };
+            upsertReservationInLocalState(id, patch, false);
+            try {
+              await db.ref(`escalonia15/reservations/${id}`).update(patch);
+            } catch (_) {}
+          }
+
+          for (const id of toManualFlagIds) {
+            const patch = { requiresManualMarginDecision: true };
+            upsertReservationInLocalState(id, patch, false);
+            try {
+              await db.ref(`escalonia15/reservations/${id}`).update(patch);
+            } catch (_) {}
+          }
+
+          refreshAllViewsNow();
+        } finally {
+          marginEvaluationInFlight = false;
+        }
       }
 
       function updateHeaderAndUserInfo() {
@@ -1311,16 +1581,26 @@ Administración Escalonia 15`
           return false;
         }
 
-        const existing = getActiveSlotReservation(selectedSlot.date, selectedSlot.shift);
-        if (existing) {
-          msgBox.textContent = `Este turno ya está ${existing.status === "reservado" ? "RESERVADO" : "PENDIENTE"}.`;
+        const existingBlocking = state.reservations.find(
+          r => r &&
+            normalizeDateISO(r.date) === selectedSlot.date &&
+            normalizeShift(r.shift) === selectedSlot.shift &&
+            (isBlockingSlotReservation(r) || isPendingSlotReservation(r))
+        );
+        if (existingBlocking) {
+          msgBox.textContent = `Este turno ya está ${existingBlocking.status === "reservado" ? "RESERVADO" : "PENDIENTE"}.`;
           msgBox.className = "p-3 rounded-xl text-xs font-bold bg-red-50 text-red-800 border border-red-300";
           btn.disabled = true;
           return false;
         }
 
         const otherShift = selectedSlot.shift === "manana" ? "tarde" : "manana";
-        const otherRes = getActiveSlotReservation(selectedSlot.date, otherShift);
+        const otherRes = state.reservations.find(
+          r => r &&
+            normalizeDateISO(r.date) === selectedSlot.date &&
+            normalizeShift(r.shift) === otherShift &&
+            (isBlockingSlotReservation(r) || isPendingSlotReservation(r))
+        );
         if (otherRes) {
           msgBox.textContent = "Solo se puede reservar un turno al día (ya existe actividad en el otro turno de esta fecha).";
           msgBox.className = "p-3 rounded-xl text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300";
@@ -1361,10 +1641,10 @@ Administración Escalonia 15`
       }
 
       function getShiftClass(dateISO, shift, isAdminView = false) {
-        const activeRes = getActiveSlotReservation(dateISO, shift);
-        if (activeRes) {
-          return activeRes.status === "pendiente" ? "st-pendiente" : "st-reservado";
-        }
+        const visual = getSlotVisualState(dateISO, shift);
+        if (visual === "reservado") return "st-reservado";
+        if (visual === "pendiente") return "st-pendiente";
+
         if (!isAdminView && authUser) {
           const rejectedMine = getUserRejectedSlotReservation(dateISO, shift, authUser.email);
           if (rejectedMine) {
@@ -1375,13 +1655,14 @@ Administración Escalonia 15`
       }
 
       function getShiftHTML(dateISO, shift, isAdminView = false) {
-        const activeRes = getActiveSlotReservation(dateISO, shift);
+        const visual = getSlotVisualState(dateISO, shift);
         const prefix = getShiftLabel(shift);
 
-        if (activeRes) {
-          return activeRes.status === "pendiente"
-            ? `<span class="slot-label">${prefix}: Pendiente</span>`
-            : `<span class="slot-label">${prefix}: Reservado</span>`;
+        if (visual === "reservado") {
+          return `<span class="slot-label">${prefix}: Reservado</span>`;
+        }
+        if (visual === "pendiente") {
+          return `<span class="slot-label">${prefix}: Pendiente</span>`;
         }
 
         if (!isAdminView && authUser) {
@@ -1644,24 +1925,27 @@ Administración Escalonia 15`
         modal.classList.remove("flex");
       }
 
+      // Aviso en anulación de reserva confirmada solo si faltan <7 días
       function openCancelConfirmModal(reservation) {
         const isConfirmed = reservation.status === "reservado";
+        const cleanDate = normalizeDateISO(reservation.date) || reservation.date;
+        const daysBefore = getDaysUntilDate(cleanDate);
+        const showConfirmedPenaltyWarning = isConfirmed && daysBefore !== null && daysBefore < 7;
+
         openConfirmModal({
           type: "owner-cancel",
           reservation,
-          headerClass: isConfirmed
+          headerClass: showConfirmedPenaltyWarning
             ? "bg-red-700 text-white px-5 py-3.5 flex items-center justify-between"
             : "bg-amber-600 text-white px-5 py-3.5 flex items-center justify-between",
-          title: isConfirmed
-            ? "¿Seguro que quieres anular esta reserva confirmada?"
-            : "¿Seguro que quieres anular esta reserva pendiente?",
-          slotText: `${formatDateSpanish(reservation.date)} — Turno ${getShiftLabel(reservation.shift)}`,
-          warningClass: isConfirmed
+          title: "¿Seguro que quieres anular esta reserva?",
+          slotText: `${formatDateSpanish(cleanDate)} — Turno ${getShiftLabel(reservation.shift)}`,
+          warningClass: showConfirmedPenaltyWarning
             ? "p-3.5 rounded-xl bg-red-50 text-red-950 border-2 border-red-400 font-bold leading-relaxed"
             : "p-3.5 rounded-xl bg-amber-50 text-amber-950 border border-amber-300 font-semibold leading-relaxed",
-          message: isConfirmed
-            ? "¿Seguro que quieres anular esta reserva? Perderá la reserva de 50 euros."
-            : "¿Seguro que quieres anular esta reserva pendiente?",
+          message: showConfirmedPenaltyWarning
+            ? "¿Seguro que quieres anular esta reserva? Al faltar menos de 7 días perderá la parte correspondiente al alquiler/reserva."
+            : "¿Seguro que quieres anular esta reserva?",
           cancelText: "No, mantener reserva",
           confirmText: "Sí, anular reserva"
         });
@@ -1680,16 +1964,18 @@ Administración Escalonia 15`
           return;
         }
 
+        const marginDays = getPriorityMarginDays();
         const mine = state.reservations.filter(
           r => r && !r.createdByAdmin && (r.ownerEmail || "").toLowerCase() === authUser.email.toLowerCase()
         );
-        const pending = mine.filter(r => r.status === "pendiente");
+        const pending = mine.filter(r => r.status === "pendiente" || r.status === "en_espera_margen");
         const confirmed = mine.filter(r => r.status === "reservado");
         const cancelledByOwner = mine.filter(r => r.status === "cancelada" && r.cancelledByOwner === true);
 
         pendingEl.innerHTML = pending.length
           ? pending.map(r => {
-              const deadlineInfo = getPaymentDeadlineInfo(r);
+              const deadlineInfo = r.status === "pendiente" ? getPaymentDeadlineInfo(r) : null;
+              const isWaitingMargin = r.status === "en_espera_margen";
               return `
               <div class="p-3 rounded-xl bg-white border border-yellow-200 space-y-2 text-xs">
                 <div class="flex items-center justify-between gap-2">
@@ -1698,6 +1984,11 @@ Administración Escalonia 15`
                     Anular
                   </button>
                 </div>
+                ${isWaitingMargin ? `
+                  <p class="text-[11px] font-bold leading-snug text-sky-950 bg-sky-50 border border-sky-300 rounded-lg px-2.5 py-1.5">
+                    Pago confirmado. Tu reserva no se confirmará definitivamente hasta entrar dentro del margen de <strong>${marginDays} días</strong> para la fecha del evento.
+                  </p>
+                ` : ""}
                 ${deadlineInfo ? `
                   <p class="text-[11px] font-bold leading-snug ${
                     deadlineInfo.expired
@@ -1745,7 +2036,152 @@ Administración Escalonia 15`
         });
       }
 
+      function getAllNeighborsList() {
+        const map = new Map();
+
+        Object.entries(state.authorizedEmails || {}).forEach(([key, entry]) => {
+          if (entry && entry.email) {
+            const email = String(entry.email).trim().toLowerCase();
+            map.set(email, {
+              key,
+              email,
+              uid: "",
+              portal: "",
+              floor: "",
+              letter: "",
+              manualYearAdjustments: {}
+            });
+          }
+        });
+
+        Object.entries(state.users || {}).forEach(([uid, prof]) => {
+          if (!prof || prof.role === "admin" || !prof.email) return;
+          const email = String(prof.email).trim().toLowerCase();
+          const prev = map.get(email) || {
+            key: normalizeEmailKey(email),
+            email,
+            uid: "",
+            portal: "",
+            floor: "",
+            letter: "",
+            manualYearAdjustments: {}
+          };
+          map.set(email, {
+            ...prev,
+            uid,
+            portal: prof.portal || prev.portal,
+            floor: prof.floor || prev.floor,
+            letter: prof.letter || prev.letter,
+            manualYearAdjustments: prof.manualYearAdjustments || prev.manualYearAdjustments
+          });
+        });
+
+        state.reservations.forEach(r => {
+          if (!r || r.createdByAdmin || !r.ownerEmail) return;
+          const email = String(r.ownerEmail).trim().toLowerCase();
+          if (!map.has(email)) {
+            map.set(email, {
+              key: normalizeEmailKey(email),
+              email,
+              uid: r.ownerUid || "",
+              portal: "",
+              floor: "",
+              letter: "",
+              manualYearAdjustments: {}
+            });
+          }
+        });
+
+        return Array.from(map.values()).sort((a, b) => a.email.localeCompare(b.email));
+      }
+
+      function renderAdminNeighborsList() {
+        const container = document.getElementById("adminNeighborsList");
+        if (!container) return;
+
+        const neighbors = getAllNeighborsList();
+        const currentYear = new Date().getFullYear();
+
+        if (!neighbors.length) {
+          container.innerHTML = `<p class="text-xs text-slate-500">No hay vecinos registrados todavía.</p>`;
+          return;
+        }
+
+        container.innerHTML = neighbors.map(n => {
+          const recorded = getUserRecordedReservationCount(n.email, currentYear);
+          const adjustment = getUserManualAdjustment(n.email, currentYear);
+          const total = recorded + adjustment;
+          const housing = getUserHousingLabel(n);
+
+          return `
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div class="space-y-0.5">
+                <p class="font-bold text-slate-900 text-sm">${n.email}</p>
+                <p class="text-slate-600 font-semibold">${housing}</p>
+                <p class="text-emerald-900 font-bold">
+                  Reservas en ${currentYear}: <strong>${total}</strong>
+                  <span class="text-[11px] font-normal text-slate-500">(${recorded} en app + ${adjustment} ajuste manual)</span>
+                </p>
+              </div>
+              <button data-edit-neighbor="${encodeURIComponent(n.email)}" type="button" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer self-start sm:self-center">
+                Modificar vecino
+              </button>
+            </div>
+          `;
+        }).join("");
+
+        container.querySelectorAll("[data-edit-neighbor]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const email = decodeURIComponent(btn.dataset.editNeighbor);
+            openEditNeighborModal(email);
+          });
+        });
+      }
+
+      function updateNeighborModalHelperText() {
+        if (!editingNeighborContext) return;
+        const year = new Date().getFullYear();
+        const recorded = getUserRecordedReservationCount(editingNeighborContext.email, year);
+        const total = Math.max(0, Number(document.getElementById("editNeighborTotalCountInput").value) || 0);
+        const adj = Math.max(0, total - recorded);
+        document.getElementById("editNeighborAutoInfo").textContent =
+          `Reservas registradas en la app (${year}): ${recorded} · Ajuste manual aplicado: ${adj} · Total contado: ${total}`;
+      }
+
+      function openEditNeighborModal(email) {
+        const neighbors = getAllNeighborsList();
+        const found = neighbors.find(n => n.email.toLowerCase() === email.toLowerCase());
+        if (!found) return;
+
+        const year = new Date().getFullYear();
+        editingNeighborContext = found;
+
+        document.getElementById("editNeighborEmailLabel").textContent = found.email;
+        document.getElementById("editNeighborPortal").value = found.portal || "1";
+        document.getElementById("editNeighborFloor").value = found.floor || "Bajo";
+        document.getElementById("editNeighborLetter").value = found.letter || "A";
+        document.getElementById("editNeighborTotalCountInput").value = String(getUserYearReservationCount(found.email, year));
+        updateNeighborModalHelperText();
+
+        const modal = document.getElementById("editNeighborModal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+
+      function closeEditNeighborModal() {
+        editingNeighborContext = null;
+        const modal = document.getElementById("editNeighborModal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+
       function renderAdminDashboard() {
+        const marginDays = getPriorityMarginDays();
+        const marginBadge = document.getElementById("adminPriorityMarginBadge");
+        if (marginBadge) {
+          marginBadge.textContent = `Margen activo: ${marginDays} días`;
+        }
+
         const authItems = Object.values(state.authorizedEmails || {}).filter(x => x && x.authorized);
         document.getElementById("authorizedCountLabel").textContent =
           `Correos autorizados: ${authItems.length}`;
@@ -1758,6 +2194,7 @@ Administración Escalonia 15`
         document.getElementById("cfgAdminEmail").value = state.adminConfig.adminEmail || ADMIN_EMAIL;
         document.getElementById("cfgAdminIban").value = state.adminConfig.iban || "";
         document.getElementById("cfgPaymentConcept").value = state.adminConfig.concept || "";
+        document.getElementById("cfgPriorityMarginDays").value = String(marginDays);
         document.getElementById("cfgMailTemplate").value = state.adminConfig.mailTemplate || "";
         document.getElementById("adminsListSummary").innerHTML =
           `Administradores: <strong>${(state.admins || []).map(a => a.email || a).join(", ")}</strong>`;
@@ -1766,9 +2203,17 @@ Administración Escalonia 15`
           document.getElementById("commDateInput").value = formatDateISO(new Date());
         }
         updateCommSelectionPreview();
+        renderAdminNeighborsList();
 
         const listEl = document.getElementById("adminReservationsList");
-        const activeList = state.reservations.filter(r => r && r.status !== "cancelada" && r.status !== "no_autorizada");
+        const activeList = sortRequestsByPriority(
+          state.reservations.filter(
+            r => r &&
+              r.status !== "cancelada" &&
+              r.status !== "no_autorizada" &&
+              r.status !== "no_adjudicada"
+          )
+        );
         if (!activeList.length) {
           listEl.innerHTML = `<p class="text-xs text-slate-500">No hay reservas pendientes ni confirmadas.</p>`;
           return;
@@ -1802,20 +2247,38 @@ Administración Escalonia 15`
 
           const year = cleanDate ? Number(cleanDate.split("-")[0]) : new Date().getFullYear();
           const yearCount = getUserYearReservationCount(r.ownerEmail, year);
+          const daysLeft = cleanDate ? getDaysUntilDate(cleanDate) : null;
+          const isOutsideMargin = daysLeft !== null && daysLeft > marginDays;
+          const contendersInSlot = state.reservations.filter(
+            other => other &&
+              !other.createdByAdmin &&
+              other.status !== "cancelada" &&
+              other.status !== "no_autorizada" &&
+              other.status !== "no_adjudicada" &&
+              normalizeDateISO(other.date) === cleanDate &&
+              normalizeShift(other.shift) === cleanShift
+          );
+          const needsManualDecision =
+            (r.status === "en_espera_margen" && daysLeft !== null && daysLeft <= marginDays && contendersInSlot.length > 1) ||
+            Boolean(r.requiresManualMarginDecision);
+
           const isSpecialFixedDate = Boolean(
             r.isFixedDateException ||
             (r.eventType && r.eventType.toLowerCase().includes("fecha fija"))
           );
           const deadlineInfo = r.status === "pendiente" ? getPaymentDeadlineInfo(r) : null;
           const isPendingPaymentActive = Boolean(deadlineInfo);
+          const canConfirmPayment = r.status === "pendiente" || r.status === "en_espera_margen";
 
           return `
             <div class="p-4 rounded-xl border flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs ${
-              isPendingPaymentActive
-                ? "bg-orange-50/60 border-amber-400"
-                : isSpecialFixedDate
-                  ? "bg-amber-50/40 border-amber-400"
-                  : "bg-slate-50 border-slate-200"
+              needsManualDecision
+                ? "bg-rose-50/60 border-rose-400"
+                : isPendingPaymentActive
+                  ? "bg-orange-50/60 border-amber-400"
+                  : isSpecialFixedDate
+                    ? "bg-amber-50/40 border-amber-400"
+                    : "bg-slate-50 border-slate-200"
             }">
               <div class="space-y-1.5">
                 <p class="font-bold text-slate-700">${cleanDate ? formatDateSpanish(cleanDate) : (r.date || "Fecha sin formato")} — ${cleanShift ? getShiftLabel(cleanShift) : (r.shift || "Sin turno")}</p>
@@ -1825,10 +2288,24 @@ Administración Escalonia 15`
                 <p class="text-xs sm:text-sm font-bold text-emerald-950 bg-white border border-slate-200 rounded-lg px-2.5 py-1 inline-block">
                   ${r.ownerEmail || "Sin correo (registro huérfano)"}
                 </p>
+                ${isOutsideMargin ? `
+                  <div>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-100 text-sky-950 border border-sky-300 text-xs font-extrabold">
+                      Fuera del margen de ${marginDays} días (${daysLeft} días restantes)
+                    </span>
+                  </div>
+                ` : ""}
+                ${needsManualDecision ? `
+                  <div>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-200 text-rose-950 border border-rose-400 text-xs font-extrabold">
+                      Adjudicación manual requerida: hay ${contendersInSlot.length} solicitud(es) dentro del margen de ${marginDays} días (prioridad: menor nº reservas, luego antigüedad)
+                    </span>
+                  </div>
+                ` : ""}
                 ${isSpecialFixedDate ? `
                   <div>
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-200 text-amber-950 border border-amber-400 text-xs font-extrabold">
-                      ★ Acto especial con fecha fija (Bautizo / Comunión / Evento señalado · &gt;30 días)
+                      ★ Acto especial con fecha fija (Bautizo / Comunión / Evento señalado)
                     </span>
                   </div>
                 ` : ""}
@@ -1856,7 +2333,7 @@ Administración Escalonia 15`
                 }">
                   Visto bueno (Correo pago 48h)
                 </button>
-                ${r.status === "pendiente" ? `
+                ${canConfirmPayment ? `
                   <button data-confirm-pay="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold">
                     Confirmar reserva
                   </button>
@@ -1937,14 +2414,34 @@ Administración Escalonia 15`
           });
         });
 
+        // Al confirmar pago: si está dentro del margen de X días (o es adjudicación manual), pasa a "reservado";
+        // si está fuera del margen (>X días), pasa a "en_espera_margen" hasta entrar en el margen.
         listEl.querySelectorAll("[data-confirm-pay]").forEach(btn => {
           btn.addEventListener("click", async () => {
             const id = btn.dataset.confirmPay;
-            const patch = { status: "reservado" };
+            const item = state.reservations.find(x => x.id === id);
+            if (!item) return;
+
+            const marginDays = getPriorityMarginDays();
+            const daysLeft = getDaysUntilDate(item.date);
+            const isWithinMargin = daysLeft === null || daysLeft <= marginDays;
+            const nextStatus = isWithinMargin ? "reservado" : "en_espera_margen";
+
+            const patch = {
+              status: nextStatus,
+              paymentConfirmed: true,
+              requiresManualMarginDecision: false,
+              ...(nextStatus === "reservado" ? { confirmedAt: new Date().toISOString() } : {})
+            };
+
             upsertReservationInLocalState(id, patch);
             try {
               await db.ref(`escalonia15/reservations/${id}`).update(patch);
-              showToast("Reserva confirmada y actualizada en tiempo real.");
+              showToast(
+                nextStatus === "reservado"
+                  ? "Pago confirmado: reserva confirmada y visible en el calendario."
+                  : `Pago confirmado: queda en espera hasta entrar dentro del margen de ${marginDays} días.`
+              );
             } catch (err) {
               showToast("Error al confirmar reserva: " + err.message, true);
             }
@@ -2013,6 +2510,7 @@ Administración Escalonia 15`
         lastEnteredPassword = "";
         pendingScreenAfterLogin = null;
         pendingConfirmAction = null;
+        editingNeighborContext = null;
         selectedSlot = null;
         activeScreen = "landing";
 
@@ -2026,6 +2524,8 @@ Administración Escalonia 15`
         document.getElementById("adminLoginModal").classList.remove("flex");
         document.getElementById("cancelConfirmModal").classList.add("hidden");
         document.getElementById("cancelConfirmModal").classList.remove("flex");
+        document.getElementById("editNeighborModal").classList.add("hidden");
+        document.getElementById("editNeighborModal").classList.remove("flex");
 
         applyScreenVisibility();
         refreshAllViewsNow();
@@ -2102,7 +2602,7 @@ Administración Escalonia 15`
             } else if (isMine) {
               showToast(`Reserva anulada: ${label}.`, true);
             }
-          } else if (nextItem.status === "no_autorizada") {
+          } else if (nextItem.status === "no_autorizada" || nextItem.status === "no_adjudicada") {
             if (isMine || isCurrentUserAdmin) {
               showToast(`Reserva marcada como no autorizada: ${label}.`, true);
             }
@@ -2137,6 +2637,7 @@ Administración Escalonia 15`
         if (!wasInitialDone) {
           refreshAllViewsNow();
         }
+        evaluateMarginTransitions();
       }
 
       const reservationsDbRef = db.ref("escalonia15/reservations");
@@ -2150,6 +2651,7 @@ Administración Escalonia 15`
         const nextItem = { ...(prevItem || {}), ...val, id: snap.key };
         upsertReservationInLocalState(snap.key, val);
         notifyReservationChangeInRealtime(prevItem, nextItem, false);
+        evaluateMarginTransitions();
       });
       reservationsDbRef.on("child_added", snap => {
         if (!snap.key) return;
@@ -2160,6 +2662,7 @@ Administración Escalonia 15`
         if (!prevItem) {
           notifyReservationChangeInRealtime(null, nextItem, false);
         }
+        evaluateMarginTransitions();
       });
       reservationsDbRef.on("child_removed", snap => {
         if (!snap.key) return;
@@ -2175,12 +2678,75 @@ Administración Escalonia 15`
             state.admins = snap.val().admins;
           }
           refreshAllViewsNow();
+          evaluateMarginTransitions();
         }
       });
 
       db.ref("escalonia15/authorizedEmails").on("value", snap => {
         state.authorizedEmails = snap.val() || {};
         refreshAllViewsNow();
+      });
+
+      db.ref("escalonia15/users").on("value", snap => {
+        state.users = snap.val() || {};
+        if (authUser && !isCurrentUserAdmin && state.users[authUser.uid]) {
+          currentUserProfile = state.users[authUser.uid];
+        }
+        refreshAllViewsNow();
+      });
+
+      document.getElementById("closeEditNeighborModal").addEventListener("click", closeEditNeighborModal);
+      document.getElementById("cancelEditNeighborBtn").addEventListener("click", closeEditNeighborModal);
+      document.getElementById("editNeighborDecBtn").addEventListener("click", () => {
+        const input = document.getElementById("editNeighborTotalCountInput");
+        const nextVal = Math.max(0, (Number(input.value) || 0) - 1);
+        input.value = String(nextVal);
+        updateNeighborModalHelperText();
+      });
+      document.getElementById("editNeighborIncBtn").addEventListener("click", () => {
+        const input = document.getElementById("editNeighborTotalCountInput");
+        const nextVal = Math.max(0, (Number(input.value) || 0) + 1);
+        input.value = String(nextVal);
+        updateNeighborModalHelperText();
+      });
+      document.getElementById("editNeighborTotalCountInput").addEventListener("input", updateNeighborModalHelperText);
+
+      document.getElementById("saveEditNeighborBtn").addEventListener("click", async () => {
+        if (!editingNeighborContext || !authUser) return;
+        const portal = document.getElementById("editNeighborPortal").value;
+        const floor = document.getElementById("editNeighborFloor").value;
+        const letter = document.getElementById("editNeighborLetter").value;
+        const year = new Date().getFullYear();
+        const recorded = getUserRecordedReservationCount(editingNeighborContext.email, year);
+        const targetTotal = Math.max(0, Number(document.getElementById("editNeighborTotalCountInput").value) || 0);
+        const adjustment = Math.max(0, targetTotal - recorded);
+
+        const targetUid = editingNeighborContext.uid || normalizeEmailKey(editingNeighborContext.email);
+        const existingUserObj = state.users[targetUid] || {};
+        const prevAdjustments = existingUserObj.manualYearAdjustments || {};
+        const nextAdjustments = { ...prevAdjustments, [String(year)]: adjustment };
+
+        const updatedUserRecord = {
+          ...existingUserObj,
+          email: editingNeighborContext.email,
+          portal,
+          floor,
+          letter,
+          role: "owner",
+          manualYearAdjustments: nextAdjustments,
+          updatedAt: new Date().toISOString()
+        };
+
+        state.users[targetUid] = updatedUserRecord;
+        closeEditNeighborModal();
+        refreshAllViewsNow();
+
+        try {
+          await db.ref(`escalonia15/users/${targetUid}`).set(updatedUserRecord);
+          showToast("Datos y contador de reservas del vecino actualizados.");
+        } catch (err) {
+          showToast("Error al guardar cambios del vecino: " + err.message, true);
+        }
       });
 
       document.getElementById("closeCancelConfirmModal").addEventListener("click", closeCancelConfirmModal);
@@ -2192,12 +2758,8 @@ Administración Escalonia 15`
 
         if (action.type === "owner-cancel") {
           const found = action.reservation;
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
           const cleanDate = normalizeDateISO(found.date) || found.date;
-          const [y, m, d] = cleanDate.split("-").map(Number);
-          const resDate = new Date(y, m - 1, d);
-          const daysBefore = Math.round((resDate - today) / (1000 * 60 * 60 * 24));
+          const daysBefore = getDaysUntilDate(cleanDate);
 
           const patch = {
             status: "cancelada",
@@ -2208,11 +2770,9 @@ Administración Escalonia 15`
           try {
             await db.ref(`escalonia15/reservations/${found.id}`).update(patch);
             showToast(
-              found.status === "reservado"
-                ? "Reserva confirmada anulada. Se pierde la reserva de 50 euros."
-                : (daysBefore < 7
-                  ? "Anulada fuera del plazo de 7 días: se devuelve la fianza pero no la parte del alquiler."
-                  : "Anulada dentro del plazo de 7 días.")
+              found.status === "reservado" && daysBefore !== null && daysBefore < 7
+                ? "Reserva confirmada anulada con menos de 7 días de antelación."
+                : "Reserva anulada."
             );
           } catch (err) {
             showToast("Error al anular la reserva: " + err.message, true);
@@ -2300,6 +2860,9 @@ Administración Escalonia 15`
         const listener = async profSnap => {
           if (!auth.currentUser || auth.currentUser.uid !== user.uid || isSigningOut) return;
           currentUserProfile = profSnap.val();
+          if (currentUserProfile) {
+            state.users[user.uid] = currentUserProfile;
+          }
           if (isCurrentUserAdmin && !currentUserProfile) {
             currentUserProfile = {
               email: user.email,
@@ -2465,6 +3028,9 @@ Administración Escalonia 15`
         const eventType = document.getElementById("eventTypeInput").value;
         const isFixedDateException = isFixedDateSpecialEvent(eventType);
         const housing = getUserHousingLabel(currentUserProfile);
+        const marginDays = getPriorityMarginDays();
+        const daysLeft = getDaysUntilDate(cleanDate);
+        const isOutsideMargin = daysLeft !== null && daysLeft > marginDays && !isFixedDateException;
         const tempId = "tmp_" + Date.now();
 
         const payload = {
@@ -2480,6 +3046,7 @@ Administración Escalonia 15`
           createdAt: new Date().toISOString(),
           depositReturned: false,
           cancelledByOwner: false,
+          paymentConfirmed: false,
           paymentWindowStartedAt: null
         };
 
@@ -2492,9 +3059,11 @@ Administración Escalonia 15`
           upsertReservationInLocalState(realId, payload);
           await newRef.set(payload);
           showToast(
-            isFixedDateException
-              ? "Solicitud enviada como acto especial con fecha fija. Queda pendiente de revisión."
-              : "Solicitud de reserva enviada. Queda pendiente de revisión por la administración."
+            isOutsideMargin
+              ? `Solicitud enviada (fuera del margen de ${marginDays} días). No se confirmará definitivamente hasta entrar dentro del margen de ${marginDays} días.`
+              : (isFixedDateException
+                ? "Solicitud enviada como acto especial con fecha fija. Queda pendiente de revisión."
+                : "Solicitud de reserva enviada. Queda pendiente de revisión por la administración.")
           );
         } catch (err) {
           state.reservations = state.reservations.filter(r => r.id !== tempId);
@@ -2604,7 +3173,9 @@ Administración Escalonia 15`
         try {
           await authUser.updatePassword(pass1);
           lastEnteredPassword = pass1;
+          const prevObj = state.users[authUser.uid] || {};
           const updatedProfile = {
+            ...prevObj,
             email: authUser.email,
             portal,
             floor,
@@ -2616,6 +3187,7 @@ Administración Escalonia 15`
           };
           await db.ref(`escalonia15/users/${authUser.uid}`).set(updatedProfile);
           currentUserProfile = updatedProfile;
+          state.users[authUser.uid] = updatedProfile;
 
           const modal = document.getElementById("forcePasswordModal");
           modal.classList.add("hidden");
@@ -2801,21 +3373,28 @@ Administración Escalonia 15`
           showToast("Sesión de administrador no iniciada.", true);
           return;
         }
+        const parsedMargin = Number(document.getElementById("cfgPriorityMarginDays").value);
+        const priorityMarginDays = Number.isFinite(parsedMargin) && parsedMargin >= 0
+          ? Math.floor(parsedMargin)
+          : DEFAULT_PRIORITY_MARGIN_DAYS;
+
         const updatedConfig = {
           ...state.adminConfig,
           adminEmail: document.getElementById("cfgAdminEmail").value.trim() || ADMIN_EMAIL,
           iban: document.getElementById("cfgAdminIban").value.trim(),
           concept: document.getElementById("cfgPaymentConcept").value.trim(),
+          priorityMarginDays,
           mailTemplate: document.getElementById("cfgMailTemplate").value,
           admins: state.admins
         };
 
         state.adminConfig = updatedConfig;
         refreshAllViewsNow();
+        evaluateMarginTransitions();
 
         try {
           await db.ref("escalonia15/adminConfig").set(updatedConfig);
-          showToast("Plantilla e IBAN guardados.");
+          showToast(`Plantilla, IBAN y margen (${priorityMarginDays} días) guardados.`);
         } catch (err) {
           showToast("Error al guardar configuración: " + err.message, true);
         }
@@ -2851,7 +3430,7 @@ Administración Escalonia 15`
         }
       });
 
-      populatePortalSelect();
+      populatePortalSelects();
       applyScreenVisibility();
       refreshAllViewsNow();
     })();
