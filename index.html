@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reserva Sala Común Escalonia 15 — v1.9</title>
+  <title>Reserva Sala Común Escalonia 15 — v1.9.1</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -130,12 +130,36 @@
     <div id="toastInner" class="pointer-events-auto rounded-xl px-4 py-3 text-xs sm:text-sm font-medium shadow-xl border bg-slate-900 text-white border-slate-700"></div>
   </div>
 
+  <!-- MODAL DE CONFIRMACIÓN DE ANULACIÓN (PROPIETARIO) -->
+  <div id="cancelConfirmModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-[1px] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div id="cancelConfirmHeader" class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+        <h3 id="cancelConfirmTitle" class="text-sm sm:text-base font-bold">Confirmar anulación de reserva</h3>
+        <button id="closeCancelConfirmModal" type="button" class="text-slate-300 hover:text-white text-lg font-bold leading-none px-1 cursor-pointer">
+          &times;
+        </button>
+      </div>
+      <div class="p-5 space-y-4 text-xs sm:text-sm">
+        <p id="cancelConfirmSlot" class="font-bold text-slate-900"></p>
+        <div id="cancelConfirmWarning" class="p-3.5 rounded-xl font-bold leading-relaxed"></div>
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button id="cancelConfirmNoBtn" type="button" class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold cursor-pointer">
+            No, mantener reserva
+          </button>
+          <button id="cancelConfirmYesBtn" type="button" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm cursor-pointer">
+            Sí, anular reserva
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- PANTALLA 0: ENTRADA PRINCIPAL -->
   <section id="landingScreen" class="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-brand-dark via-brand-primary to-emerald-900 text-white">
     <div class="max-w-xl w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-7 sm:p-10 text-center shadow-2xl space-y-7">
       <div class="space-y-1">
         <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-emerald-200 px-3 py-1 rounded-full bg-white/10">
-          Versión 1.9 · Tiempo Real
+          Versión 1.9.1 · Tiempo Real
         </span>
         <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight pt-2">
           Bienvenido a reserva sala común Escalonia 15
@@ -339,13 +363,6 @@
               </div>
 
               <label class="flex items-start gap-2 pt-1 cursor-pointer select-none">
-                <input id="fixedDateExceptionCheck" type="checkbox" class="mt-0.5 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600" />
-                <span class="text-[11px] text-slate-600 leading-snug">
-                  Acto con <strong>fecha fija</strong> (bautizo, comunión o evento especial, punto 12.1): permite reservar con más de 30 días de antelación.
-                </span>
-              </label>
-
-              <label class="flex items-start gap-2 cursor-pointer select-none">
                 <input id="acceptNormsCheck" type="checkbox" class="mt-0.5 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600" />
                 <span class="text-[11px] text-slate-700 leading-snug">
                   Acepto las <strong>Normas de la sala</strong>.
@@ -642,7 +659,7 @@
       <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <span class="inline-block px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-400/40 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
-            Administrador · v1.9
+            Administrador · v1.9.1
           </span>
           <h2 id="adminHeaderTitle" class="text-base sm:text-lg font-bold leading-tight">
             Administrador — Sala Común Escalonia 15
@@ -715,7 +732,7 @@
           <div>
             <h3 class="text-base sm:text-lg font-bold text-slate-900">Programar acto comunitario</h3>
             <p class="text-xs text-slate-500">
-              Reserva directa de administración: queda en estado Reservado sin pago ni fianza, con contador sin límite.
+              Selecciona fecha y turno desde los campos o pinchando directamente en el calendario de abajo (sincronizado con todas las reservas).
             </p>
           </div>
           <span id="adminCommCounterBadge" class="px-3 py-1 rounded-full bg-slate-100 text-slate-900 text-xs font-bold">
@@ -740,6 +757,8 @@
             <input id="commTitleInput" type="text" placeholder="Junta / Evento comunitario" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white" />
           </div>
         </div>
+
+        <div id="commSelectedSlotPreview" class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700"></div>
 
         <div class="flex justify-end">
           <button id="createCommEventBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold">
@@ -840,12 +859,12 @@
         </div>
       </div>
 
-      <!-- CALENDARIO VISIBLE EN LA VISTA DE ADMINISTRADOR -->
-      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+      <!-- CALENDARIO VISIBLE EN RESERVAS/FIANZAS Y PROGRAMAR ACTO COMUNITARIO -->
+      <div id="adminCalendarSection" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
           <div>
             <h3 class="text-base sm:text-lg font-bold text-slate-900">Calendario de reservas</h3>
-            <p class="text-xs text-slate-500">Vista en tiempo real del estado de cada turno de mañana y tarde.</p>
+            <p id="adminCalendarHint" class="text-xs text-slate-500">Vista en tiempo real del estado de cada turno de mañana y tarde.</p>
           </div>
           <div class="flex items-center gap-2">
             <button id="adminPrevMonthBtn" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold">
@@ -902,8 +921,10 @@
       const secondaryDb = secondaryApp.database();
 
       let activeScreen = "landing";
+      let activeAdminTab = "reservas-fianzas";
       let selectedSlot = null;
       let activePaymentModalReservationId = null;
+      let pendingCancelReservation = null;
       let authUser = null;
       let isCurrentUserAdmin = false;
       let currentUserProfile = null;
@@ -1094,8 +1115,7 @@ Administración Escalonia 15`
         return Boolean(profile && profile.portal && profile.floor && profile.letter);
       }
 
-      function isFixedDateSpecialEvent(eventType, checked) {
-        if (checked) return true;
+      function isFixedDateSpecialEvent(eventType) {
         return Boolean(eventType && eventType.toLowerCase().includes("fecha fija"));
       }
 
@@ -1141,7 +1161,7 @@ Administración Escalonia 15`
         const hoursLeft = Math.ceil(remainingMs / (1000 * 60 * 60));
         return {
           expired: false,
-          text: `Tiempo restante para pagar y confirmar: ${hoursLeft}h (de 48h)`
+          text: `Correo 48h enviado · Quedan ${hoursLeft}h para pagar y confirmar`
         };
       }
 
@@ -1209,9 +1229,8 @@ Administración Escalonia 15`
         const msgBox = document.getElementById("ruleValidationMsg");
         const btn = document.getElementById("btnSubmitBooking");
         const accepted = document.getElementById("acceptNormsCheck").checked;
-        const fixedChecked = document.getElementById("fixedDateExceptionCheck").checked;
         const eventType = document.getElementById("eventTypeInput").value;
-        const isFixedEvent = isFixedDateSpecialEvent(eventType, fixedChecked);
+        const isFixedEvent = isFixedDateSpecialEvent(eventType);
 
         if (!authUser) {
           if (selectedSlot) {
@@ -1261,7 +1280,7 @@ Administración Escalonia 15`
         }
 
         if (diffDays > 30 && !isFixedEvent) {
-          msgBox.textContent = `Este tipo de acto no se puede reservar con más de 30 días de antelación (${diffDays} días). Solo está permitido si seleccionas un acto con fecha fija especial.`;
+          msgBox.textContent = `Este tipo de acto no se puede reservar con más de 30 días de antelación (${diffDays} días). Solo está permitido si eliges "Acto con fecha fija (Bautizo / Comunión / Evento señalado)".`;
           msgBox.className = "p-3 rounded-xl text-xs font-bold bg-red-50 text-red-900 border-2 border-red-400";
           btn.disabled = true;
           return false;
@@ -1313,6 +1332,31 @@ Administración Escalonia 15`
         return `<span class="slot-label">${prefix}: Libre</span>`;
       }
 
+      function syncCommInputsFromDateAndShift(dateISO, shift) {
+        const dateInput = document.getElementById("commDateInput");
+        const shiftInput = document.getElementById("commShiftInput");
+        if (dateISO) dateInput.value = dateISO;
+        if (shift) shiftInput.value = shift;
+        updateCommSelectionPreview();
+      }
+
+      function updateCommSelectionPreview() {
+        const preview = document.getElementById("commSelectedSlotPreview");
+        if (!preview) return;
+        const dateVal = document.getElementById("commDateInput").value;
+        const shiftVal = document.getElementById("commShiftInput").value;
+        if (!dateVal) {
+          preview.textContent = "Selecciona una fecha y turno arriba o pulsa sobre el calendario.";
+          return;
+        }
+        const existing = getActiveSlotReservation(dateVal, shiftVal);
+        const conflictNote = existing
+          ? ` · Aviso: ya hay un registro (${existing.housing || existing.eventType || existing.status}) en ese hueco; al registrar el acto comunitario tendrá prioridad.`
+          : " · Hueco sin reservas activas.";
+        preview.innerHTML =
+          `Seleccionado: <strong class="text-slate-950">${formatDateSpanish(dateVal)}</strong> · Turno <strong class="text-emerald-800">${getShiftLabel(shiftVal)}</strong> (${getShiftScheduleText(dateVal, shiftVal)})${conflictNote}`;
+      }
+
       function buildMonthGridInto(grid, isAdminView) {
         const { year, month } = state.currentYearMonth;
         const monthDate = new Date(year, month, 1);
@@ -1321,6 +1365,9 @@ Administración Escalonia 15`
         const firstDayJS = monthDate.getDay();
         const offset = firstDayJS === 0 ? 6 : firstDayJS - 1;
         const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        const commDateVal = document.getElementById("commDateInput").value;
+        const commShiftVal = document.getElementById("commShiftInput").value;
 
         for (let i = 0; i < offset; i++) {
           const empty = document.createElement("div");
@@ -1337,20 +1384,46 @@ Administración Escalonia 15`
 
           if (!isAdminView && selectedSlot && selectedSlot.date === iso) {
             tile.classList.add("ring-2", "ring-emerald-700");
+          } else if (isAdminView && activeAdminTab === "acto-comunitario" && commDateVal === iso) {
+            tile.classList.add("ring-2", "ring-slate-900");
           }
 
           const topLeft = document.createElement("div");
           topLeft.className = `diag-top-left ${getShiftClass(iso, "manana", isAdminView)}`;
+          if (isAdminView && activeAdminTab === "acto-comunitario" && commDateVal === iso && commShiftVal === "manana") {
+            topLeft.classList.add("ring-2", "ring-inset", "ring-slate-950");
+          }
           topLeft.innerHTML = getShiftHTML(iso, "manana", isAdminView);
           if (!isAdminView) {
             topLeft.addEventListener("click", () => handleSelectSlot(iso, "manana"));
+          } else {
+            topLeft.addEventListener("click", () => {
+              syncCommInputsFromDateAndShift(iso, "manana");
+              if (activeAdminTab !== "acto-comunitario") {
+                switchAdminTab("acto-comunitario");
+              } else {
+                renderAdminCalendar();
+              }
+            });
           }
 
           const bottomRight = document.createElement("div");
           bottomRight.className = `diag-bottom-right ${getShiftClass(iso, "tarde", isAdminView)}`;
+          if (isAdminView && activeAdminTab === "acto-comunitario" && commDateVal === iso && commShiftVal === "tarde") {
+            bottomRight.classList.add("ring-2", "ring-inset", "ring-slate-950");
+          }
           bottomRight.innerHTML = getShiftHTML(iso, "tarde", isAdminView);
           if (!isAdminView) {
             bottomRight.addEventListener("click", () => handleSelectSlot(iso, "tarde"));
+          } else {
+            bottomRight.addEventListener("click", () => {
+              syncCommInputsFromDateAndShift(iso, "tarde");
+              if (activeAdminTab !== "acto-comunitario") {
+                switchAdminTab("acto-comunitario");
+              } else {
+                renderAdminCalendar();
+              }
+            });
           }
 
           const divider = document.createElement("div");
@@ -1383,6 +1456,20 @@ Administración Escalonia 15`
       }
 
       function renderAdminCalendar() {
+        const section = document.getElementById("adminCalendarSection");
+        const hint = document.getElementById("adminCalendarHint");
+        const showCalendar = activeAdminTab === "reservas-fianzas" || activeAdminTab === "acto-comunitario";
+
+        if (!showCalendar) {
+          section.classList.add("hidden");
+          return;
+        }
+        section.classList.remove("hidden");
+
+        hint.textContent = activeAdminTab === "acto-comunitario"
+          ? "Pulsa en Mañana o Tarde de cualquier día para rellenar automáticamente la fecha y el turno del acto comunitario."
+          : "Vista en tiempo real del estado de cada turno de mañana y tarde.";
+
         const { year, month } = state.currentYearMonth;
         const monthText = new Date(year, month, 1).toLocaleDateString("es-ES", {
           month: "long",
@@ -1391,6 +1478,7 @@ Administración Escalonia 15`
 
         document.getElementById("adminCurrentMonthLabel").textContent = monthText;
         buildMonthGridInto(document.getElementById("adminCalendarGrid"), true);
+        updateCommSelectionPreview();
       }
 
       function handleSelectSlot(dateISO, shift) {
@@ -1457,6 +1545,40 @@ Administración Escalonia 15`
         scheduleRefreshAllViews();
       }
 
+      function openCancelConfirmModal(reservation) {
+        pendingCancelReservation = reservation;
+        const isConfirmed = reservation.status === "reservado";
+        const modal = document.getElementById("cancelConfirmModal");
+        const header = document.getElementById("cancelConfirmHeader");
+        const title = document.getElementById("cancelConfirmTitle");
+        const slotEl = document.getElementById("cancelConfirmSlot");
+        const warnEl = document.getElementById("cancelConfirmWarning");
+
+        slotEl.textContent = `${formatDateSpanish(reservation.date)} — Turno ${getShiftLabel(reservation.shift)}`;
+
+        if (isConfirmed) {
+          header.className = "bg-red-700 text-white px-5 py-3.5 flex items-center justify-between";
+          title.textContent = "Confirmar anulación de reserva confirmada";
+          warnEl.className = "p-3.5 rounded-xl bg-red-50 text-red-950 border-2 border-red-400 font-bold leading-relaxed";
+          warnEl.textContent = "¿Está seguro de que quiere anular? Perderá la reserva de 50 euros.";
+        } else {
+          header.className = "bg-amber-600 text-white px-5 py-3.5 flex items-center justify-between";
+          title.textContent = "Confirmar anulación de reserva pendiente";
+          warnEl.className = "p-3.5 rounded-xl bg-amber-50 text-amber-950 border border-amber-300 font-semibold leading-relaxed";
+          warnEl.textContent = "¿Confirma que desea anular esta reserva pendiente?";
+        }
+
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+
+      function closeCancelConfirmModal() {
+        pendingCancelReservation = null;
+        const modal = document.getElementById("cancelConfirmModal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+
       function renderMyReservations() {
         const pendingEl = document.getElementById("pendingReservationsList");
         const confirmedEl = document.getElementById("confirmedReservationsList");
@@ -1481,7 +1603,7 @@ Administración Escalonia 15`
           ? pending.map(r => `
               <div class="p-3 rounded-xl bg-white border border-yellow-200 flex items-center justify-between gap-2 text-xs">
                 <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
-                <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold">
+                <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold cursor-pointer">
                   Anular
                 </button>
               </div>
@@ -1492,7 +1614,7 @@ Administración Escalonia 15`
           ? confirmed.map(r => `
               <div class="p-3 rounded-xl bg-white border border-red-200 flex items-center justify-between gap-2 text-xs">
                 <p class="font-bold text-slate-900">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
-                <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold">
+                <button data-cancel-res="${r.id}" type="button" class="px-2.5 py-1 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold cursor-pointer">
                   Anular
                 </button>
               </div>
@@ -1514,32 +1636,9 @@ Administración Escalonia 15`
         }
 
         document.querySelectorAll("[data-cancel-res]").forEach(btn => {
-          btn.addEventListener("click", async () => {
+          btn.addEventListener("click", () => {
             const found = state.reservations.find(item => item.id === btn.dataset.cancelRes);
-            if (!found) return;
-
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const [y, m, d] = found.date.split("-").map(Number);
-            const resDate = new Date(y, m - 1, d);
-            const daysBefore = Math.round((resDate - today) / (1000 * 60 * 60 * 24));
-
-            const patch = {
-              status: "cancelada",
-              cancelledByOwner: true
-            };
-            upsertReservationInLocalState(found.id, patch);
-
-            try {
-              await db.ref(`escalonia15/reservations/${found.id}`).update(patch);
-              showToast(
-                daysBefore < 7
-                  ? "Anulada fuera del plazo de 7 días: se devuelve la fianza pero no la parte del alquiler."
-                  : "Anulada dentro del plazo de 7 días."
-              );
-            } catch (err) {
-              showToast("Error al anular la reserva: " + err.message, true);
-            }
+            if (found) openCancelConfirmModal(found);
           });
         });
       }
@@ -1564,6 +1663,7 @@ Administración Escalonia 15`
         if (!document.getElementById("commDateInput").value) {
           document.getElementById("commDateInput").value = formatDateISO(new Date());
         }
+        updateCommSelectionPreview();
 
         const listEl = document.getElementById("adminReservationsList");
         const activeList = state.reservations.filter(r => r.status !== "cancelada" && r.status !== "no_autorizada");
@@ -1598,9 +1698,16 @@ Administración Escalonia 15`
             (r.eventType && r.eventType.toLowerCase().includes("fecha fija"))
           );
           const countdown = r.status === "pendiente" ? getPaymentCountdownInfo(r) : null;
+          const is48hActive = Boolean(countdown && !countdown.expired);
 
           return `
-            <div class="p-4 rounded-xl bg-slate-50 border ${isSpecialFixedDate ? "border-amber-400 bg-amber-50/40" : "border-slate-200"} flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
+            <div class="p-4 rounded-xl border flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs ${
+              is48hActive
+                ? "bg-amber-50/90 border-2 border-amber-500 shadow-md"
+                : isSpecialFixedDate
+                  ? "bg-amber-50/40 border-amber-400"
+                  : "bg-slate-50 border-slate-200"
+            }">
               <div class="space-y-1.5">
                 <p class="font-bold text-slate-700">${formatDateSpanish(r.date)} — ${getShiftLabel(r.shift)}</p>
                 <p class="text-base sm:text-lg font-extrabold text-slate-950 tracking-tight">
@@ -1618,10 +1725,10 @@ Administración Escalonia 15`
                 ` : ""}
                 ${countdown ? `
                   <div>
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-extrabold border ${
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-extrabold border-2 ${
                       countdown.expired
-                        ? "bg-red-100 text-red-900 border-red-300"
-                        : "bg-sky-100 text-sky-950 border-sky-300"
+                        ? "bg-red-200 text-red-950 border-red-500"
+                        : "bg-orange-500 text-white border-orange-700 animate-pulse shadow-sm"
                     }">
                       ⏱ ${countdown.text}
                     </span>
@@ -1633,8 +1740,12 @@ Administración Escalonia 15`
                 <p class="text-emerald-800 font-semibold">Veces reservado este año (${year}): <strong>${yearCount}</strong></p>
               </div>
               <div class="flex flex-wrap items-center gap-2">
-                <button data-visto-bueno="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold">
-                  Visto bueno (Correo pago 48h)
+                <button data-visto-bueno="${r.id}" type="button" class="px-3 py-1.5 rounded-lg font-bold ${
+                  countdown
+                    ? "bg-orange-600 hover:bg-orange-700 text-white ring-2 ring-orange-300"
+                    : "bg-amber-500 hover:bg-amber-600 text-slate-950"
+                }">
+                  ${countdown ? "48h activadas · Ver / reenviar correo" : "Visto bueno (Correo pago 48h)"}
                 </button>
                 ${r.status === "pendiente" ? `
                   <button data-confirm-pay="${r.id}" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold">
@@ -1737,6 +1848,7 @@ Administración Escalonia 15`
         currentUserProfile = null;
         lastEnteredPassword = "";
         pendingScreenAfterLogin = null;
+        pendingCancelReservation = null;
         selectedSlot = null;
         activeScreen = "landing";
 
@@ -1748,6 +1860,8 @@ Administración Escalonia 15`
         document.getElementById("authModal").classList.remove("flex");
         document.getElementById("adminLoginModal").classList.add("hidden");
         document.getElementById("adminLoginModal").classList.remove("flex");
+        document.getElementById("cancelConfirmModal").classList.add("hidden");
+        document.getElementById("cancelConfirmModal").classList.remove("flex");
 
         applyScreenVisibility();
         refreshAllViewsNow();
@@ -1758,6 +1872,22 @@ Administración Escalonia 15`
 
         isSigningOut = false;
         showToast("Sesión cerrada.");
+      }
+
+      function switchAdminTab(target) {
+        activeAdminTab = target;
+        document.querySelectorAll(".admin-tab").forEach(b => {
+          const isSelected = b.dataset.adminTab === target;
+          b.classList.toggle("bg-emerald-600", isSelected);
+          b.classList.toggle("text-white", isSelected);
+          b.classList.toggle("bg-white/10", !isSelected);
+          b.classList.toggle("text-slate-200", !isSelected);
+        });
+
+        document.querySelectorAll(".admin-panel").forEach(panel => {
+          panel.classList.toggle("hidden", panel.id !== `admin-tab-${target}`);
+        });
+        refreshAllViewsNow();
       }
 
       db.ref("escalonia15/adminConfig").on("value", snap => {
@@ -1791,6 +1921,39 @@ Administración Escalonia 15`
           renderAdminDashboard();
         }
       }, 60000);
+
+      document.getElementById("closeCancelConfirmModal").addEventListener("click", closeCancelConfirmModal);
+      document.getElementById("cancelConfirmNoBtn").addEventListener("click", closeCancelConfirmModal);
+      document.getElementById("cancelConfirmYesBtn").addEventListener("click", async () => {
+        if (!pendingCancelReservation) return;
+        const found = pendingCancelReservation;
+        closeCancelConfirmModal();
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const [y, m, d] = found.date.split("-").map(Number);
+        const resDate = new Date(y, m - 1, d);
+        const daysBefore = Math.round((resDate - today) / (1000 * 60 * 60 * 24));
+
+        const patch = {
+          status: "cancelada",
+          cancelledByOwner: true
+        };
+        upsertReservationInLocalState(found.id, patch);
+
+        try {
+          await db.ref(`escalonia15/reservations/${found.id}`).update(patch);
+          showToast(
+            found.status === "reservado"
+              ? "Reserva confirmada anulada. Se pierde la reserva de 50 €."
+              : (daysBefore < 7
+                ? "Anulada fuera del plazo de 7 días: se devuelve la fianza pero no la parte del alquiler."
+                : "Anulada dentro del plazo de 7 días.")
+          );
+        } catch (err) {
+          showToast("Error al anular la reserva: " + err.message, true);
+        }
+      });
 
       function openForcePasswordModal() {
         const modal = document.getElementById("forcePasswordModal");
@@ -1955,19 +2118,7 @@ Administración Escalonia 15`
       });
 
       document.querySelectorAll(".admin-tab").forEach(tabBtn => {
-        tabBtn.addEventListener("click", () => {
-          const target = tabBtn.dataset.adminTab;
-          document.querySelectorAll(".admin-tab").forEach(b => {
-            b.classList.remove("bg-emerald-600", "text-white");
-            b.classList.add("bg-white/10", "text-slate-200");
-          });
-          tabBtn.classList.add("bg-emerald-600", "text-white");
-          tabBtn.classList.remove("bg-white/10", "text-slate-200");
-
-          document.querySelectorAll(".admin-panel").forEach(panel => panel.classList.add("hidden"));
-          document.getElementById(`admin-tab-${target}`).classList.remove("hidden");
-          refreshAllViewsNow();
-        });
+        tabBtn.addEventListener("click", () => switchAdminTab(tabBtn.dataset.adminTab));
       });
 
       function shiftMonthBy(delta) {
@@ -1982,23 +2133,26 @@ Administración Escalonia 15`
       document.getElementById("adminPrevMonthBtn").addEventListener("click", () => shiftMonthBy(-1));
       document.getElementById("adminNextMonthBtn").addEventListener("click", () => shiftMonthBy(1));
 
-      document.getElementById("eventTypeInput").addEventListener("change", () => {
-        const val = document.getElementById("eventTypeInput").value;
-        if (val.toLowerCase().includes("fecha fija")) {
-          document.getElementById("fixedDateExceptionCheck").checked = true;
+      document.getElementById("eventTypeInput").addEventListener("change", validateSelection);
+      document.getElementById("acceptNormsCheck").addEventListener("change", validateSelection);
+
+      document.getElementById("commDateInput").addEventListener("change", () => {
+        const val = document.getElementById("commDateInput").value;
+        if (val) {
+          const [y, m] = val.split("-").map(Number);
+          state.currentYearMonth = { year: y, month: m - 1 };
         }
-        validateSelection();
+        renderAdminCalendar();
       });
 
-      ["acceptNormsCheck", "fixedDateExceptionCheck"].forEach(id => {
-        document.getElementById(id).addEventListener("change", validateSelection);
+      document.getElementById("commShiftInput").addEventListener("change", () => {
+        renderAdminCalendar();
       });
 
       document.getElementById("btnSubmitBooking").addEventListener("click", async () => {
         if (!validateSelection() || !selectedSlot || !authUser) return;
         const eventType = document.getElementById("eventTypeInput").value;
-        const fixedChecked = document.getElementById("fixedDateExceptionCheck").checked;
-        const isFixedDateException = isFixedDateSpecialEvent(eventType, fixedChecked);
+        const isFixedDateException = isFixedDateSpecialEvent(eventType);
         const housing = getUserHousingLabel(currentUserProfile);
         const tempId = "tmp_" + Date.now();
 
@@ -2069,7 +2223,7 @@ Administración Escalonia 15`
         document.body.appendChild(a);
         a.click();
         a.remove();
-        showToast("Correo preparado y contador de 48h iniciado.");
+        showToast("Correo preparado y contador de 48h activado.");
       });
 
       const authModal = document.getElementById("authModal");
@@ -2232,10 +2386,6 @@ Administración Escalonia 15`
 
         if (!dateVal) {
           showToast("Selecciona una fecha.", true);
-          return;
-        }
-        if (getActiveSlotReservation(dateVal, shiftVal)) {
-          showToast("Ya existe una reserva en ese día y turno.", true);
           return;
         }
 
