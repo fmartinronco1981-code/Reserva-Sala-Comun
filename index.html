@@ -1376,6 +1376,29 @@ Administración Escalonia 15`
         a.remove();
       }
 
+      const SCREEN_STORAGE_KEY = "escalonia15_active_screen_v1";
+      const ADMIN_TAB_STORAGE_KEY = "escalonia15_admin_tab_v1";
+      const OWNER_TAB_STORAGE_KEY = "escalonia15_owner_tab_v1";
+
+      function persistScreenState(screenName) {
+        try {
+          if (screenName === "owner" || screenName === "admin") {
+            window.sessionStorage.setItem(SCREEN_STORAGE_KEY, screenName);
+          } else if (screenName === "landing") {
+            window.sessionStorage.removeItem(SCREEN_STORAGE_KEY);
+          }
+        } catch (_) {}
+      }
+
+      function readPersistedScreenState() {
+        try {
+          const val = window.sessionStorage.getItem(SCREEN_STORAGE_KEY);
+          return (val === "owner" || val === "admin") ? val : null;
+        } catch (_) {
+          return null;
+        }
+      }
+
       function applyScreenVisibility() {
         const landing = document.getElementById("landingScreen");
         const ownerApp = document.getElementById("ownerApp");
@@ -1388,14 +1411,32 @@ Administración Escalonia 15`
         adminFull.classList.remove("flex");
 
         if (activeScreen === "owner" && authUser) {
+          persistScreenState("owner");
           ownerApp.classList.remove("hidden");
           ownerApp.classList.add("flex");
         } else if (activeScreen === "admin" && authUser && isCurrentUserAdmin) {
+          persistScreenState("admin");
           adminFull.classList.remove("hidden");
           adminFull.classList.add("flex");
         } else {
-          activeScreen = "landing";
-          landing.classList.remove("hidden");
+          // Si hay sesión activa o en curso de restauración, no forzar landing hasta confirmar sin usuario
+          const persisted = readPersistedScreenState();
+          if (authUser && persisted === "admin" && isCurrentUserAdmin) {
+            activeScreen = "admin";
+            adminFull.classList.remove("hidden");
+            adminFull.classList.add("flex");
+          } else if (authUser && persisted === "owner") {
+            activeScreen = "owner";
+            ownerApp.classList.remove("hidden");
+            ownerApp.classList.add("flex");
+          } else if (!authUser && persisted && !isSigningOut) {
+            // Mantener oculta la pantalla de entrada mientras Firebase Auth recupera la sesión
+            activeScreen = persisted;
+          } else {
+            persistScreenState("landing");
+        activeScreen = "landing";
+            landing.classList.remove("hidden");
+          }
         }
       }
 
@@ -2900,6 +2941,7 @@ Administración Escalonia 15`
 
       function switchAdminTab(target) {
         activeAdminTab = target;
+        try { window.sessionStorage.setItem(ADMIN_TAB_STORAGE_KEY, target); } catch (_) {}
         document.querySelectorAll(".admin-tab").forEach(b => {
           const isSelected = b.dataset.adminTab === target;
           b.classList.toggle("bg-emerald-600", isSelected);
@@ -3296,6 +3338,7 @@ Administración Escalonia 15`
         if (!user) {
           isCurrentUserAdmin = false;
           currentUserProfile = null;
+          persistScreenState("landing");
           activeScreen = "landing";
           applyScreenVisibility();
           refreshAllViewsNow();
@@ -3303,7 +3346,17 @@ Administración Escalonia 15`
         }
 
         const extraAdmins = (state.admins || []).map(a => (a.uid || "").trim()).filter(Boolean);
-        isCurrentUserAdmin = user.uid === ADMIN_UID || extraAdmins.includes(user.uid);
+        const extraAdminEmails = (state.admins || []).map(a => String(a.email || "").trim().toLowerCase()).filter(Boolean);
+        const userEmailLower = String(user.email || "").trim().toLowerCase();
+        isCurrentUserAdmin =
+          user.uid === ADMIN_UID ||
+          extraAdmins.includes(user.uid) ||
+          Boolean(userEmailLower && extraAdminEmails.includes(userEmailLower));
+
+        const savedScreen = readPersistedScreenState();
+        if (!pendingScreenAfterLogin && savedScreen) {
+          activeScreen = (savedScreen === "admin" && !isCurrentUserAdmin) ? "owner" : savedScreen;
+        }
 
         const targetRef = db.ref(`escalonia15/users/${user.uid}`);
         const listener = async profSnap => {
@@ -3427,6 +3480,7 @@ Administración Escalonia 15`
       document.querySelectorAll(".nav-tab").forEach(tabBtn => {
         tabBtn.addEventListener("click", () => {
           const target = tabBtn.dataset.tab;
+          try { window.sessionStorage.setItem(OWNER_TAB_STORAGE_KEY, target); } catch (_) {}
           document.querySelectorAll(".nav-tab").forEach(b => {
             b.classList.remove("bg-emerald-700", "text-white");
             b.classList.add("bg-white/10", "text-emerald-100");
@@ -3970,9 +4024,39 @@ Administración Escalonia 15`
         }
       }, 60000);
 
+      try {
+        const savedAdminTab = window.sessionStorage.getItem(ADMIN_TAB_STORAGE_KEY);
+        if (savedAdminTab && document.getElementById(`admin-tab-${savedAdminTab}`)) {
+          activeAdminTab = savedAdminTab;
+          document.querySelectorAll(".admin-tab").forEach(b => {
+            const isSelected = b.dataset.adminTab === savedAdminTab;
+            b.classList.toggle("bg-emerald-600", isSelected);
+            b.classList.toggle("text-white", isSelected);
+            b.classList.toggle("bg-white/10", !isSelected);
+            b.classList.toggle("text-slate-200", !isSelected);
+          });
+          document.querySelectorAll(".admin-panel").forEach(panel => {
+            panel.classList.toggle("hidden", panel.id !== `admin-tab-${savedAdminTab}`);
+          });
+        }
+        const savedOwnerTab = window.sessionStorage.getItem(OWNER_TAB_STORAGE_KEY);
+        if (savedOwnerTab && document.getElementById(`tab-${savedOwnerTab}`)) {
+          document.querySelectorAll(".nav-tab").forEach(b => {
+            const isSelected = b.dataset.tab === savedOwnerTab;
+            b.classList.toggle("bg-emerald-700", isSelected);
+            b.classList.toggle("text-white", isSelected);
+            b.classList.toggle("bg-white/10", !isSelected);
+            b.classList.toggle("text-emerald-100", !isSelected);
+          });
+          document.querySelectorAll(".tab-panel").forEach(panel => {
+            panel.classList.toggle("hidden", panel.id !== `tab-${savedOwnerTab}`);
+          });
+        }
+      } catch (_) {}
+
       populatePortalSelects();
       applyScreenVisibility();
-      refreshAllViewsNow();
+      refreshAllViewsNow(true);
     })();
   </script>
 </body>
